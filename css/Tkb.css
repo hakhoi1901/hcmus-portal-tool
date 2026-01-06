@@ -1,0 +1,248 @@
+/* CSS CHO THỜI KHÓA BIỂU */
+.schedule-option {
+    background: white;
+    border: 2px solid #e5e7eb;
+    border-radius: 12px;
+    padding: 20px;
+    margin-top: 30px;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+}
+
+.schedule-header {
+    background: var(--primary);
+    color: white;
+    padding: 10px 15px;
+    border-radius: 8px;
+    margin-bottom: 15px;
+    font-weight: bold;
+    display: flex;
+    justify-content: space-between;
+}
+
+.tkb-grid {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 12px;
+    table-layout: fixed; /* Cố định chiều rộng cột */
+}
+
+.tkb-grid th {
+    background: #f3f4f6;
+    border: 1px solid #d1d5db;
+    padding: 8px;
+    text-align: center;
+    color: #374151;
+}
+
+.tkb-grid td {
+    border: 1px solid #e5e7eb;
+    height: 50px; /* Chiều cao tối thiểu mỗi tiết */
+    vertical-align: middle;
+    text-align: center;
+    padding: 2px;
+    color: #6b7280; /* Màu chữ cho ô trống */
+}
+
+/* Ô có môn học */
+.tkb-cell-active {
+    background-color: #eff6ff; /* Xanh nhạt */
+    color: #1e3a8a !important;
+    border: 1px solid #60a5fa !important;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.tkb-cell-active:hover {
+    background-color: #2563eb;
+    color: white !important;
+    transform: scale(1.05);
+    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+}
+
+.period-col {
+    width: 40px;
+    background: #f9fafb;
+    font-weight: bold;
+}
+
+/* CSS CHO DANH SÁCH MÔN HỌC */
+.course-selector-box {
+    max-height: 400px;
+    overflow-y: auto;
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+    margin-top: 10px;
+    background: #f9fafb;
+}
+
+.course-search-bar {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #d1d5db;
+    border-radius: 6px;
+    margin-bottom: 10px;
+    font-size: 14px;
+}
+
+.course-row {
+    display: flex;
+    align-items: center;
+    padding: 8px 12px;
+    border-bottom: 1px solid #eee;
+    background: white;
+    transition: background 0.2s;
+}
+
+.course-row:hover {
+    background: #f0f9ff;
+}
+
+.course-row.selected {
+    background: #eff6ff;
+    border-left: 4px solid var(--primary);
+}
+
+.chk-course {
+    width: 18px;
+    height: 18px;
+    margin-right: 10px;
+    cursor: pointer;
+}
+
+.course-info {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+}
+
+.course-code {
+    font-size: 12px;
+    font-weight: bold;
+    color: #6b7280;
+}
+
+.course-name {
+    font-size: 14px;
+    font-weight: 600;
+    color: #1f2937;
+}
+
+/* Dropdown chọn lớp cố định */
+.fixed-class-select {
+    padding: 5px;
+    border: 1px solid #d1d5db;
+    border-radius: 4px;
+    font-size: 12px;
+    color: #374151;
+    background: white;
+    max-width: 120px;
+    margin-left: 10px;
+}
+
+.fixed-class-select:disabled {
+    background: #f3f4f6;
+    color: #9ca3af;
+    cursor: not-allowed;
+}
+
+/* Layout 2 cột */
+.selector-container {
+    display: flex;
+    gap: 20px;
+    height: 500px; /* Chiều cao cố định để scroll */
+}
+
+.col-source, .col-selected {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+}
+
+.col-source h4, .col-selected h4 {
+    margin: 0 0 10px 0;
+    color: var(--primary);
+    font-size: 16px;
+}
+
+/* Box chứa list có scroll */
+.course-list-box, .selected-list-box {
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+    flex: 1;
+    overflow-y: auto;
+    background: #f9fafb;
+}
+
+/* Item bên trái (Đơn giản) */
+.course-item {
+    padding: 8px 10px;
+    border-bottom: 1px solid #eee;
+    background: white;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    cursor: pointer;
+    transition: 0.2s;
+}
+.course-item:hover { background: #f0f9ff; }
+.course-item input { pointer-events: none; } /* Click row là tick luôn */
+
+/* Item bên phải (Có dropdown + nút xóa) */
+.selected-item {
+    background: white;
+    border-bottom: 1px solid #eee;
+    padding: 10px;
+    border-left: 4px solid var(--success);
+    animation: slideIn 0.3s ease;
+}
+
+.selected-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: start;
+    margin-bottom: 8px;
+}
+
+.btn-remove {
+    background: none;
+    border: none;
+    color: #ef4444;
+    cursor: pointer;
+    font-size: 16px;
+    padding: 0 5px;
+}
+.btn-remove:hover { color: #b91c1c; transform: scale(1.2); }
+
+.class-dropdown {
+    width: 100%;
+    padding: 6px;
+    border: 1px solid #d1d5db;
+    border-radius: 4px;
+    font-size: 13px;
+    background-color: #fff;
+}
+
+.empty-state {
+    text-align: center;
+    color: #9ca3af;
+    padding-top: 50px;
+    font-style: italic;
+}
+
+.config-area {
+    margin-top: 10px;
+    padding: 10px;
+    background: #eef2ff;
+    border-radius: 6px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-weight: 600;
+    font-size: 14px;
+}
+
+@keyframes slideIn {
+    from { opacity: 0; transform: translateX(-10px); }
+    to { opacity: 1; transform: translateX(0); }
+}

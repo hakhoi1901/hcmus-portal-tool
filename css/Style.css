@@ -1,0 +1,146 @@
+:root {
+            --primary: #005a8d;
+            --secondary: #0084cd;
+            --bg: #f3f4f6;
+            --card-bg: #ffffff;
+            --text-main: #1f2937;
+            --text-sub: #6b7280;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+        }
+
+        body {
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+            background-color: var(--bg);
+            color: var(--text-main);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px;
+        }
+
+        .container {
+            background: var(--card-bg);
+            width: 100%;
+            max-width: 700px; /* Rộng hơn xíu để chứa nhiều bảng */
+            border-radius: 16px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.05);
+            overflow: hidden;
+            animation: fadeIn 0.5s ease-out;
+        }
+
+        .header {
+            background: var(--primary);
+            color: white;
+            padding: 25px;
+            text-align: center;
+        }
+        .header h1 { margin: 0; font-size: 22px; font-weight: 700; }
+
+        .content { padding: 25px; }
+
+        /* Step Styles */
+        .step {
+            margin-bottom: 20px;
+            padding-bottom: 20px;
+            border-bottom: 1px dashed #e5e7eb;
+        }
+        .step:last-child { border-bottom: none; margin-bottom: 0; }
+        
+        .step-title {
+            font-weight: 600;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            color: var(--text-main);
+        }
+        .badge {
+            background: var(--primary); color: white;
+            width: 24px; height: 24px; border-radius: 50%;
+            display: inline-flex; justify-content: center; align-items: center;
+            font-size: 12px;
+        }
+
+        /* Buttons */
+        .btn-bookmarklet {
+            display: block;
+            background: white;
+            border: 2px dashed var(--primary);
+            color: var(--primary);
+            padding: 12px;
+            text-align: center;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: 600;
+            cursor: grab;
+        }
+        .btn-bookmarklet:hover {
+            background: #f0f9ff;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+        }
+
+        .btn-open {
+            width: 100%;
+            background: var(--success);
+            color: white;
+            border: none;
+            padding: 12px;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 8px;
+        }
+        .btn-open:hover { background: #059669; }
+
+        /* Status Area */
+        #status-area {
+            background: #fffbeb;
+            border: 1px solid #fcd34d;
+            color: #b45309;
+            padding: 10px;
+            border-radius: 8px;
+            font-size: 14px;
+            text-align: center;
+            display: none;
+            margin-bottom: 20px;
+        }
+        #status-area.success {
+            background: #ecfdf5; border-color: #6ee7b7; color: #047857;
+        }
+
+        /* Result Sections */
+        .result-container { display: none; }
+        
+        .section-box {
+            border: 1px solid #e5e7eb;
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 15px;
+        }
+        .section-title {
+            font-size: 15px; font-weight: 700; color: var(--primary);
+            margin: 0 0 10px 0; border-bottom: 2px solid #f3f4f6; padding-bottom: 5px;
+        }
+
+        .info-row { display: flex; justify-content: space-between; margin-bottom: 5px; font-size: 14px; }
+        
+        /* Tables */
+        .table-scroll { max-height: 200px; overflow-y: auto; }
+        table { width: 100%; border-collapse: collapse; font-size: 13px; }
+        th { text-align: left; background: #f9fafb; padding: 8px; position: sticky; top: 0; color: var(--text-sub); }
+        td { padding: 8px; border-bottom: 1px solid #e5e7eb; }
+        tr:last-child td { border-bottom: none; }
+
+        .money { color: var(--danger); font-weight: bold; }
+
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
