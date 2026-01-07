@@ -11,6 +11,82 @@ export function renderDashboardUI(data) {
     renderTuition(data);    // Học phí
     renderExams(data);      // Lịch thi
     renderGrades(data);     // Điểm
+    renderProgram(data);
+}
+
+export function renderProgram(data) {
+    // Tìm hoặc tạo bảng Program (Nếu bạn chưa thêm ID tbl-program vào HTML thì cần thêm nhé)
+    // Ở đây mình giả sử bạn sẽ thêm 1 section mới vào HTML, hoặc mình render tạm vào 1 div nào đó
+    
+    // Tuy nhiên, tốt nhất là tạo DOM động nếu HTML chưa có
+    let section = document.getElementById('section-program');
+    if (!section) {
+        const wrapper = document.getElementById('result-wrapper');
+        if (!wrapper) return;
+        
+        section = document.createElement('div');
+        section.id = 'section-program';
+        section.className = 'section-box';
+        section.innerHTML = `
+            <h4 class="section-title">🎓 Chương trình đào tạo & Tiến độ</h4>
+            <div class="info-row">
+                <span>Số môn trong CTĐT: <b id="lbl-prog-total">0</b></span>
+                <span>Đã hoàn thành: <b id="lbl-prog-done" style="color:green">0</b></span>
+            </div>
+            <div class="table-scroll" style="max-height: 300px;">
+                <table id="tbl-program">
+                    <thead>
+                        <tr>
+                            <th>Mã Môn</th>
+                            <th>Tên Môn</th>
+                            <th>TC</th>
+                            <th>Trạng thái</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+        `;
+        wrapper.appendChild(section);
+    }
+
+    const tbody = section.querySelector('tbody');
+    tbody.innerHTML = '';
+
+    const program = data.program || [];
+    const grades = data.grades || [];
+    
+    // Tạo Set các môn đã qua môn (Điểm >= 5) để tra cứu cho nhanh
+    const passedSubjects = new Set();
+    grades.forEach(g => {
+        // Chỉ tính là qua môn nếu điểm là số và >= 5
+        if (typeof g.score === 'number' && g.score >= 5.0) {
+            passedSubjects.add(g.id);
+        }
+    });
+
+    let doneCount = 0;
+
+    program.forEach(p => {
+        const isDone = passedSubjects.has(p.id);
+        if (isDone) doneCount++;
+
+        const tr = document.createElement('tr');
+        tr.style.background = isDone ? '#f0fdf4' : 'white'; // Xanh nhạt nếu đã học
+        
+        tr.innerHTML = `
+            <td style="font-weight:bold; color:${isDone ? '#15803d' : '#666'}">${p.id}</td>
+            <td>${p.name}</td>
+            <td style="text-align:center">${p.credits}</td>
+            <td style="text-align:center">
+                ${isDone ? '<span style="color:#15803d; font-weight:bold">✔ Đã xong</span>' : '<span style="color:#ca8a04; font-size:12px">Chưa học</span>'}
+            </td>
+        `;
+        tbody.appendChild(tr);
+    });
+
+    document.getElementById('lbl-prog-total').innerText = program.length;
+    document.getElementById('lbl-prog-done').innerText = doneCount;
 }
 
 // render thông tin
@@ -89,19 +165,45 @@ export function renderExams(data) {
 }
 
 // render chương trình đào tạo
+
 export function renderGrades(data) {
     const tbodyGrades = document.querySelector('#tbl-grades tbody');
     if (!tbodyGrades) return;
 
     tbodyGrades.innerHTML = '';
-    if (data.grades && data.grades.length > 0) {
-        data.grades.forEach(g => {
+    
+    // Sắp xếp: Môn mới nhất (theo HK) lên đầu, hoặc giữ nguyên thứ tự portal
+    // Ở đây mình giữ nguyên thứ tự cào được để giống Portal nhất
+    const gradeList = data.grades || [];
+
+    if (gradeList.length > 0) {
+        gradeList.forEach(g => {
             const tr = document.createElement('tr');
-            tr.innerHTML = `<td><b>${g.id}</b></td><td>${g.score}</td>`;
+            
+            // Tô màu điểm cao/thấp/chưa có điểm
+            let scoreColor = '#374151'; // Mặc định đen
+            let scoreText = g.score;
+
+            if (g.score === '(*)' || g.score === null) {
+                scoreText = '(*)';
+                scoreColor = '#6b7280'; // Xám
+            } else if (typeof g.score === 'number') {
+                if (g.score >= 8.0) scoreColor = '#059669'; // Xanh lá (Giỏi)
+                else if (g.score < 5.0) scoreColor = '#dc2626'; // Đỏ (Rớt)
+            }
+
+            tr.innerHTML = `
+                <td style="text-align:center; font-size:12px; color:#666;">${g.semester}</td>
+                <td style="font-weight:bold; color:#005a8d;">${g.id}</td>
+                <td>${g.name}</td>
+                <td style="text-align:center;">${g.credits}</td>
+                <td style="text-align:center; font-size:12px;">${g.class}</td>
+                <td style="text-align:center; font-weight:bold; color:${scoreColor};">${scoreText}</td>
+            `;
             tbodyGrades.appendChild(tr);
         });
     } else {
-        tbodyGrades.innerHTML = '<tr><td colspan="2" style="text-align:center">Chưa có dữ liệu</td></tr>';
+        tbodyGrades.innerHTML = '<tr><td colspan="6" style="text-align:center; color:grey; padding: 20px;">Chưa có dữ liệu điểm</td></tr>';
     }
 }
 

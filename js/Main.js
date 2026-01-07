@@ -4,6 +4,7 @@
 
 import { setupBookmarklet, openPortal } from './PortalHandler.js';
 import { renderDashboardUI } from './render/Dashboard.js';
+import { renderCourseList } from './render/Dashboard.js';
 
 // Setup bookmarklet
 setupBookmarklet();
@@ -30,6 +31,26 @@ window.addEventListener("message", (event) => {
         // render và lưu dữ liệu mới nhận được
         renderDashboardUI(payload);
         localStorage.setItem('student_db_full', JSON.stringify(payload)); // dùng JSON.stringify để ép kiểu object sang string.
+    }
+
+    if (event.data.type === 'OPEN_CLASS_DATA') {
+        const courses = event.data.payload;
+        
+        // 1. Lưu vào LocalStorage
+        localStorage.setItem('courses_db_offline', JSON.stringify(courses));
+        
+        // 2. Thông báo UI
+        const statusEl = document.getElementById('status-area');
+        if (statusEl) {
+            statusEl.innerText = `Đã cập nhật ${courses.length} môn học từ Portal!`;
+            statusEl.classList.add('success');
+        }
+
+        // 3. Reload lại ứng dụng hoặc reload list môn
+        // Cách đơn giản nhất: Reload trang để Logic.js init lại từ localStorage
+        if(confirm(`Đã lấy được ${courses.length} môn. Tải lại trang để cập nhật?`)) {
+            location.reload();
+        }
     }
 }, false);
 

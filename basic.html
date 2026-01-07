@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HCMUS Portal Tool</title>
+</head>
+<body>
+
+<div class="container">
+    <div class="header">
+    </div>
+
+    <div class="content">
+        
+        <div class="step">
+            <div class="step-title"><span class="badge">1</span> Cài đặt Tool</div>
+            <!-- nút để kéo bookmark -->
+            <a href="#" id="bookmark-btn" class="btn-bookmarklet" onclick="return false;"> 
+                lấy dữ liệu portal
+            </a>
+        </div>
+
+        <div class="step">
+            <div class="step-title"><span class="badge">2</span> Kết nối Portal</div>
+            <!-- Nút mở portal -->
+            <button onclick="window.openPortal()" class="btn-open">
+                Mở Portal
+            </button>
+        </div>
+
+        <div id="status-area">Đang kết nối</div>
+
+        
+        <div id="result-wrapper" class="result-container">
+            <div class="section-box">
+                <h4 class="section-title">Thông tin sinh viên</h4>
+                <div class="info-row">
+                    <span>Sinh viên: <b id="lbl-mssv"> mssv render ở đây </b></span>
+                    <span>Tổng môn học: <b id="lbl-count"> tổng số môn render ở đây</b></span>
+                </div>
+            </div>
+
+            <div class="section-box">
+                <h4 class="section-title">Học Phí</h4>
+                <div class="info-row">
+                    <span>Tổng phải đóng:</span>
+                    <span class="money" id="lbl-tuition-total">0</span> <!-- hihi -->
+                </div>
+                <div class="table-scroll">
+                    <table id="tbl-tuition">
+                        <thead>
+                            <tr>
+                                <th>Môn học</th>
+                                <th>TC</th>
+                                <th>Thực đóng</th>
+                            </tr>
+                        </thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div class="section-box">
+                <h4 class="section-title">📅 Lịch Thi Sắp Tới</h4>
+                <div class="table-scroll">
+                    <table id="tbl-exams">
+                        <thead>
+                            <tr><th>Môn</th><th>Ngày</th><th>Giờ</th><th>Phòng</th></tr>
+                        </thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div class="section-box">
+                <h4 class="section-title">📚 Bảng Điểm</h4>
+                <div class="table-scroll">
+                    <table id="tbl-grades">
+                        <thead>
+                            <tr>
+                                <th>HK</th>
+                                <th>Mã Môn</th>
+                                <th>Tên Môn</th>
+                                <th>TC</th>
+                                <th>Lớp</th>
+                                <th>Điểm</th>
+                            </tr>
+                        </thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <div class="step">
+            <div class="step-title"><span class="badge">3</span> Chọn Môn & Xếp Lịch</div>
+            
+            <div class="selector-container">
+                <div class="col-source">
+                    <h4>📂 Danh sách môn mở</h4>
+                    <input type="text" id="inp-search" class="course-search-bar" placeholder="🔍 Tìm tên/mã môn..." onkeyup="window.filterCourses()">
+                    
+                    <div id="course-list-area" class="course-list-box">
+                        <div style="text-align:center; padding: 20px; color:gray">
+                            ⏳ Đang tải danh sách...
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-selected">
+                    <h4>✅ Đã chọn (<span id="count-selected">0</span>)</h4>
+                    <div id="selected-list-area" class="selected-list-box">
+                        <div class="empty-state">Chưa chọn môn nào</div>
+                    </div>
+
+                    <div class="config-area">
+                        <label>Ưu tiên buổi:</label>
+                        <select id="sel-session-pref">
+                            <option value="0">Tùy ý</option>
+                            <option value="1">Sáng</option>
+                            <option value="2">Chiều</option>
+                        </select>
+                    </div>
+
+                    <button onclick="window.onNutBamXepLich()" class="btn-open" style="background-color: #f59e0b; margin-top: 10px;">
+                        🧩 Xếp Lịch Ngay
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <div id="schedule-results-area" style="display: none; margin-top: 20px;"></div>
+
+    </div>
+</div>
+
+<script type="module">
+    import { initApp } from './js/main.js';
+    initApp();
+</script>
+
+</body>
+</html>

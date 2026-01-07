@@ -40,7 +40,7 @@ export class Bitset {
         return false;
     }
 
-    // Load từ mảng số nguyên (Format JSON của bạn)
+    // Load từ mảng số nguyên
     loadFromData(data) {
         for (let i = 0; i < 4 && i < data.length; i++) {
             this.parts[i] = data[i];

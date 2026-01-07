@@ -1,4 +1,3 @@
-
 // 1. IMPORT ENGINE XẾP LỊCH
 // Lưu ý: Đường dẫn phải đúng so với vị trí file html
 import { runScheduleSolver } from './tkb/Scheduler.js';
@@ -18,9 +17,14 @@ export function initApp() {
         // Tải danh sách môn học
         console.log("Đang tải course_db.json...");
         const data = await loadCourseData();
+
         if (data) {
-            GLOBAL_COURSE_DB = data;
-            renderCourseList(GLOBAL_COURSE_DB);
+            if(window.renderCourseList) window.renderCourseList(GLOBAL_COURSE_DB);
+            else console.error("Không tìm thấy hàm renderCourseList");
+            
+            // Cập nhật text trạng thái nguồn dữ liệu
+            const srcIndicator = document.getElementById('data-source-indicator'); // Nếu có
+            if(srcIndicator) srcIndicator.innerText = data._source === 'local' ? "Nguồn: Portal (Mới nhất)" : "Nguồn: File tĩnh (Cũ)";
         }
     });
     
@@ -34,46 +38,33 @@ export function initApp() {
 // --- CÁC HÀM UTILS & RENDER ---
 
 async function loadCourseData() {
+    // 1. Ưu tiên lấy từ LocalStorage (Dữ liệu vừa cào được)
+    const localData = localStorage.getItem('courses_db_offline');
+    if (localData) {
+        try {
+            console.log("Phát hiện dữ liệu môn học offline từ Portal.");
+            const parsed = JSON.parse(localData);
+            if (Array.isArray(parsed) && parsed.length > 0) {
+                parsed._source = 'local'; // Đánh dấu nguồn
+                return parsed;
+            }
+        } catch (e) {
+            console.error("Lỗi parse data offline, sẽ dùng file json fallback.", e);
+        }
+    }
+
+    // 2. Fallback: Nếu không có thì tải file JSON tĩnh
     try {
+        console.log("Không có data offline, tải file Course_db.json...");
         const response = await fetch('./js/tkb/Course_db.json'); 
         if (!response.ok) throw new Error("Không tải được file dữ liệu môn học!");
-        return await response.json();
+        const jsonData = await response.json();
+        jsonData._source = 'file';
+        return jsonData;
     } catch (error) {
-        alert("Lỗi: " + error.message);
-        return null;
+        alert("Lỗi tải dữ liệu: " + error.message);
+        return [];
     }
-}
-
-function renderCourseList(courses) {
-    const container = document.getElementById('course-list-area');
-    container.innerHTML = '';
-
-    if (!courses || courses.length === 0) {
-        container.innerHTML = '<div style="padding:10px; text-align:center">Không có dữ liệu môn học.</div>';
-        return;
-    }
-
-    let html = '';
-    courses.forEach(subj => {
-        let classOptions = `<option value="">-- AI Tự Xếp --</option>`;
-        subj.classes.forEach(c => {
-            classOptions += `<option value="${c.id}">${c.id}</option>`;
-        });
-
-        html += `
-            <div class="course-row" id="row-${subj.id}">
-                <input type="checkbox" class="chk-course" value="${subj.id}" onchange="toggleRow('${subj.id}')">
-                <div class="course-info">
-                    <span class="course-code">${subj.id}</span>
-                    <span class="course-name">${subj.name}</span>
-                </div>
-                <select id="sel-${subj.id}" class="fixed-class-select" disabled>
-                    ${classOptions}
-                </select>
-            </div>
-        `;
-    });
-    container.innerHTML = html;
 }
 
 function toggleRow(subjID) {
