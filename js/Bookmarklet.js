@@ -1,23 +1,21 @@
 (async function() {
-    // 1. CẤU HÌNH & CONSTANTS
+    // === 1. CẤU HÌNH ===
     const CONFIG = {
         URL_DIEM: "/SinhVien.aspx?pid=211",
         URL_LICHTHI: "/SinhVien.aspx?pid=212",
         URL_HOCPHI: "/SinhVien.aspx?pid=331",
         URL_LOPMO: "/SinhVien.aspx?pid=327",
-        
-        // Cấu hình cho trang Lớp Mở
         TARGET_YEAR: "25-26",
         TARGET_SEM: "1"
     };
 
-    // ============================================================
-    // PHẦN 1: LOGIC CÀO ĐIỂM & THÔNG TIN CÁ NHÂN (MODE STUDENT)
-    // ============================================================
+    const STORAGE_KEY = "HCMUS_TOOL_DATA";
 
+    // === 2. CÁC HÀM CÀO DỮ LIỆU ===
+
+    // Cào Bảng Điểm (Giữ nguyên)
     function scrapeGrades() {
         try {
-            // Lấy MSSV
             let mssv = "Unknown";
             const userEl = document.getElementById('user_tools');
             if (userEl) {
@@ -28,31 +26,27 @@
             const grades = [];
             document.querySelectorAll('#tbDiemThiGK tbody tr').forEach(row => {
                 if (row.cells.length < 6) return;
-                const semester = row.cells[0]?.innerText.trim() || '';
-                const rawSubj = row.cells[1]?.innerText.trim() || '';
-                
+                const semester = row.cells[0]?.innerText.trim();
+                const rawSubj = row.cells[1]?.innerText.trim();
                 let id = "", name = rawSubj;
                 if (rawSubj.includes(" - ")) {
                     const parts = rawSubj.split(" - ");
                     id = parts[0].trim();
                     name = parts.slice(1).join(" - ").trim();
                 }
-
                 const credits = row.cells[2]?.innerText.trim();
                 const classID = row.cells[3]?.innerText.trim();
                 const rawScore = row.cells[5]?.innerText.trim();
-                
-                let score = rawScore;
-                if (!isNaN(parseFloat(rawScore))) score = parseFloat(rawScore);
+                let score = !isNaN(parseFloat(rawScore)) ? parseFloat(rawScore) : rawScore;
 
                 if (id) grades.push({ semester, id, name, credits, class: classID, score });
             });
-
             return { mssv, grades };
         } catch (e) { return null; }
     }
 
-    async function fetchBG(url, type) {
+    // Fetch Ngầm (Giữ nguyên)
+    async function fetchBackgroundData(url, type) {
         try {
             const res = await fetch(url);
             const text = await res.text();
@@ -72,41 +66,30 @@
                 });
                 return ex;
             }
-
             if (type === 'TUITION') {
                 const details = [];
                 doc.querySelectorAll('.dkhp-table tbody tr').forEach(row => {
                     const c = row.querySelectorAll('td');
                     if (c.length > 9) {
                         let rawName = c[2].innerText.trim();
-                        let codeMatch = rawName.match(/\[(.*?)\]/); 
+                        let codeMatch = rawName.match(/\[(.*?)\]/);
                         let code = codeMatch ? codeMatch[1] : "";
                         let name = rawName.replace(/\[.*?\]/g, '').trim();
-
-                        if (rawName) details.push({
-                             code, name,
-                             credits: c[3].innerText.trim(),
-                             fee: c[9].innerText.trim()
-                        });
+                        if (rawName) details.push({ code, name, credits: c[3].innerText.trim(), fee: c[9].innerText.trim() });
                     }
                 });
                 const totalEl = doc.querySelector('th[title="Tổng số phải đóng"]');
                 return { total: totalEl ? totalEl.innerText.trim() : "0", details };
             }
-            return [];
-        } catch (e) {
-            return type === 'TUITION' ? { total: "0", details: [] } : [];
-        }
+        } catch (e) { return type === 'TUITION' ? { total: "0", details: [] } : []; }
+        return [];
     }
 
-    // ============================================================
-    // PHẦN 2: LOGIC CÀO DANH SÁCH LỚP MỞ (MODE COURSE DB)
-    // ============================================================
-
+    // --- PHẦN QUAN TRỌNG: CÀO LỚP MỞ (ĐÃ FIX CHỈ SỐ CỘT) ---
     function parseScheduleString(str) {
-        // Input: "T2(1-5)-P.cs2:TNL_A211" -> ["T2(1-5)"]
         if (!str) return [];
-        const regex = /T(\d|CN)\((\d+)-(\d+)\)/g; 
+        // Regex bắt chuỗi dạng T2(1-3) hoặc CN(1-3)
+        const regex = /T(\d|CN)\((\d+)-(\d+)\)/g;
         const matches = str.match(regex);
         return matches ? matches : [];
     }
@@ -114,23 +97,32 @@
     function scrapeOpenClasses() {
         const table = document.getElementById('tbPDTKQ');
         if (!table) return null;
-
+        
         const rows = table.querySelectorAll('tbody tr');
-        const courseMap = {}; 
+        const courseMap = {}; // Dùng Map để gom nhóm các lớp cùng môn
 
         rows.forEach(row => {
             const cells = row.cells;
-            if (cells.length < 9) return; 
+            if (cells.length < 8) return; // Bỏ qua dòng lỗi
 
-            // Cấu trúc cột trang pid=327: [1] Mã MH, [2] Tên, [3] Lớp, [4] TC, [8] Lịch
-            const subjID = cells[1].innerText.trim();
-            const subjName = cells[2].innerText.trim();
-            const classID = cells[3].innerText.trim();
-            const credits = parseInt(cells[4].innerText.trim()) || 0;
-            const rawSchedule = cells[8].innerText.trim();
+            // --- SỬA LẠI INDEX CỘT Ở ĐÂY ---
+            // 0: Mã MH
+            // 1: Tên Môn
+            // 2: Tên Lớp (Mã Lớp) -> QUAN TRỌNG: Trước đây đọc nhầm cột này
+            // 3: Số TC
+            // 7: Lịch Học
+            
+            const subjID = cells[0].innerText.trim();      // Index 0 (Thay vì 1)
+            const subjName = cells[1].innerText.trim();    // Index 1 (Thay vì 2)
+            const classID = cells[2].innerText.trim();     // Index 2 (Thay vì 3 - Cột này là unique)
+            const credits = parseInt(cells[3].innerText.trim()) || 0; // Index 3
+            
+            // Lịch học nằm ở cột 7 (index 7)
+            const rawSchedule = cells[7] ? cells[7].innerText.trim() : "";
 
             if (!subjID) return;
 
+            // Khởi tạo môn học nếu chưa có
             if (!courseMap[subjID]) {
                 courseMap[subjID] = {
                     id: subjID,
@@ -140,141 +132,125 @@
                 };
             }
 
-            courseMap[subjID].classes.push({
-                id: classID,
-                schedule: parseScheduleString(rawSchedule) 
-            });
+            // Kiểm tra trùng lặp lớp (Dựa vào classID - ví dụ: 24CLC1)
+            const existingClass = courseMap[subjID].classes.find(c => c.id === classID);
+            
+            if (!existingClass) {
+                // Nếu chưa có lớp này thì thêm vào
+                courseMap[subjID].classes.push({
+                    id: classID,
+                    schedule: parseScheduleString(rawSchedule)
+                });
+            } else {
+                // (Optional) Nếu lớp đã tồn tại (do bảng bị tách dòng), gộp thêm lịch học
+                const newSchedule = parseScheduleString(rawSchedule);
+                if(newSchedule.length > 0) {
+                     existingClass.schedule = [...new Set([...existingClass.schedule, ...newSchedule])];
+                }
+            }
         });
 
+        // Trả về mảng các môn học (đã chứa full danh sách lớp bên trong)
         return Object.values(courseMap);
     }
 
-    // ============================================================
-    // PHẦN 3: ĐIỀU PHỐI (MAIN CONTROLLER)
-    // ============================================================
-
+    // === 3. LOGIC ĐIỀU KHIỂN CHÍNH ===
+    let savedData = {};
+    try { savedData = JSON.parse(sessionStorage.getItem(STORAGE_KEY)) || {}; } catch (e) {}
     const currentUrl = window.location.href;
 
-    // --- TRƯỜNG HỢP A: ĐANG Ở TRANG LỚP MỞ (pid=327) ---
-    if (currentUrl.indexOf("pid=327") !== -1) {
-        console.log("Đang ở chế độ: Cào Dữ Liệu Lớp Mở (Course DB)");
-
-        // 1. Tự động chọn Năm/Kỳ
-        try {
-            const cboNam = window.cboNamHoc; 
-            const cboHK = window.cboHocKy; 
-            const btnXem = document.getElementById("ctl00_ContentPlaceHolder1_ctl00_btnXem");
-
-            if (cboNam && cboHK && btnXem) {
-                // Kiểm tra giá trị hiện tại
-                // Lưu ý: Obout ComboBox dùng method .value() để get
-                if (cboNam.value() !== CONFIG.TARGET_YEAR || cboHK.value() !== CONFIG.TARGET_SEM) {
-                    
-                    // Set giá trị mới
-                    cboNam.value(CONFIG.TARGET_YEAR);
-                    cboHK.value(CONFIG.TARGET_SEM);
-                    
-                    // Click xem để reload
-                    btnXem.click();
-                    
-                    alert(`⏳ Đang chuyển sang năm ${CONFIG.TARGET_YEAR} - HK${CONFIG.TARGET_SEM}...\nVui lòng đợi trang tải xong rồi BẤM LẠI BOOKMARKLET!`);
-                    return; // Dừng script chờ reload
-                }
+    // --- BƯỚC 1: TRANG ĐIỂM ---
+    if (!savedData.hasStudentInfo) {
+        if (currentUrl.indexOf("pid=211") === -1) {
+            if(confirm("Bước 1: Cần lấy dữ liệu Điểm/Lịch thi trước.\nChuyển đến trang Xem Điểm (pid=211)?")) {
+                window.location.href = CONFIG.URL_DIEM;
             }
-        } catch (e) {
-            console.warn("Lỗi auto-select combo box:", e);
-        }
-
-        // 2. Cào dữ liệu
-        const courses = scrapeOpenClasses();
-        if (!courses || courses.length === 0) {
-            alert("⚠️ Bảng dữ liệu trống! Hãy chắc chắn bạn đã chọn Năm học/Học kỳ và bấm Xem.");
             return;
         }
-
-        // 3. Gửi về Web App
-        if (window.opener) {
-            window.opener.postMessage({ type: 'OPEN_CLASS_DATA', payload: courses }, '*');
-            alert(`✅ Đã lấy được ${courses.length} môn học!\nKiểm tra bên Web App.`);
-        } else {
-            console.log(courses);
-            alert(`Đã lấy ${courses.length} môn (Chế độ debug).`);
-        }
-        return;
-    }
-
-    // --- TRƯỜNG HỢP B: ĐANG Ở TRANG ĐIỂM (pid=211) ---
-    if (currentUrl.indexOf("pid=211") !== -1) {
-        console.log("Đang ở chế độ: Cào Thông Tin Sinh Viên");
-
-        // 1. Check nút "Tất cả" (Logic cũ của bạn)
         const cb = document.getElementById("ctl00_ContentPlaceHolder1_ctl00_cboNamHoc_gvDKHPLichThi_ob_CbocboNamHoc_gvDKHPLichThiTB");
         const btn = document.getElementById("ctl00_ContentPlaceHolder1_ctl00_btnXemDiemThi");
-        
-        // Fix lỗi null check an toàn hơn
-        if (cb && btn) {
-            const isAll = (cb.value.indexOf("Tất cả") !== -1 || cb.value.indexOf("All") !== -1);
-            if (!isAll) {
-                try { if (typeof cboNamHoc_gvDKHPLichThi !== 'undefined') cboNamHoc_gvDKHPLichThi.value('0'); } catch(e){}
-                btn.click();
-                alert("🔄 Đang chuyển sang chế độ 'Tất cả'...\nBấm lại Bookmarklet sau khi tải xong!");
-                return;
-            }
-        }
-
-        // 2. Cào điểm
-        const gData = scrapeGrades();
-        if (!gData || gData.grades.length === 0) {
-            alert("⚠️ Không lấy được bảng điểm. Đợi trang tải xong rồi thử lại.");
+        if (cb && btn && (cb.value.indexOf("Tất cả") === -1 && cb.value.indexOf("All") === -1)) {
+            try { if (typeof cboNamHoc_gvDKHPLichThi !== 'undefined') cboNamHoc_gvDKHPLichThi.value('0'); } catch(e){}
+            btn.click();
+            alert("⏳ Đang chọn 'Tất cả'... Đợi trang load xong bấm lại Bookmarklet!");
             return;
         }
-
-        // 3. Loading UI
-        const noti = document.createElement('div');
-        Object.assign(noti.style, {
-            position: 'fixed', bottom: '20px', right: '20px',
-            background: '#005a8d', color: 'white', padding: '15px 20px',
-            zIndex: '99999', borderRadius: '8px', boxShadow: '0 4px 12px rgba(0,0,0,0.3)',
-            fontFamily: 'Segoe UI, sans-serif', fontSize: '14px',
-            display: 'flex', alignItems: 'center', gap: '10px'
-        });
-        noti.innerHTML = `<div style="width:20px;height:20px;border:3px solid #fff;border-top-color:transparent;border-radius:50%;animation:spin 1s linear infinite"></div><span>Đang lấy Lịch thi & Học phí...</span><style>@keyframes spin{to{transform:rotate(360deg)}}</style>`;
-        document.body.appendChild(noti);
-
-        // 4. Fetch ngầm
-        try {
-            const [exams, tuitionData] = await Promise.all([
-                fetchBG(CONFIG.URL_LICHTHI, 'EXAM'),
-                fetchBG(CONFIG.URL_HOCPHI, 'TUITION')
-            ]);
-    
-            document.body.removeChild(noti);
-    
-            const payload = {
-                mssv: gData.mssv,
-                grades: gData.grades,
-                exams: exams,
-                tuition: tuitionData,
-                program: [] // CTĐT để trống hoặc logic khác nếu cần
-            };
-    
-            if (window.opener) {
-                window.opener.postMessage({ type: 'PORTAL_DATA', payload: payload }, '*');
-                alert(`✅ XONG!\n- SV: ${payload.mssv}\n- Điểm: ${payload.grades.length} mục\n- Học phí: ${payload.tuition.total}`);
-            } else {
-                console.log(payload);
-                alert("Không tìm thấy Web App cha.");
-            }
-        } catch (e) {
-            alert("Lỗi fetch: " + e.message);
+        const gData = scrapeGrades();
+        if (!gData || gData.grades.length === 0) {
+            alert("⚠️ Bảng điểm trống. Đợi load xong hãy bấm lại.");
+            return;
         }
+        const noti = document.createElement('div');
+        noti.style.cssText = "position:fixed;bottom:20px;right:20px;background:#005a8d;color:white;padding:15px;z-index:9999;border-radius:5px";
+        noti.innerHTML = "⏳ Đang lấy Lịch thi & Học phí...";
+        document.body.appendChild(noti);
+        try {
+            const [exams, tuition] = await Promise.all([
+                fetchBackgroundData(CONFIG.URL_LICHTHI, 'EXAM'),
+                fetchBackgroundData(CONFIG.URL_HOCPHI, 'TUITION')
+            ]);
+            document.body.removeChild(noti);
+            savedData.mssv = gData.mssv;
+            savedData.grades = gData.grades;
+            savedData.exams = exams;
+            savedData.tuition = tuition;
+            savedData.hasStudentInfo = true;
+            sessionStorage.setItem(STORAGE_KEY, JSON.stringify(savedData));
+            if(confirm(`✅ Xong bước 1.\nChuyển sang trang Lớp mở (pid=327) để lấy danh sách môn học?`)) {
+                window.location.href = CONFIG.URL_LOPMO;
+            }
+        } catch(e) { alert("Lỗi: " + e.message); }
         return;
     }
 
-    // --- TRƯỜNG HỢP C: TRANG KHÁC ---
-    // Hỏi user muốn đi đâu
-    const choice = prompt("Bạn muốn làm gì?\n1. Cào Điểm & Lịch thi (Về trang pid=211)\n2. Cào Danh sách Lớp Mở 25-26 (Về trang pid=327)", "1");
-    if (choice === "1") window.location.href = CONFIG.URL_DIEM;
-    else if (choice === "2") window.location.href = CONFIG.URL_LOPMO;
+    // --- BƯỚC 2: TRANG LỚP MỞ ---
+    if (!savedData.hasCourseInfo) {
+        if (currentUrl.indexOf("pid=327") === -1) {
+             window.location.href = CONFIG.URL_LOPMO;
+             return;
+        }
+        try {
+            const cboNam = window.cboNamHoc;
+            const cboHK = window.cboHocKy;
+            const btnXem = document.getElementById("ctl00_ContentPlaceHolder1_ctl00_btnXem");
+            if (cboNam && cboHK && btnXem) {
+                if (cboNam.value() !== CONFIG.TARGET_YEAR || cboHK.value() !== CONFIG.TARGET_SEM) {
+                    cboNam.value(CONFIG.TARGET_YEAR);
+                    cboHK.value(CONFIG.TARGET_SEM);
+                    btnXem.click();
+                    alert(`🔄 Đang chuyển sang năm ${CONFIG.TARGET_YEAR}... Đợi load xong bấm lại lần cuối!`);
+                    return;
+                }
+            }
+        } catch (e) {}
 
+        const courses = scrapeOpenClasses();
+        if (!courses || courses.length === 0) {
+            alert("⚠️ Chưa có dữ liệu lớp mở. Hãy bấm nút 'Xem' trên web trước.");
+            return;
+        }
+
+        const finalPayload = {
+            mssv: savedData.mssv,
+            grades: savedData.grades,
+            exams: savedData.exams,
+            tuition: savedData.tuition,
+            program: []
+        };
+
+        if (window.opener) {
+            window.opener.postMessage({ type: 'PORTAL_DATA', payload: finalPayload }, '*');
+            setTimeout(() => {
+                window.opener.postMessage({ type: 'OPEN_CLASS_DATA', payload: courses }, '*');
+                alert(`✅ HOÀN TẤT!\nĐã lấy ${courses.length} môn học (với đầy đủ các lớp).`);
+                sessionStorage.removeItem(STORAGE_KEY);
+            }, 500);
+        } else {
+            console.log("Full Data:", finalPayload);
+            console.log("Courses:", courses);
+            alert(`Đã lấy ${courses.length} môn (Debug).`);
+            sessionStorage.removeItem(STORAGE_KEY);
+        }
+        return;
+    }
 })();

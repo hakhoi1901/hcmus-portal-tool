@@ -1,0 +1,3020 @@
+{
+    "student_db_full": {
+        "mssv": "HÀ ĐĂNG KHÔI",
+        "grades": [
+            {
+                "semester": "24-25/1",
+                "id": "ADD00031",
+                "name": "Anh văn 1",
+                "credits": "3",
+                "class": "24CTT4",
+                "score": 7.7
+            },
+            {
+                "semester": "24-25/1",
+                "id": "BAA00021",
+                "name": "Thể dục 1",
+                "credits": "2",
+                "class": "24VT_T4Ti1",
+                "score": 7
+            },
+            {
+                "semester": "24-25/1",
+                "id": "CSC00004",
+                "name": "Nhập môn Công nghệ Thông tin",
+                "credits": "4",
+                "class": "24CTT4",
+                "score": 8.8
+            },
+            {
+                "semester": "24-25/1",
+                "id": "CSC10012",
+                "name": "Cơ sở lập trình",
+                "credits": "4",
+                "class": "24CTT4",
+                "score": 8.3
+            },
+            {
+                "semester": "24-25/1",
+                "id": "MTH00021",
+                "name": "Vi tích phân 1",
+                "credits": "4",
+                "class": "24CTT4",
+                "score": 10
+            },
+            {
+                "semester": "24-25/1",
+                "id": "MTH00045",
+                "name": "Toán rời rạc",
+                "credits": "4",
+                "class": "24CTT4",
+                "score": 8.5
+            },
+            {
+                "semester": "24-25/2",
+                "id": "ADD00032",
+                "name": "Anh văn 2",
+                "credits": "3",
+                "class": "24C3_3",
+                "score": 8.5
+            },
+            {
+                "semester": "24-25/2",
+                "id": "BAA00004",
+                "name": "Pháp luật đại cương",
+                "credits": "3",
+                "class": "24CTT5",
+                "score": 8.3
+            },
+            {
+                "semester": "24-25/2",
+                "id": "BAA00022",
+                "name": "Thể dục 2",
+                "credits": "2",
+                "class": "24PB_T6Ti8",
+                "score": 8
+            },
+            {
+                "semester": "24-25/2",
+                "id": "CSC10004",
+                "name": "Cấu trúc dữ liệu và giải thuật",
+                "credits": "4",
+                "class": "24CTT5",
+                "score": 8.6
+            },
+            {
+                "semester": "24-25/2",
+                "id": "ENV00003",
+                "name": "Con người và môi trường",
+                "credits": "2",
+                "class": "24SHH2",
+                "score": 8
+            },
+            {
+                "semester": "24-25/2",
+                "id": "MTH00022",
+                "name": "Vi tích phân 2",
+                "credits": "4",
+                "class": "24CTT5",
+                "score": 6
+            },
+            {
+                "semester": "24-25/2",
+                "id": "MTH00035",
+                "name": "Đại số tuyến tính",
+                "credits": "4",
+                "class": "24CTT5",
+                "score": 7.1
+            },
+            {
+                "semester": "24-25/2",
+                "id": "PHY00001",
+                "name": "Vật l‎‎ý đại cương 1 (Cơ - Nhiệt)",
+                "credits": "3",
+                "class": "24CTT5",
+                "score": 9.2
+            },
+            {
+                "semester": "25-26/1",
+                "id": "BAA00005",
+                "name": "Kinh tế đại cương",
+                "credits": "2",
+                "class": "24_2",
+                "score": ""
+            },
+            {
+                "semester": "25-26/1",
+                "id": "BAA00030",
+                "name": "Giáo dục quốc phòng - An ninh",
+                "credits": "4",
+                "class": "1",
+                "score": 7
+            },
+            {
+                "semester": "25-26/1",
+                "id": "CSC10003",
+                "name": "Phương pháp lập trình hướng đối tượng",
+                "credits": "4",
+                "class": "24CTT5",
+                "score": ""
+            },
+            {
+                "semester": "25-26/1",
+                "id": "CSC10008",
+                "name": "Mạng máy tính",
+                "credits": "4",
+                "class": "24CTT5",
+                "score": ""
+            },
+            {
+                "semester": "25-26/1",
+                "id": "MTH00044",
+                "name": "Xác suất thống kê",
+                "credits": "4",
+                "class": "24CTT5",
+                "score": ""
+            },
+            {
+                "semester": "25-26/1",
+                "id": "MTH00050",
+                "name": "Toán học tổ hợp",
+                "credits": "4",
+                "class": "24CTT5",
+                "score": ""
+            },
+            {
+                "semester": "25-26/1",
+                "id": "PHY00002",
+                "name": "Vật l‎‎ý đại cương 2 (Điện từ - Quang)",
+                "credits": "3",
+                "class": "24KDL1",
+                "score": ""
+            }
+        ],
+        "exams": [],
+        "tuition": {
+            "total": "19,427,000",
+            "details": [
+                {
+                    "code": "BAA00030/1",
+                    "name": "Giáo dục quốc phòng - An ninh",
+                    "credits": "4.0",
+                    "fee": "1,700,000"
+                },
+                {
+                    "code": "BAA00005/24_2",
+                    "name": "Kinh tế đại cương",
+                    "credits": "2.0",
+                    "fee": "850,000"
+                },
+                {
+                    "code": "CSC10008/24CTT5",
+                    "name": "Mạng máy tính",
+                    "credits": "4.0",
+                    "fee": "4,285,000"
+                },
+                {
+                    "code": "CSC10003/24CTT5",
+                    "name": "Phương pháp lập trình hướng đối tượng",
+                    "credits": "4.0",
+                    "fee": "4,285,000"
+                },
+                {
+                    "code": "MTH00050/24CTT5",
+                    "name": "Toán học tổ hợp",
+                    "credits": "4.0",
+                    "fee": "3,195,000"
+                },
+                {
+                    "code": "PHY00002/24KDL1",
+                    "name": "Vật l‎‎ý đại cương 2 (Điện từ - Quang)",
+                    "credits": "3.0",
+                    "fee": "1,917,000"
+                },
+                {
+                    "code": "MTH00044/24CTT5",
+                    "name": "Xác suất thống kê",
+                    "credits": "4.0",
+                    "fee": "3,195,000"
+                }
+            ]
+        },
+        "program": []
+    },
+    "courses_db_offline": [
+        {
+            "id": "ADD00001",
+            "name": "Anh văn bổ túc",
+            "credits": 3,
+            "classes": [
+                {
+                    "id": "25C4_1",
+                    "schedule": [
+                        "T4(6-9)"
+                    ]
+                },
+                {
+                    "id": "25S2_1",
+                    "schedule": [
+                        "T2(1-4)"
+                    ]
+                },
+                {
+                    "id": "25S5_1",
+                    "schedule": [
+                        "T5(1-4)"
+                    ]
+                },
+                {
+                    "id": "25S6_1",
+                    "schedule": [
+                        "T6(1-4)"
+                    ]
+                },
+                {
+                    "id": "25S7_1",
+                    "schedule": [
+                        "T7(1-4)"
+                    ]
+                },
+                {
+                    "id": "25S4_1",
+                    "schedule": [
+                        "T4(1-4)"
+                    ]
+                },
+                {
+                    "id": "25C2_1",
+                    "schedule": [
+                        "T2(6-9)"
+                    ]
+                },
+                {
+                    "id": "25C3_1",
+                    "schedule": [
+                        "T3(6-9)"
+                    ]
+                },
+                {
+                    "id": "25C3_3",
+                    "schedule": [
+                        "T3(6-9)"
+                    ]
+                },
+                {
+                    "id": "25C5_1",
+                    "schedule": [
+                        "T5(6-9)"
+                    ]
+                },
+                {
+                    "id": "25C6_1",
+                    "schedule": [
+                        "T6(6-9)"
+                    ]
+                }
+            ]
+        },
+        {
+            "id": "ADD00031",
+            "name": "Anh văn 1",
+            "credits": 3,
+            "classes": [
+                {
+                    "id": "25KMT1",
+                    "schedule": [
+                        "T4(1-4)"
+                    ]
+                },
+                {
+                    "id": "25SHH3",
+                    "schedule": [
+                        "T6(1-4)"
+                    ]
+                },
+                {
+                    "id": "25QMT1B",
+                    "schedule": [
+                        "T6(1-4)"
+                    ]
+                },
+                {
+                    "id": "25TTH1AB",
+                    "schedule": [
+                        "T2(1-4)"
+                    ]
+                },
+                {
+                    "id": "25TTH2",
+                    "schedule": [
+                        "T2(6-9)"
+                    ]
+                },
+                {
+                    "id": "25KVL2",
+                    "schedule": [
+                        "T6(6-9)"
+                    ]
+                },
+                {
+                    "id": "25SHH2",
+                    "schedule": [
+                        "T6(1-4)"
+                    ]
+                },
+                {
+                    "id": "25HDH1",
+                    "schedule": [
+                        "T6(6-9)"
+                    ]
+                },
+                {
+                    "id": "25ICD1",
+                    "schedule": [
+                        "T7(1-4)"
+                    ]
+                },
+                {
+                    "id": "25KMT2",
+                    "schedule": [
+                        "T5(6-9)"
+                    ]
+                },
+                {
+                    "id": "25KVL1A",
+                    "schedule": [
+                        "T3(6-9)"
+                    ]
+                },
+                {
+                    "id": "25HOH2",
+                    "schedule": [
+                        "T5(1-4)"
+                    ]
+                },
+                {
+                    "id": "25CSH1",
+                    "schedule": [
+                        "T3(6-9)"
+                    ]
+                },
+                {
+                    "id": "25CSH2",
+                    "schedule": [
+                        "T2(1-4)"
+                    ]
+                },
+                {
+                    "id": "25CSH3",
+                    "schedule": [
+                        "T4(1-4)"
+                    ]
+                },
+                {
+                    "id": "25CTT2",
+                    "schedule": [
+                        "T4(6-9)"
+                    ]
+                },
+                {
+                    "id": "25CTT3",
+                    "schedule": [
+                        "T7(6-9)"
+                    ]
+                },
+                {
+                    "id": "25CTT4",
+                    "schedule": [
+                        "T4(6-9)"
+                    ]
+                },
+                {
+                    "id": "25CBD1",
+                    "schedule": [
+                        "T4(6-9)"
+                    ]
+                },
+                {
+                    "id": "25CGD1",
+                    "schedule": [
+                        "T3(1-4)"
+                    ]
+                },
+                {
+                    "id": "25CMT1",
+                    "schedule": [
+                        "T5(1-4)"
+                    ]
+                },
+                {
+                    "id": "25CMT2",
+                    "schedule": [
+                        "T5(6-9)"
+                    ]
+                },
+                {
+                    "id": "25CTT5",
+                    "schedule": [
+                        "T2(6-9)"
+                    ]
+                },
+                {
+                    "id": "25CVD1",
+                    "schedule": [
+                        "T5(6-9)"
+                    ]
+                }
+            ]
+        },
+        {
+            "id": "ADD00032",
+            "name": "Anh văn 2",
+            "credits": 3,
+            "classes": [
+                {
+                    "id": "25C4_1",
+                    "schedule": [
+                        "T4(6-9)"
+                    ]
+                },
+                {
+                    "id": "25S4_1",
+                    "schedule": [
+                        "T4(1-4)"
+                    ]
+                },
+                {
+                    "id": "25S3_1",
+                    "schedule": [
+                        "T3(1-4)"
+                    ]
+                },
+                {
+                    "id": "25C2_1",
+                    "schedule": [
+                        "T2(6-9)"
+                    ]
+                },
+                {
+                    "id": "25C3_1",
+                    "schedule": [
+                        "T3(6-9)"
+                    ]
+                },
+                {
+                    "id": "25C6_1",
+                    "schedule": [
+                        "T6(6-9)"
+                    ]
+                }
+            ]
+        },
+        {
+            "id": "ADD00033",
+            "name": "Anh văn 3",
+            "credits": 3,
+            "classes": [
+                {
+                    "id": "24C2_1",
+                    "schedule": [
+                        "T2(6-9)"
+                    ]
+                },
+                {
+                    "id": "24C3_1",
+                    "schedule": [
+                        "T3(6-9)"
+                    ]
+                },
+                {
+                    "id": "24C4_1",
+                    "schedule": [
+                        "T4(6-9)"
+                    ]
+                },
+                {
+                    "id": "24C5_1",
+                    "schedule": [
+                        "T5(6-9)"
+                    ]
+                },
+                {
+                    "id": "24S3_1",
+                    "schedule": [
+                        "T3(1-4)"
+                    ]
+                },
+                {
+                    "id": "24S4_1",
+                    "schedule": [
+                        "T4(1-4)"
+                    ]
+                },
+                {
+                    "id": "24S5_1",
+                    "schedule": [
+                        "T5(1-4)"
+                    ]
+                },
+                {
+                    "id": "24S6_1",
+                    "schedule": [
+                        "T6(1-4)"
+                    ]
+                }
+            ]
+        },
+        {
+            "id": "ADD00034",
+            "name": "Anh văn 4",
+            "credits": 3,
+            "classes": [
+                {
+                    "id": "24S7_1",
+                    "schedule": [
+                        "T7(1-4)"
+                    ]
+                },
+                {
+                    "id": "24C3_1",
+                    "schedule": [
+                        "T3(6-9)"
+                    ]
+                }
+            ]
+        },
+        {
+            "id": "BAA00003",
+            "name": "Tư tưởng Hồ Chí Minh",
+            "credits": 2,
+            "classes": [
+                {
+                    "id": "24_3",
+                    "schedule": [
+                        "T7(6-9)"
+                    ]
+                },
+                {
+                    "id": "24CMT2",
+                    "schedule": [
+                        "T5(1-4)"
+                    ]
+                },
+                {
+                    "id": "24CMT1",
+                    "schedule": [
+                        "T6(1-4)"
+                    ]
+                },
+                {
+                    "id": "24DCH1",
+                    "schedule": [
+                        "T6(1-4)"
+                    ]
+                },
+                {
+                    "id": "24DTV1",
+                    "schedule": [
+                        "T6(6-9)"
+                    ]
+                },
+                {
+                    "id": "24ICD1",
+                    "schedule": [
+                        "T2(1-4)"
+                    ]
+                },
+                {
+                    "id": "24KMT1",
+                    "schedule": [
+                        "T6(6-9)"
+                    ]
+                },
+                {
+                    "id": "24QMT1",
+                    "schedule": [
+                        "T7(1-4)"
+                    ]
+                },
+                {
+                    "id": "24DTV2",
+                    "schedule": [
+                        "T7(1-4)"
+                    ]
+                }
+            ]
+        },
+        {
+            "id": "BAA00004",
+            "name": "Pháp luật đại cương",
+            "credits": 3,
+            "classes": [
+                {
+                    "id": "24DTV2",
+                    "schedule": [
+                        "T7(6-9)"
+                    ]
+                },
+                {
+                    "id": "24CSH1",
+                    "schedule": [
+                        "T5(6-9)"
+                    ]
+                },
+                {
+                    "id": "25KMT1",
+                    "schedule": [
+                        "T7(1-4)"
+                    ]
+                },
+                {
+                    "id": "25CBD1",
+                    "schedule": [
+                        "T4(1-4)"
+                    ]
+                },
+                {
+                    "id": "25CMT2",
+                    "schedule": [
+                        "T3(1-4)"
+                    ]
+                },
+                {
+                    "id": "25CMT1",
+                    "schedule": [
+                        "T3(1-4)"
+                    ]
+                },
+                {
+                    "id": "25KVL1",
+                    "schedule": [
+                        "T5(1-4)"
+                    ]
+                },
+                {
+                    "id": "25CVL1",
+                    "schedule": [
+                        "T4(6-9)"
+                    ]
+                },
+                {
+                    "id": "25CVL2",
+                    "schedule": [
+                        "T5(1-4)"
+                    ]
+                },
+                {
+                    "id": "24DTV1",
+                    "schedule": [
+                        "T7(6-9)"
+                    ]
+                },
+                {
+                    "id": "24SHH1",
+                    "schedule": [
+                        "T7(1-4)"
+                    ]
+                },
+                {
+                    "id": "24SHH3",
+                    "schedule": [
+                        "T3(6-9)"
+                    ]
+                }
+            ]
+        },
+        {
+            "id": "BAA00005",
+            "name": "Kinh tế đại cương",
+            "credits": 2,
+            "classes": [
+                {
+                    "id": "24_3",
+                    "schedule": [
+                        "T3(6-9)"
+                    ]
+                },
+                {
+                    "id": "24_2",
+                    "schedule": [
+                        "T3(1-4)"
+                    ]
+                },
+                {
+                    "id": "24_1",
+                    "schedule": [
+                        "T7(1-4)"
+                    ]
+                }
+            ]
+        },
+        {
+            "id": "BAA00006",
+            "name": "Tâm lý đại cương",
+            "credits": 2,
+            "classes": [
+                {
+                    "id": "24_1",
+                    "schedule": []
+                },
+                {
+                    "id": "24_4",
+                    "schedule": []
+                },
+                {
+                    "id": "24_2",
+                    "schedule": []
+                },
+                {
+                    "id": "24_3",
+                    "schedule": []
+                }
+            ]
+        },
+        {
+            "id": "BAA00007",
+            "name": "Phương pháp luận sáng tạo",
+            "credits": 2,
+            "classes": [
+                {
+                    "id": "24_2",
+                    "schedule": []
+                },
+                {
+                    "id": "24_1",
+                    "schedule": []
+                },
+                {
+                    "id": "25DCH1",
+                    "schedule": []
+                },
+                {
+                    "id": "24_3",
+                    "schedule": []
+                }
+            ]
+        },
+        {
+            "id": "BAA00021",
+            "name": "Thể dục 1",
+            "credits": 2,
+            "classes": [
+                {
+                    "id": "25PB_T5Ti1",
+                    "schedule": [
+                        "T5(1-3)"
+                    ]
+                },
+                {
+                    "id": "25CL_T2Ti1",
+                    "schedule": [
+                        "T2(1-3)"
+                    ]
+                },
+                {
+                    "id": "25CL_T2Ti3",
+                    "schedule": [
+                        "T2(3-5)"
+                    ]
+                },
+                {
+                    "id": "25CL_T2Ti8",
+                    "schedule": [
+                        "T2(8-10)"
+                    ]
+                },
+                {
+                    "id": "25VT_T2Ti1",
+                    "schedule": [
+                        "T2(1-3)"
+                    ]
+                },
+                {
+                    "id": "25VT_T2Ti3",
+                    "schedule": [
+                        "T2(3-5)"
+                    ]
+                },
+                {
+                    "id": "25VT_T3Ti1",
+                    "schedule": [
+                        "T3(1-3)"
+                    ]
+                },
+                {
+                    "id": "25VT_T3Ti3",
+                    "schedule": [
+                        "T3(3-5)"
+                    ]
+                },
+                {
+                    "id": "25VT_T4Ti3",
+                    "schedule": [
+                        "T4(3-5)"
+                    ]
+                },
+                {
+                    "id": "25VT_T5Ti3",
+                    "schedule": [
+                        "T5(3-5)"
+                    ]
+                },
+                {
+                    "id": "25VT_T5Ti8",
+                    "schedule": [
+                        "T5(8-10)"
+                    ]
+                },
+                {
+                    "id": "25VT_T6Ti1",
+                    "schedule": [
+                        "T6(1-3)"
+                    ]
+                },
+                {
+                    "id": "25AE_T3Ti1",
+                    "schedule": [
+                        "T3(1-3)"
+                    ]
+                },
+                {
+                    "id": "25AE_T6Ti3",
+                    "schedule": [
+                        "T6(3-5)"
+                    ]
+                },
+                {
+                    "id": "25BC_T2Ti1",
+                    "schedule": [
+                        "T2(1-3)"
+                    ]
+                },
+                {
+                    "id": "25BC_T2Ti3",
+                    "schedule": [
+                        "T2(3-5)"
+                    ]
+                },
+                {
+                    "id": "25BC_T3Ti1",
+                    "schedule": [
+                        "T3(1-3)"
+                    ]
+                },
+                {
+                    "id": "25BC_T4Ti1",
+                    "schedule": [
+                        "T4(1-3)"
+                    ]
+                },
+                {
+                    "id": "25BC_T4Ti3",
+                    "schedule": [
+                        "T4(3-5)"
+                    ]
+                },
+                {
+                    "id": "25BC_T5Ti1",
+                    "schedule": [
+                        "T5(1-3)"
+                    ]
+                },
+                {
+                    "id": "25BC_T6Ti1",
+                    "schedule": [
+                        "T6(1-3)"
+                    ]
+                },
+                {
+                    "id": "25BC_T6Ti8",
+                    "schedule": [
+                        "T6(8-10)"
+                    ]
+                },
+                {
+                    "id": "25BD_T2Ti3",
+                    "schedule": [
+                        "T2(3-5)"
+                    ]
+                },
+                {
+                    "id": "25BD_T2Ti8",
+                    "schedule": [
+                        "T2(8-10)"
+                    ]
+                },
+                {
+                    "id": "25BD_T3Ti3",
+                    "schedule": [
+                        "T3(3-5)"
+                    ]
+                },
+                {
+                    "id": "25BD_T3Ti8",
+                    "schedule": [
+                        "T3(8-10)"
+                    ]
+                },
+                {
+                    "id": "25BD_T4Ti3",
+                    "schedule": [
+                        "T4(3-5)"
+                    ]
+                },
+                {
+                    "id": "25BD_T4Ti8",
+                    "schedule": [
+                        "T4(8-10)"
+                    ]
+                },
+                {
+                    "id": "25BD_T6Ti3",
+                    "schedule": [
+                        "T6(3-5)"
+                    ]
+                },
+                {
+                    "id": "25BL_T2Ti8",
+                    "schedule": [
+                        "T2(8-10)"
+                    ]
+                },
+                {
+                    "id": "25BL_T3Ti1",
+                    "schedule": [
+                        "T3(1-3)"
+                    ]
+                },
+                {
+                    "id": "25BL_T4Ti3",
+                    "schedule": [
+                        "T4(3-5)"
+                    ]
+                },
+                {
+                    "id": "25BL_T5Ti1",
+                    "schedule": [
+                        "T5(1-3)"
+                    ]
+                },
+                {
+                    "id": "25BL_T6Ti3",
+                    "schedule": [
+                        "T6(3-5)"
+                    ]
+                },
+                {
+                    "id": "25BR_T2Ti1",
+                    "schedule": [
+                        "T2(1-3)"
+                    ]
+                },
+                {
+                    "id": "25BR_T3Ti3",
+                    "schedule": [
+                        "T3(3-5)"
+                    ]
+                },
+                {
+                    "id": "25BR_T4Ti1",
+                    "schedule": [
+                        "T4(1-3)"
+                    ]
+                },
+                {
+                    "id": "25BR_T5Ti8",
+                    "schedule": [
+                        "T5(8-10)"
+                    ]
+                },
+                {
+                    "id": "25BR_T6Ti1",
+                    "schedule": [
+                        "T6(1-3)"
+                    ]
+                },
+                {
+                    "id": "25CL_T3T8",
+                    "schedule": [
+                        "T3(8-10)"
+                    ]
+                },
+                {
+                    "id": "25CL_T3Ti1",
+                    "schedule": [
+                        "T3(1-3)"
+                    ]
+                },
+                {
+                    "id": "25CL_T3Ti3",
+                    "schedule": [
+                        "T3(3-5)"
+                    ]
+                },
+                {
+                    "id": "25CL_T3Ti8",
+                    "schedule": [
+                        "T3(8-10)"
+                    ]
+                },
+                {
+                    "id": "25CL_T4T8",
+                    "schedule": [
+                        "T4(8-10)"
+                    ]
+                },
+                {
+                    "id": "25CL_T4Ti1",
+                    "schedule": [
+                        "T4(1-3)"
+                    ]
+                },
+                {
+                    "id": "25CL_T4Ti3",
+                    "schedule": [
+                        "T4(3-5)"
+                    ]
+                },
+                {
+                    "id": "25CL_T4Ti8",
+                    "schedule": [
+                        "T4(8-10)"
+                    ]
+                },
+                {
+                    "id": "25CL_T5Ti1",
+                    "schedule": [
+                        "T5(1-3)"
+                    ]
+                },
+                {
+                    "id": "25CL_T5Ti3",
+                    "schedule": [
+                        "T5(3-5)"
+                    ]
+                },
+                {
+                    "id": "25CL_T5Ti8",
+                    "schedule": [
+                        "T5(8-10)"
+                    ]
+                },
+                {
+                    "id": "25CL_T6T8",
+                    "schedule": [
+                        "T6(8-10)"
+                    ]
+                },
+                {
+                    "id": "25CL_T6Ti1",
+                    "schedule": [
+                        "T6(1-3)"
+                    ]
+                },
+                {
+                    "id": "25CL_T6Ti3",
+                    "schedule": [
+                        "T6(3-5)"
+                    ]
+                },
+                {
+                    "id": "25CL_T6Ti8",
+                    "schedule": [
+                        "T6(8-10)"
+                    ]
+                }
+            ]
+        },
+        {
+            "id": "BAA00101",
+            "name": "Triết học Mác - Lênin",
+            "credits": 3,
+            "classes": [
+                {
+                    "id": "25CMT1",
+                    "schedule": [
+                        "T6(6-10)"
+                    ]
+                },
+                {
+                    "id": "25CMT2",
+                    "schedule": [
+                        "T5(1-5)"
+                    ]
+                },
+                {
+                    "id": "25CBD1",
+                    "schedule": [
+                        "T5(1-5)"
+                    ]
+                },
+                {
+                    "id": "25CGD1",
+                    "schedule": [
+                        "T2(1-5)"
+                    ]
+                },
+                {
+                    "id": "24SHH2",
+                    "schedule": [
+                        "T2(6-10)"
+                    ]
+                },
+                {
+                    "id": "25DTV1",
+                    "schedule": [
+                        "T5(6-10)"
+                    ]
+                },
+                {
+                    "id": "25DTV2",
+                    "schedule": [
+                        "T3(1-5)"
+                    ]
+                },
+                {
+                    "id": "25KMT2",
+                    "schedule": [
+                        "T4(1-5)"
+                    ]
+                },
+                {
+                    "id": "25ICD1",
+                    "schedule": [
+                        "T5(6-10)"
+                    ]
+                },
+                {
+                    "id": "25QMT1",
+                    "schedule": [
+                        "T4(6-10)"
+                    ]
+                },
+                {
+                    "id": "24SHH1",
+                    "schedule": [
+                        "T3(6-10)"
+                    ]
+                },
+                {
+                    "id": "24CSH1",
+                    "schedule": [
+                        "T6(6-10)"
+                    ]
+                },
+                {
+                    "id": "24SHH3",
+                    "schedule": [
+                        "T3(1-5)"
+                    ]
+                },
+                {
+                    "id": "25DCH1",
+                    "schedule": [
+                        "T2(6-10)"
+                    ]
+                },
+                {
+                    "id": "25CVD1",
+                    "schedule": [
+                        "T3(6-10)"
+                    ]
+                },
+                {
+                    "id": "24CSH2",
+                    "schedule": [
+                        "T2(1-5)"
+                    ]
+                },
+                {
+                    "id": "24CSH3",
+                    "schedule": [
+                        "T4(6-10)"
+                    ]
+                },
+                {
+                    "id": "25VYK1",
+                    "schedule": [
+                        "T2(1-5)"
+                    ]
+                },
+                {
+                    "id": "25TTH3",
+                    "schedule": [
+                        "T6(6-10)"
+                    ]
+                },
+                {
+                    "id": "25TTH1",
+                    "schedule": [
+                        "T3(6-10)"
+                    ]
+                },
+                {
+                    "id": "25TNT1",
+                    "schedule": [
+                        "T4(1-3)"
+                    ]
+                },
+                {
+                    "id": "25TTH2",
+                    "schedule": [
+                        "T3(1-5)"
+                    ]
+                },
+                {
+                    "id": "25VLH1",
+                    "schedule": [
+                        "T6(1-5)"
+                    ]
+                },
+                {
+                    "id": "25KMT1",
+                    "schedule": [
+                        "T2(6-10)"
+                    ]
+                }
+            ]
+        },
+        {
+            "id": "BAA00102",
+            "name": "Kinh tế chính trị Mác - Lênin",
+            "credits": 2,
+            "classes": [
+                {
+                    "id": "25KMT1",
+                    "schedule": [
+                        "T2(6-10)"
+                    ]
+                },
+                {
+                    "id": "25DCH1",
+                    "schedule": [
+                        "T2(6-10)"
+                    ]
+                },
+                {
+                    "id": "24CVL1",
+                    "schedule": [
+                        "T3(6-10)"
+                    ]
+                },
+                {
+                    "id": "24KVL1",
+                    "schedule": [
+                        "T4(6-10)"
+                    ]
+                },
+                {
+                    "id": "25QMT1",
+                    "schedule": [
+                        "T4(6-10)"
+                    ]
+                },
+                {
+                    "id": "25KMT2",
+                    "schedule": [
+                        "T4(1-5)"
+                    ]
+                },
+                {
+                    "id": "25DTV2",
+                    "schedule": [
+                        "T3(1-5)"
+                    ]
+                },
+                {
+                    "id": "25DTV1",
+                    "schedule": [
+                        "T5(6-10)"
+                    ]
+                },
+                {
+                    "id": "25CVD1",
+                    "schedule": [
+                        "T3(6-10)"
+                    ]
+                },
+                {
+                    "id": "24TTH1",
+                    "schedule": [
+                        "T2(1-5)"
+                    ]
+                },
+                {
+                    "id": "24TTH2",
+                    "schedule": [
+                        "T7(1-5)"
+                    ]
+                },
+                {
+                    "id": "24TTH3",
+                    "schedule": [
+                        "T3(1-5)"
+                    ]
+                },
+                {
+                    "id": "25CGD1",
+                    "schedule": [
+                        "T2(1-5)"
+                    ]
+                },
+                {
+                    "id": "25CBD1",
+                    "schedule": [
+                        "T5(1-5)"
+                    ]
+                },
+                {
+                    "id": "25CMT2",
+                    "schedule": [
+                        "T5(1-5)"
+                    ]
+                },
+                {
+                    "id": "25CMT1",
+                    "schedule": [
+                        "T6(6-10)"
+                    ]
+                }
+            ]
+        },
+        {
+            "id": "BAA00103",
+            "name": "Chủ nghĩa xã hội khoa học",
+            "credits": 2,
+            "classes": [
+                {
+                    "id": "24VYK1",
+                    "schedule": [
+                        "T5(6-9)"
+                    ]
+                },
+                {
+                    "id": "24QMT1",
+                    "schedule": [
+                        "T6(1-4)"
+                    ]
+                },
+                {
+                    "id": "25DCH1",
+                    "schedule": [
+                        "T3(1-4)"
+                    ]
+                },
+                {
+                    "id": "24KVL1",
+                    "schedule": [
+                        "T4(6-9)"
+                    ]
+                },
+                {
+                    "id": "24CVL1",
+                    "schedule": [
+                        "T3(6-9)"
+                    ]
+                },
+                {
+                    "id": "24CVD1",
+                    "schedule": [
+                        "T2(6-9)"
+                    ]
+                },
+                {
+                    "id": "24KMT1",
+                    "schedule": [
+                        "T2(1-4)"
+                    ]
+                },
+                {
+                    "id": "24KDL1",
+                    "schedule": [
+                        "T6(6-9)"
+                    ]
+                },
+                {
+                    "id": "24CMT1",
+                    "schedule": [
+                        "T2(6-9)"
+                    ]
+                },
+                {
+                    "id": "24VLH2",
+                    "schedule": [
+                        "T5(1-4)"
+                    ]
+                },
+                {
+                    "id": "24CMT2",
+                    "schedule": [
+                        "T4(1-4)"
+                    ]
+                },
+                {
+                    "id": "24CBD1",
+                    "schedule": [
+                        "T3(1-4)"
+                    ]
+                },
+                {
+                    "id": "24VLH1",
+                    "schedule": [
+                        "T3(6-9)"
+                    ]
+                }
+            ]
+        },
+        {
+            "id": "BAA00104",
+            "name": "Lịch sử Đảng Cộng sản Việt Nam",
+            "credits": 2,
+            "classes": [
+                {
+                    "id": "24VLH1",
+                    "schedule": [
+                        "T3(6-9)"
+                    ]
+                },
+                {
+                    "id": "24KMT1",
+                    "schedule": [
+                        "T2(1-4)"
+                    ]
+                },
+                {
+                    "id": "24CBD1",
+                    "schedule": [
+                        "T3(1-4)"
+                    ]
+                },
+                {
+                    "id": "24CMT1",
+                    "schedule": [
+                        "T2(6-9)"
+                    ]
+                },
+                {
+                    "id": "24CMT2",
+                    "schedule": [
+                        "T4(1-4)"
+                    ]
+                },
+                {
+                    "id": "24VLH2",
+                    "schedule": [
+                        "T5(1-4)"
+                    ]
+                },
+                {
+                    "id": "24KDL1",
+                    "schedule": [
+                        "T6(6-9)"
+                    ]
+                },
+                {
+                    "id": "24ICD1",
+                    "schedule": [
+                        "T2(1-4)"
+                    ]
+                },
+                {
+                    "id": "24CVD1",
+                    "schedule": [
+                        "T2(6-9)"
+                    ]
+                },
+                {
+                    "id": "24QMT1",
+                    "schedule": [
+                        "T6(1-4)"
+                    ]
+                },
+                {
+                    "id": "24VYK1",
+                    "schedule": [
+                        "T5(6-9)"
+                    ]
+                }
+            ]
+        },
+        {
+            "id": "BIO00001",
+            "name": "Sinh đại cương 1",
+            "credits": 3,
+            "classes": [
+                {
+                    "id": "25CMT1",
+                    "schedule": [
+                        "T7(1-4)"
+                    ]
+                },
+                {
+                    "id": "25CMT2",
+                    "schedule": [
+                        "T6(1-4)"
+                    ]
+                },
+                {
+                    "id": "25CSH1",
+                    "schedule": [
+                        "T4(1-4)"
+                    ]
+                },
+                {
+                    "id": "25CSH3",
+                    "schedule": [
+                        "T5(1-4)"
+                    ]
+                },
+                {
+                    "id": "25CSH2",
+                    "schedule": [
+                        "T4(6-9)"
+                    ]
+                },
+                {
+                    "id": "25HOH2",
+                    "schedule": [
+                        "T2(1-4)"
+                    ]
+                },
+                {
+                    "id": "25HOH1",
+                    "schedule": [
+                        "T2(6-9)"
+                    ]
+                },
+                {
+                    "id": "25KMT2",
+                    "schedule": [
+                        "T3(1-4)"
+                    ]
+                },
+                {
+                    "id": "25KVL1",
+                    "schedule": [
+                        "T7(6-9)"
+                    ]
+                },
+                {
+                    "id": "25KMT1",
+                    "schedule": [
+                        "T6(6-9)"
+                    ]
+                },
+                {
+                    "id": "25SHH1",
+                    "schedule": [
+                        "T3(6-9)"
+                    ]
+                },
+                {
+                    "id": "25SHH2",
+                    "schedule": [
+                        "T3(1-4)"
+                    ]
+                },
+                {
+                    "id": "25KVL2",
+                    "schedule": [
+                        "T5(1-4)"
+                    ]
+                },
+                {
+                    "id": "25SHH3",
+                    "schedule": [
+                        "T5(6-9)"
+                    ]
+                }
+            ]
+        },
+        {
+            "id": "BIO00081",
+            "name": "Thực tập Sinh đại cương 1",
+            "credits": 1,
+            "classes": [
+                {
+                    "id": "25SHH2A",
+                    "schedule": [
+                        "T4(6-8)"
+                    ]
+                },
+                {
+                    "id": "25SHH2B",
+                    "schedule": [
+                        "T4(8-10)"
+                    ]
+                },
+                {
+                    "id": "25SHH3A",
+                    "schedule": [
+                        "T4(1-3)"
+                    ]
+                },
+                {
+                    "id": "25SHH3B",
+                    "schedule": [
+                        "T4(3-5)"
+                    ]
+                },
+                {
+                    "id": "25SHH1A",
+                    "schedule": [
+                        "T3(1-3)"
+                    ]
+                },
+                {
+                    "id": "25SHH1B",
+                    "schedule": [
+                        "T3(3-5)"
+                    ]
+                },
+                {
+                    "id": "25CSH2A",
+                    "schedule": [
+                        "T3(6-8)"
+                    ]
+                },
+                {
+                    "id": "25CSH2B",
+                    "schedule": [
+                        "T3(8-10)"
+                    ]
+                },
+                {
+                    "id": "25CSH1A",
+                    "schedule": [
+                        "T2(1-3)"
+                    ]
+                },
+                {
+                    "id": "25CSH1B",
+                    "schedule": [
+                        "T2(3-5)"
+                    ]
+                },
+                {
+                    "id": "25CSH3A",
+                    "schedule": [
+                        "T2(6-8)"
+                    ]
+                },
+                {
+                    "id": "25CSH3B",
+                    "schedule": [
+                        "T2(8-10)"
+                    ]
+                }
+            ]
+        },
+        {
+            "id": "CHE00001",
+            "name": "Hóa đại cương 1",
+            "credits": 3,
+            "classes": [
+                {
+                    "id": "24DCH1",
+                    "schedule": [
+                        "T7(1-4)"
+                    ]
+                },
+                {
+                    "id": "25CSH1",
+                    "schedule": [
+                        "T2(6-9)"
+                    ]
+                },
+                {
+                    "id": "25CSH2",
+                    "schedule": [
+                        "T4(1-4)"
+                    ]
+                },
+                {
+                    "id": "25CSH3",
+                    "schedule": [
+                        "T7(1-4)"
+                    ]
+                },
+                {
+                    "id": "25CVL1",
+                    "schedule": [
+                        "T5(1-4)"
+                    ]
+                },
+                {
+                    "id": "25CVL2",
+                    "schedule": [
+                        "T6(1-4)"
+                    ]
+                },
+                {
+                    "id": "25HOH1",
+                    "schedule": [
+                        "T5(6-9)"
+                    ]
+                },
+                {
+                    "id": "25HOH2",
+                    "schedule": [
+                        "T3(1-4)"
+                    ]
+                },
+                {
+                    "id": "25SHH2",
+                    "schedule": [
+                        "T2(1-4)"
+                    ]
+                },
+                {
+                    "id": "25SHH1",
+                    "schedule": [
+                        "T6(6-9)"
+                    ]
+                },
+                {
+                    "id": "25KVL1",
+                    "schedule": [
+                        "T6(6-9)"
+                    ]
+                },
+                {
+                    "id": "25HDH1",
+                    "schedule": [
+                        "T4(6-9)"
+                    ]
+                },
+                {
+                    "id": "25SHH3",
+                    "schedule": [
+                        "T3(6-9)"
+                    ]
+                },
+                {
+                    "id": "25VYK1",
+                    "schedule": [
+                        "T4(6-9)"
+                    ]
+                },
+                {
+                    "id": "25VLH2",
+                    "schedule": [
+                        "T7(6-9)"
+                    ]
+                },
+                {
+                    "id": "25KVL2",
+                    "schedule": [
+                        "T4(1-4)"
+                    ]
+                },
+                {
+                    "id": "25VLH1",
+                    "schedule": [
+                        "T7(1-4)"
+                    ]
+                }
+            ]
+        },
+        {
+            "id": "CHE00002",
+            "name": "Hóa đại cương 2",
+            "credits": 3,
+            "classes": [
+                {
+                    "id": "25HOH2",
+                    "schedule": [
+                        "T6(1-4)"
+                    ]
+                },
+                {
+                    "id": "25HOH1",
+                    "schedule": [
+                        "T2(1-4)"
+                    ]
+                },
+                {
+                    "id": "24SHH2",
+                    "schedule": [
+                        "T4(1-4)"
+                    ]
+                },
+                {
+                    "id": "24SHH3",
+                    "schedule": [
+                        "T2(6-9)"
+                    ]
+                },
+                {
+                    "id": "24CSH1",
+                    "schedule": [
+                        "T7(6-9)"
+                    ]
+                },
+                {
+                    "id": "24HDH1",
+                    "schedule": [
+                        "T7(1-4)"
+                    ]
+                },
+                {
+                    "id": "24SHH1",
+                    "schedule": [
+                        "T4(6-9)"
+                    ]
+                },
+                {
+                    "id": "24CSH2",
+                    "schedule": [
+                        "T5(6-9)"
+                    ]
+                },
+                {
+                    "id": "24CSH3",
+                    "schedule": [
+                        "T6(6-9)"
+                    ]
+                }
+            ]
+        },
+        {
+            "id": "CHE00081",
+            "name": "Thực hành Hóa đại cương 1",
+            "credits": 2,
+            "classes": [
+                {
+                    "id": "24KVL1B",
+                    "schedule": [
+                        "T2(6-10)"
+                    ]
+                },
+                {
+                    "id": "24KVL1A",
+                    "schedule": [
+                        "T2(6-10)"
+                    ]
+                },
+                {
+                    "id": "24KVL2A",
+                    "schedule": [
+                        "T2(1-5)"
+                    ]
+                },
+                {
+                    "id": "24KVL2B",
+                    "schedule": [
+                        "T2(1-5)"
+                    ]
+                },
+                {
+                    "id": "24CVL1A",
+                    "schedule": [
+                        "T6(6-10)"
+                    ]
+                },
+                {
+                    "id": "24CVL2B",
+                    "schedule": [
+                        "T6(1-5)"
+                    ]
+                },
+                {
+                    "id": "24CVL1B",
+                    "schedule": [
+                        "T6(6-10)"
+                    ]
+                },
+                {
+                    "id": "24CVL2A",
+                    "schedule": [
+                        "T6(1-5)"
+                    ]
+                }
+            ]
+        },
+        {
+            "id": "CHE00082",
+            "name": "Thực hành Hóa đại cương 2",
+            "credits": 2,
+            "classes": [
+                {
+                    "id": "24KMT2A",
+                    "schedule": [
+                        "T3(6-10)"
+                    ]
+                },
+                {
+                    "id": "24KMT2B",
+                    "schedule": [
+                        "T3(6-10)"
+                    ]
+                },
+                {
+                    "id": "24CMT2A",
+                    "schedule": [
+                        "T4(6-10)"
+                    ]
+                },
+                {
+                    "id": "24CMT2B",
+                    "schedule": [
+                        "T4(6-10)"
+                    ]
+                },
+                {
+                    "id": "24CMT1A",
+                    "schedule": [
+                        "T4(1-5)"
+                    ]
+                },
+                {
+                    "id": "24CMT1B",
+                    "schedule": [
+                        "T4(1-5)"
+                    ]
+                },
+                {
+                    "id": "24KMT1A",
+                    "schedule": [
+                        "T3(1-5)"
+                    ]
+                },
+                {
+                    "id": "24KMT1B",
+                    "schedule": [
+                        "T3(1-5)"
+                    ]
+                }
+            ]
+        },
+        {
+            "id": "CSC00004",
+            "name": "Nhập môn Công nghệ Thông tin",
+            "credits": 4,
+            "classes": [
+                {
+                    "id": "25CTT1",
+                    "schedule": [
+                        "T6(2-5)"
+                    ]
+                },
+                {
+                    "id": "25CTT5",
+                    "schedule": [
+                        "T5(6-9)"
+                    ]
+                },
+                {
+                    "id": "25CTT4",
+                    "schedule": [
+                        "T5(3-5)"
+                    ]
+                },
+                {
+                    "id": "25CTT6",
+                    "schedule": [
+                        "T5(1-4)"
+                    ]
+                },
+                {
+                    "id": "25CTT3",
+                    "schedule": [
+                        "T7(1-4)"
+                    ]
+                },
+                {
+                    "id": "25CTT2",
+                    "schedule": [
+                        "T7(1-4)"
+                    ]
+                }
+            ]
+        },
+        {
+            "id": "CSC10003",
+            "name": "Phương pháp lập trình hướng đối tượng",
+            "credits": 4,
+            "classes": [
+                {
+                    "id": "24CTT3",
+                    "schedule": [
+                        "T6(1-4)"
+                    ]
+                },
+                {
+                    "id": "24CTT6",
+                    "schedule": [
+                        "T4(6-9)"
+                    ]
+                },
+                {
+                    "id": "24CTT4",
+                    "schedule": [
+                        "T4(6-9)"
+                    ]
+                },
+                {
+                    "id": "24CTT2",
+                    "schedule": [
+                        "T7(6-9)"
+                    ]
+                },
+                {
+                    "id": "24CTT1",
+                    "schedule": [
+                        "T3(1-4)"
+                    ]
+                },
+                {
+                    "id": "24CTT5",
+                    "schedule": [
+                        "T7(1-4)"
+                    ]
+                }
+            ]
+        },
+        {
+            "id": "CSC10004",
+            "name": "Cấu trúc dữ liệu và giải thuật",
+            "credits": 4,
+            "classes": [
+                {
+                    "id": "24CTT7",
+                    "schedule": [
+                        "T2(6-9)"
+                    ]
+                }
+            ]
+        },
+        {
+            "id": "CSC10008",
+            "name": "Mạng máy tính",
+            "credits": 4,
+            "classes": [
+                {
+                    "id": "24CTT6",
+                    "schedule": [
+                        "T7(6-9)"
+                    ]
+                },
+                {
+                    "id": "24CTT3",
+                    "schedule": [
+                        "T7(6-9)"
+                    ]
+                },
+                {
+                    "id": "24CTT5",
+                    "schedule": [
+                        "T5(6-9)"
+                    ]
+                },
+                {
+                    "id": "24CTT1",
+                    "schedule": [
+                        "T4(1-4)"
+                    ]
+                },
+                {
+                    "id": "24CTT2",
+                    "schedule": [
+                        "T4(6-9)"
+                    ]
+                },
+                {
+                    "id": "24CTT4",
+                    "schedule": [
+                        "T7(1-4)"
+                    ]
+                }
+            ]
+        },
+        {
+            "id": "CSC10012",
+            "name": "Cơ sở lập trình",
+            "credits": 4,
+            "classes": [
+                {
+                    "id": "25CTT5",
+                    "schedule": [
+                        "T4(2-5)"
+                    ]
+                },
+                {
+                    "id": "25CTT1",
+                    "schedule": [
+                        "T3(6-9)"
+                    ]
+                },
+                {
+                    "id": "25CTT2",
+                    "schedule": [
+                        "T5(6-9)"
+                    ]
+                },
+                {
+                    "id": "25CTT3",
+                    "schedule": [
+                        "T2(6-9)"
+                    ]
+                },
+                {
+                    "id": "25CTT6",
+                    "schedule": [
+                        "T7(1-4)"
+                    ]
+                },
+                {
+                    "id": "25CTT4",
+                    "schedule": [
+                        "T6(1-4)"
+                    ]
+                }
+            ]
+        },
+        {
+            "id": "ENV00001",
+            "name": "Môi trường đại cương",
+            "credits": 2,
+            "classes": [
+                {
+                    "id": "25DCH1",
+                    "schedule": [
+                        "T6(6-9)"
+                    ]
+                },
+                {
+                    "id": "25KDC1",
+                    "schedule": [
+                        "T7(6-9)"
+                    ]
+                },
+                {
+                    "id": "24_1",
+                    "schedule": [
+                        "T6(1-4)"
+                    ]
+                },
+                {
+                    "id": "24HDH1",
+                    "schedule": [
+                        "T7(6-9)"
+                    ]
+                }
+            ]
+        },
+        {
+            "id": "ENV00003",
+            "name": "Con người và môi trường",
+            "credits": 2,
+            "classes": [
+                {
+                    "id": "24CSH1",
+                    "schedule": [
+                        "T3(6-8)"
+                    ]
+                },
+                {
+                    "id": "24_1",
+                    "schedule": [
+                        "T7(6-8)"
+                    ]
+                },
+                {
+                    "id": "24CSH2",
+                    "schedule": [
+                        "T3(1-3)"
+                    ]
+                },
+                {
+                    "id": "24CSH3",
+                    "schedule": [
+                        "T5(1-3)"
+                    ]
+                }
+            ]
+        },
+        {
+            "id": "GEO00002",
+            "name": "Khoa học Trái đất",
+            "credits": 2,
+            "classes": [
+                {
+                    "id": "24_1",
+                    "schedule": [
+                        "T7(6-8)"
+                    ]
+                },
+                {
+                    "id": "24_2",
+                    "schedule": [
+                        "T7(1-3)"
+                    ]
+                }
+            ]
+        },
+        {
+            "id": "MTH00003",
+            "name": "Vi tích phân 1B",
+            "credits": 3,
+            "classes": [
+                {
+                    "id": "25KVL1",
+                    "schedule": [
+                        "T3(1-4)"
+                    ]
+                },
+                {
+                    "id": "25KTH1",
+                    "schedule": [
+                        "T5(6-9)"
+                    ]
+                },
+                {
+                    "id": "25KVL2",
+                    "schedule": [
+                        "T2(6-9)"
+                    ]
+                },
+                {
+                    "id": "25ICD1",
+                    "schedule": [
+                        "T6(6-9)"
+                    ]
+                },
+                {
+                    "id": "25CVL2",
+                    "schedule": [
+                        "T3(6-9)"
+                    ]
+                },
+                {
+                    "id": "25CVL1",
+                    "schedule": [
+                        "T7(1-4)"
+                    ]
+                },
+                {
+                    "id": "25CVD1",
+                    "schedule": [
+                        "T2(1-4)"
+                    ]
+                },
+                {
+                    "id": "25DTV1",
+                    "schedule": [
+                        "T2(1-4)"
+                    ]
+                },
+                {
+                    "id": "25DTV2",
+                    "schedule": [
+                        "T5(1-4)"
+                    ]
+                },
+                {
+                    "id": "25CBD1",
+                    "schedule": [
+                        "T6(1-4)"
+                    ]
+                },
+                {
+                    "id": "25VYK1",
+                    "schedule": [
+                        "T4(1-4)"
+                    ]
+                },
+                {
+                    "id": "25VLH1",
+                    "schedule": [
+                        "T6(6-9)"
+                    ]
+                }
+            ]
+        },
+        {
+            "id": "MTH00004",
+            "name": "Vi tích phân 2B",
+            "credits": 3,
+            "classes": [
+                {
+                    "id": "24_1",
+                    "schedule": [
+                        "T7(6-9)"
+                    ]
+                }
+            ]
+        },
+        {
+            "id": "MTH00021",
+            "name": "Vi tích phân 1",
+            "credits": 4,
+            "classes": [
+                {
+                    "id": "25CTT1",
+                    "schedule": [
+                        "T5(6-9)"
+                    ]
+                },
+                {
+                    "id": "25CTT5",
+                    "schedule": [
+                        "T3(6-9)"
+                    ]
+                },
+                {
+                    "id": "25CGD1",
+                    "schedule": [
+                        "T4(6-9)"
+                    ]
+                },
+                {
+                    "id": "25CTT4",
+                    "schedule": [
+                        "T7(6-9)"
+                    ]
+                },
+                {
+                    "id": "25CTT6",
+                    "schedule": [
+                        "T6(6-9)"
+                    ]
+                },
+                {
+                    "id": "25CTT3",
+                    "schedule": [
+                        "T4(6-9)"
+                    ]
+                },
+                {
+                    "id": "25CTT2",
+                    "schedule": [
+                        "T2(6-9)"
+                    ]
+                },
+                {
+                    "id": "25TNT1",
+                    "schedule": [
+                        "T6(1-3)"
+                    ]
+                }
+            ]
+        },
+        {
+            "id": "MTH00030",
+            "name": "Đại số tuyến tính",
+            "credits": 3,
+            "classes": [
+                {
+                    "id": "25DTV2",
+                    "schedule": [
+                        "T4(6-9)"
+                    ]
+                },
+                {
+                    "id": "25DTV1",
+                    "schedule": [
+                        "T6(6-9)"
+                    ]
+                },
+                {
+                    "id": "24ICD1",
+                    "schedule": [
+                        "T5(6-9)"
+                    ]
+                }
+            ]
+        },
+        {
+            "id": "MTH00035",
+            "name": "Đại số tuyến tính",
+            "credits": 4,
+            "classes": [
+                {
+                    "id": "25CGD1",
+                    "schedule": [
+                        "T7(1-4)"
+                    ]
+                }
+            ]
+        },
+        {
+            "id": "MTH00040",
+            "name": "Xác suất thống kê",
+            "credits": 3,
+            "classes": [
+                {
+                    "id": "24DTV1",
+                    "schedule": [
+                        "T3(6-9)"
+                    ]
+                },
+                {
+                    "id": "24DTV2",
+                    "schedule": [
+                        "T3(1-4)"
+                    ]
+                },
+                {
+                    "id": "24CVD1",
+                    "schedule": [
+                        "T3(6-9)"
+                    ]
+                },
+                {
+                    "id": "24CVL1",
+                    "schedule": [
+                        "T7(1-4)"
+                    ]
+                },
+                {
+                    "id": "24DCH1",
+                    "schedule": [
+                        "T4(1-4)"
+                    ]
+                },
+                {
+                    "id": "24KVL2",
+                    "schedule": [
+                        "T5(6-9)"
+                    ]
+                },
+                {
+                    "id": "24KVL1",
+                    "schedule": [
+                        "T6(1-4)"
+                    ]
+                },
+                {
+                    "id": "24VYK1",
+                    "schedule": [
+                        "T6(6-9)"
+                    ]
+                },
+                {
+                    "id": "24KTH1",
+                    "schedule": [
+                        "T6(1-4)"
+                    ]
+                },
+                {
+                    "id": "24VLH1",
+                    "schedule": [
+                        "T5(1-4)"
+                    ]
+                }
+            ]
+        },
+        {
+            "id": "MTH00041",
+            "name": "Toán rời rạc",
+            "credits": 3,
+            "classes": [
+                {
+                    "id": "24KDL1",
+                    "schedule": [
+                        "T5(1-4)"
+                    ]
+                }
+            ]
+        },
+        {
+            "id": "MTH00044",
+            "name": "Xác suất thống kê",
+            "credits": 4,
+            "classes": [
+                {
+                    "id": "24CTT3",
+                    "schedule": [
+                        "T7(1-4)"
+                    ]
+                },
+                {
+                    "id": "24CTT6",
+                    "schedule": [
+                        "T4(1-4)"
+                    ]
+                },
+                {
+                    "id": "24CTT2",
+                    "schedule": [
+                        "T3(1-4)"
+                    ]
+                },
+                {
+                    "id": "24TNT1",
+                    "schedule": [
+                        "T7(6-9)"
+                    ]
+                },
+                {
+                    "id": "24CTT1",
+                    "schedule": [
+                        "T2(1-4)"
+                    ]
+                },
+                {
+                    "id": "24CTT4",
+                    "schedule": [
+                        "T5(6-9)"
+                    ]
+                },
+                {
+                    "id": "24CTT5",
+                    "schedule": [
+                        "T6(6-9)"
+                    ]
+                }
+            ]
+        },
+        {
+            "id": "MTH00045",
+            "name": "Toán rời rạc",
+            "credits": 4,
+            "classes": [
+                {
+                    "id": "25TNT1",
+                    "schedule": [
+                        "T3(1-3)"
+                    ]
+                },
+                {
+                    "id": "25CTT1",
+                    "schedule": [
+                        "T7(1-4)"
+                    ]
+                },
+                {
+                    "id": "25CTT5",
+                    "schedule": [
+                        "T5(1-4)"
+                    ]
+                },
+                {
+                    "id": "25CTT2",
+                    "schedule": [
+                        "T7(6-9)"
+                    ]
+                },
+                {
+                    "id": "25CTT3",
+                    "schedule": [
+                        "T6(1-4)"
+                    ]
+                },
+                {
+                    "id": "25CTT6",
+                    "schedule": [
+                        "T3(6-9)"
+                    ]
+                },
+                {
+                    "id": "25CTT4",
+                    "schedule": [
+                        "T2(1-4)"
+                    ]
+                }
+            ]
+        },
+        {
+            "id": "MTH00050",
+            "name": "Toán học tổ hợp",
+            "credits": 4,
+            "classes": [
+                {
+                    "id": "24CTT2",
+                    "schedule": [
+                        "T2(1-4)"
+                    ]
+                },
+                {
+                    "id": "24CTT6",
+                    "schedule": [
+                        "T2(1-4)"
+                    ]
+                },
+                {
+                    "id": "24CTT3",
+                    "schedule": [
+                        "T5(6-9)"
+                    ]
+                },
+                {
+                    "id": "24CTT5",
+                    "schedule": [
+                        "T6(2-5)"
+                    ]
+                },
+                {
+                    "id": "24CTT4",
+                    "schedule": [
+                        "T5(1-4)"
+                    ]
+                },
+                {
+                    "id": "24CTT1",
+                    "schedule": [
+                        "T2(6-9)"
+                    ]
+                },
+                {
+                    "id": "24TNT1",
+                    "schedule": [
+                        "T6(6-9)"
+                    ]
+                }
+            ]
+        },
+        {
+            "id": "MTH00081",
+            "name": "Thực hành Vi tích phân 1B",
+            "credits": 1,
+            "classes": [
+                {
+                    "id": "25HDH1A",
+                    "schedule": []
+                },
+                {
+                    "id": "25VLH1A",
+                    "schedule": []
+                },
+                {
+                    "id": "25VLH1TN",
+                    "schedule": []
+                },
+                {
+                    "id": "25VLH2A",
+                    "schedule": []
+                },
+                {
+                    "id": "25VLH2B",
+                    "schedule": []
+                },
+                {
+                    "id": "25VYK1A",
+                    "schedule": []
+                },
+                {
+                    "id": "25VYK1B",
+                    "schedule": []
+                },
+                {
+                    "id": "25KTH1A",
+                    "schedule": []
+                },
+                {
+                    "id": "25CBD1TN1",
+                    "schedule": []
+                },
+                {
+                    "id": "25CBD1TN2",
+                    "schedule": []
+                },
+                {
+                    "id": "25CVD1A",
+                    "schedule": []
+                },
+                {
+                    "id": "25CVD1B",
+                    "schedule": []
+                }
+            ]
+        },
+        {
+            "id": "MTH00086",
+            "name": "Thực hành Toán rời rạc",
+            "credits": 1,
+            "classes": [
+                {
+                    "id": "24KDL1A",
+                    "schedule": []
+                },
+                {
+                    "id": "24KDL1B",
+                    "schedule": []
+                },
+                {
+                    "id": "24KDL1C",
+                    "schedule": []
+                }
+            ]
+        },
+        {
+            "id": "PHY00001",
+            "name": "Vật l‎‎ý đại cương 1 (Cơ - Nhiệt)",
+            "credits": 3,
+            "classes": [
+                {
+                    "id": "24KDL1",
+                    "schedule": [
+                        "T3(6-9)"
+                    ]
+                },
+                {
+                    "id": "25KTH1",
+                    "schedule": [
+                        "T7(1-4)"
+                    ]
+                },
+                {
+                    "id": "25KVL1",
+                    "schedule": [
+                        "T5(6-9)"
+                    ]
+                },
+                {
+                    "id": "24DTV2",
+                    "schedule": [
+                        "T6(6-9)"
+                    ]
+                },
+                {
+                    "id": "25CVL2",
+                    "schedule": [
+                        "T7(1-4)"
+                    ]
+                },
+                {
+                    "id": "25CVD1",
+                    "schedule": [
+                        "T4(6-9)"
+                    ]
+                },
+                {
+                    "id": "25CVL1",
+                    "schedule": [
+                        "T2(6-9)"
+                    ]
+                },
+                {
+                    "id": "25HOH1",
+                    "schedule": [
+                        "T6(1-4)"
+                    ]
+                },
+                {
+                    "id": "25HOH2",
+                    "schedule": [
+                        "T4(6-9)"
+                    ]
+                },
+                {
+                    "id": "25KMT2",
+                    "schedule": [
+                        "T6(6-9)"
+                    ]
+                },
+                {
+                    "id": "25KVL2",
+                    "schedule": [
+                        "T7(6-9)"
+                    ]
+                },
+                {
+                    "id": "25KMT1",
+                    "schedule": [
+                        "T5(1-4)"
+                    ]
+                },
+                {
+                    "id": "25SHH1",
+                    "schedule": [
+                        "T4(1-4)"
+                    ]
+                },
+                {
+                    "id": "25QMT1",
+                    "schedule": [
+                        "T2(1-4)"
+                    ]
+                },
+                {
+                    "id": "25SHH2",
+                    "schedule": [
+                        "T5(1-4)"
+                    ]
+                },
+                {
+                    "id": "25CMT2",
+                    "schedule": [
+                        "T7(6-9)"
+                    ]
+                },
+                {
+                    "id": "25CMT1",
+                    "schedule": [
+                        "T4(1-4)"
+                    ]
+                },
+                {
+                    "id": "25CSH3",
+                    "schedule": [
+                        "T6(1-4)"
+                    ]
+                },
+                {
+                    "id": "25CSH2",
+                    "schedule": [
+                        "T3(1-4)"
+                    ]
+                },
+                {
+                    "id": "25CSH1",
+                    "schedule": [
+                        "T3(1-4)"
+                    ]
+                },
+                {
+                    "id": "25VLH2",
+                    "schedule": [
+                        "T3(6-9)"
+                    ]
+                },
+                {
+                    "id": "25VYK1",
+                    "schedule": [
+                        "T3(6-9)"
+                    ]
+                },
+                {
+                    "id": "25VLH1",
+                    "schedule": [
+                        "T2(6-9)"
+                    ]
+                },
+                {
+                    "id": "25SHH3",
+                    "schedule": [
+                        "T2(1-4)"
+                    ]
+                },
+                {
+                    "id": "24DTV1",
+                    "schedule": [
+                        "T7(1-4)"
+                    ]
+                },
+                {
+                    "id": "25HDH1",
+                    "schedule": [
+                        "T5(6-9)"
+                    ]
+                }
+            ]
+        },
+        {
+            "id": "PHY00002",
+            "name": "Vật lý đại cương 2 (Điện từ - Quang)",
+            "credits": 3,
+            "classes": [
+                {
+                    "id": "24CTT5",
+                    "schedule": [
+                        "T3(1-4)"
+                    ]
+                },
+                {
+                    "id": "24CTT1",
+                    "schedule": [
+                        "T6(1-4)"
+                    ]
+                },
+                {
+                    "id": "24TNT1",
+                    "schedule": [
+                        "T7(1-4)"
+                    ]
+                },
+                {
+                    "id": "24KDL1",
+                    "schedule": [
+                        "T7(6-9)"
+                    ]
+                },
+                {
+                    "id": "24CTT3",
+                    "schedule": [
+                        "T2(6-9)"
+                    ]
+                },
+                {
+                    "id": "24CTT6",
+                    "schedule": [
+                        "T6(6-9)"
+                    ]
+                }
+            ]
+        },
+        {
+            "id": "PHY00081",
+            "name": "Thực hành Vật lý đại cương",
+            "credits": 2,
+            "classes": [
+                {
+                    "id": "24KVL1A",
+                    "schedule": [
+                        "T3(6-10)"
+                    ]
+                },
+                {
+                    "id": "24HOH1A",
+                    "schedule": [
+                        "T5(6-10)"
+                    ]
+                },
+                {
+                    "id": "24HOH1B",
+                    "schedule": [
+                        "T5(6-10)"
+                    ]
+                },
+                {
+                    "id": "24HOH2A",
+                    "schedule": [
+                        "T2(6-10)"
+                    ]
+                },
+                {
+                    "id": "24HOH2B",
+                    "schedule": [
+                        "T2(6-10)"
+                    ]
+                },
+                {
+                    "id": "24HOH2C",
+                    "schedule": [
+                        "T4(6-10)"
+                    ]
+                },
+                {
+                    "id": "24CVL2B",
+                    "schedule": [
+                        "T2(1-5)"
+                    ]
+                },
+                {
+                    "id": "24CVL2A",
+                    "schedule": [
+                        "T2(1-5)"
+                    ]
+                },
+                {
+                    "id": "24CVL1B",
+                    "schedule": [
+                        "T3(1-5)"
+                    ]
+                },
+                {
+                    "id": "24CVL1A",
+                    "schedule": [
+                        "T3(1-5)"
+                    ]
+                },
+                {
+                    "id": "24KVL1B",
+                    "schedule": [
+                        "T3(6-10)"
+                    ]
+                },
+                {
+                    "id": "24KVL2B",
+                    "schedule": [
+                        "T7(6-10)"
+                    ]
+                },
+                {
+                    "id": "24KVL2A",
+                    "schedule": [
+                        "T7(1-5)"
+                    ]
+                },
+                {
+                    "id": "24HOH1TN",
+                    "schedule": [
+                        "T6(6-10)"
+                    ]
+                }
+            ]
+        }
+    ]
+}

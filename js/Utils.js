@@ -1,7 +1,5 @@
-
-// 1. IMPORT ENGINE XẾP LỊCH
-// Lưu ý: Đường dẫn phải đúng so với vị trí file html
 import { runScheduleSolver } from './tkb/Scheduler.js';
+import { renderCourseList } from './render/Dashboard.js';
 
 // Biến toàn cục lưu dữ liệu gốc
 let GLOBAL_COURSE_DB = [];
@@ -44,37 +42,7 @@ async function loadCourseData() {
     }
 }
 
-function renderCourseList(courses) {
-    const container = document.getElementById('course-list-area');
-    container.innerHTML = '';
 
-    if (!courses || courses.length === 0) {
-        container.innerHTML = '<div style="padding:10px; text-align:center">Không có dữ liệu môn học.</div>';
-        return;
-    }
-
-    let html = '';
-    courses.forEach(subj => {
-        let classOptions = `<option value="">-- AI Tự Xếp --</option>`;
-        subj.classes.forEach(c => {
-            classOptions += `<option value="${c.id}">${c.id}</option>`;
-        });
-
-        html += `
-            <div class="course-row" id="row-${subj.id}">
-                <input type="checkbox" class="chk-course" value="${subj.id}" onchange="toggleRow('${subj.id}')">
-                <div class="course-info">
-                    <span class="course-code">${subj.id}</span>
-                    <span class="course-name">${subj.name}</span>
-                </div>
-                <select id="sel-${subj.id}" class="fixed-class-select" disabled>
-                    ${classOptions}
-                </select>
-            </div>
-        `;
-    });
-    container.innerHTML = html;
-}
 
 function toggleRow(subjID) {
     const row = document.getElementById(`row-${subjID}`);
@@ -242,3 +210,21 @@ function renderScheduleResults(results) {
     container.scrollIntoView({ behavior: 'smooth' });
 }
 
+// Chuyển mảng string ["T2(1-3)"] -> Bitmask [int, int, int, int]
+export function encodeScheduleToMask(scheduleStrArray) {
+    let mask = [0, 0, 0, 0]; 
+    if (!Array.isArray(scheduleStrArray)) return mask;
+
+    scheduleStrArray.forEach(str => {
+        const parsed = parseScheduleString(str);
+        if (parsed) {
+            for (let i = parsed.start; i <= parsed.end; i++) {
+                const bitIndex = (parsed.day * 10) + (i - 1); 
+                const arrayIndex = Math.floor(bitIndex / 32);
+                const bitPos = bitIndex % 32;
+                if (arrayIndex < 4) mask[arrayIndex] |= (1 << bitPos);
+            }
+        }
+    });
+    return mask;
+}

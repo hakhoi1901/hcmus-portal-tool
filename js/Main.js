@@ -1,79 +1,100 @@
-// =================== MAIN.JS ====================
-// Hàm khởi đầu và import các file js
-// ================================================
-
 import { setupBookmarklet, openPortal } from './PortalHandler.js';
-import { renderDashboardUI } from './render/Dashboard.js';
-import { renderCourseList } from './render/Dashboard.js';
+import { renderDashboardUI, renderCourseList, toggleCourse, removeCourse, filterCourses } from './render/Dashboard.js';
+import { onNutBamXepLich } from './Logic.js';
 
-// Setup bookmarklet
+// Setup
 setupBookmarklet();
 
-// Gán hàm openPortal vào window để nút bấm HTML onclick="openPortal()" có thể gọi được
+// Export hàm ra window
 window.openPortal = openPortal;
+window.toggleCourse = toggleCourse;
+window.removeCourse = removeCourse;
+window.filterCourses = filterCourses;
+window.onNutBamXepLich = onNutBamXepLich;
 
-// Lắng nghe sự kiện 'message' từ tab portal.
+// --- 1. XỬ LÝ SỰ KIỆN TỪ BOOKMARKLET GỬI VỀ ---
 window.addEventListener("message", (event) => {
-    // Kiểm tra có sự kiện dữ liệu mới từ portal
-    if (event.data && event.data.type === 'PORTAL_DATA') {
-        // Lấy dữ liệu từ sự kiện
-        const payload = event.data.payload;
+    if (!event.data) return;
 
-        // DOM cập nhật trạng thái người dùng
+    // A. Dữ liệu Sinh Viên
+    if (event.data.type === 'PORTAL_DATA') {
+        const payload = event.data.payload;
+        localStorage.setItem('student_db_full', JSON.stringify(payload));
+        renderDashboardUI(payload);
+        
         const statusEl = document.getElementById('status-area');
         if (statusEl) {
-            // Báo thành công
-            statusEl.innerText = "Đồng bộ thành công! (Điểm, Lịch thi, Học phí)";
-            // Thêm class để kích hoạt CSS styling (màu xanh lá)
-            statusEl.classList.add('success');
+            statusEl.innerText = "Đã cập nhật dữ liệu Sinh viên!";
+            statusEl.className = 'status-msg success';
+            statusEl.style.display = 'block';
         }
-
-        // render và lưu dữ liệu mới nhận được
-        renderDashboardUI(payload);
-        localStorage.setItem('student_db_full', JSON.stringify(payload)); // dùng JSON.stringify để ép kiểu object sang string.
     }
 
+    // B. Dữ liệu Lớp Mở -> RENDER NGAY LẬP TỨC
     if (event.data.type === 'OPEN_CLASS_DATA') {
         const courses = event.data.payload;
-        
-        // 1. Lưu vào LocalStorage
         localStorage.setItem('courses_db_offline', JSON.stringify(courses));
         
-        // 2. Thông báo UI
+        // Gọi hàm Render
+        renderCourseList(courses);
+
         const statusEl = document.getElementById('status-area');
         if (statusEl) {
             statusEl.innerText = `Đã cập nhật ${courses.length} môn học từ Portal!`;
-            statusEl.classList.add('success');
+            statusEl.className = 'status-msg success';
+            statusEl.style.display = 'block';
         }
+        
+        // Cập nhật chỉ báo nguồn
+        const ind = document.getElementById('data-source-indicator');
+        if(ind) ind.innerText = "Nguồn: Dữ liệu vừa lấy từ Portal";
 
-        // 3. Reload lại ứng dụng hoặc reload list môn
-        // Cách đơn giản nhất: Reload trang để Logic.js init lại từ localStorage
-        if(confirm(`Đã lấy được ${courses.length} môn. Tải lại trang để cập nhật?`)) {
-            location.reload();
-        }
+        alert(`Đã nhận ${courses.length} môn lớp mở. Giao diện đã được cập nhật!`);
     }
 }, false);
 
-// Load lại data cũ
-window.onload = () => {
-    // Đọc dữ liệu từ ổ cứng local storage với tên student_db_full
-    const oldData = localStorage.getItem('student_db_full');
-    if (oldData) {
+// --- 2. KHỞI TẠO KHI LOAD TRANG ---
+window.onload = async () => {
+    // A. Load thông tin SV
+    const oldStudentData = localStorage.getItem('student_db_full');
+    if (oldStudentData) {
+        try { renderDashboardUI(JSON.parse(oldStudentData)); } catch (e) {}
+    }
+
+    // B. Load dữ liệu Lớp Mở (Logic quan trọng đã sửa)
+    let courseData = [];
+    const localCourses = localStorage.getItem('courses_db_offline');
+    const ind = document.getElementById('data-source-indicator');
+
+    if (localCourses) {
         try {
-            // Đảo chuỗi từ json sang object
-            const data = JSON.parse(oldData);
-
-            // Render dữ liệu cũ từ local storage
-            renderDashboardUI(data);
-
-            // Thông báo cho user biết đây là dữ liệu cũ.
-            const statusEl = document.getElementById('status-area');
-            if (statusEl) {
-                statusEl.style.display = 'block';
-                statusEl.innerText = "Đã tải lại dữ liệu cũ.";
-            }
-        } catch (e) {
-            console.log("Data cũ lỗi");
+            console.log("🔥 Đang dùng dữ liệu LocalStorage (Portal)");
+            courseData = JSON.parse(localCourses);
+            if(ind) ind.innerText = "Nguồn: Dữ liệu thực tế từ Portal (Offline)";
+        } catch(e) { 
+            console.error("Data offline lỗi, sẽ tải file JSON"); 
         }
+    } 
+    
+    // Nếu không có data offline (hoặc lỗi parse), tải file JSON
+    if (!courseData || courseData.length === 0) {
+        try {
+            console.log("📂 Đang tải Course_db.json...");
+            const res = await fetch('./js/tkb/Course_db.json');
+            if (res.ok) {
+                courseData = await res.json();
+                if(ind) ind.innerText = "Nguồn: File tĩnh (Mẫu)";
+            }
+        } catch (e) { 
+            console.log("Không tải được file mẫu.", e); 
+        }
+    }
+
+    // Render dữ liệu (Dù nguồn nào thì cũng gọi hàm này)
+    if (courseData && courseData.length > 0) {
+        renderCourseList(courseData);
+    } else {
+        const container = document.getElementById('course-list-area');
+        if(container) container.innerHTML = '<div style="padding:10px; text-align:center">Không có dữ liệu môn học nào.</div>';
     }
 };

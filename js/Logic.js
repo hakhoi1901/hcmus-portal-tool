@@ -1,234 +1,113 @@
-// 1. IMPORT ENGINE XẾP LỊCH
-// Lưu ý: Đường dẫn phải đúng so với vị trí file html
 import { runScheduleSolver } from './tkb/Scheduler.js';
+import { renderScheduleResults } from './render/Dashboard.js';
+import { encodeScheduleToMask } from './Utils.js'; // Đảm bảo import hàm này
 
-// Biến toàn cục lưu dữ liệu gốc
-let GLOBAL_COURSE_DB = [];
-
-// --- HÀM KHỞI TẠO ---
-export function initApp() {
-    window.addEventListener('load', async () => {
-        // Tải dữ liệu cũ
-        const oldData = localStorage.getItem('student_db_full');
-        if(oldData && window.renderUI) {
-            try { window.renderUI(JSON.parse(oldData)); } catch(e){}
-        }
-
-        // Tải danh sách môn học
-        console.log("Đang tải course_db.json...");
-        const data = await loadCourseData();
-
-        if (data) {
-            if(window.renderCourseList) window.renderCourseList(GLOBAL_COURSE_DB);
-            else console.error("Không tìm thấy hàm renderCourseList");
-            
-            // Cập nhật text trạng thái nguồn dữ liệu
-            const srcIndicator = document.getElementById('data-source-indicator'); // Nếu có
-            if(srcIndicator) srcIndicator.innerText = data._source === 'local' ? "Nguồn: Portal (Mới nhất)" : "Nguồn: File tĩnh (Cũ)";
-        }
-    });
-    
-    // Gán các hàm cần thiết vào window để HTML gọi được (onclick)
-    window.toggleRow = toggleRow;
-    window.filterCourses = filterCourses;
-    window.onNutBamXepLich = onNutBamXepLich;
-    window.runScheduleSolver = runScheduleSolver; // Để debug
-}
-
-// --- CÁC HÀM UTILS & RENDER ---
-
-async function loadCourseData() {
-    // 1. Ưu tiên lấy từ LocalStorage (Dữ liệu vừa cào được)
-    const localData = localStorage.getItem('courses_db_offline');
-    if (localData) {
-        try {
-            console.log("Phát hiện dữ liệu môn học offline từ Portal.");
-            const parsed = JSON.parse(localData);
-            if (Array.isArray(parsed) && parsed.length > 0) {
-                parsed._source = 'local'; // Đánh dấu nguồn
-                return parsed;
-            }
-        } catch (e) {
-            console.error("Lỗi parse data offline, sẽ dùng file json fallback.", e);
-        }
-    }
-
-    // 2. Fallback: Nếu không có thì tải file JSON tĩnh
-    try {
-        console.log("Không có data offline, tải file Course_db.json...");
-        const response = await fetch('./js/tkb/Course_db.json'); 
-        if (!response.ok) throw new Error("Không tải được file dữ liệu môn học!");
-        const jsonData = await response.json();
-        jsonData._source = 'file';
-        return jsonData;
-    } catch (error) {
-        alert("Lỗi tải dữ liệu: " + error.message);
-        return [];
-    }
-}
-
-function toggleRow(subjID) {
-    const row = document.getElementById(`row-${subjID}`);
-    const chk = row.querySelector('.chk-course');
-    const sel = document.getElementById(`sel-${subjID}`);
-
-    if (chk.checked) {
-        row.classList.add('selected');
-        sel.disabled = false;
-    } else {
-        row.classList.remove('selected');
-        sel.disabled = true;
-        sel.value = "";
-    }
-}
-
-function filterCourses() {
-    const keyword = document.getElementById('inp-search').value.toLowerCase();
-    const rows = document.querySelectorAll('.course-row');
-
-    rows.forEach(row => {
-        const text = row.innerText.toLowerCase();
-        if (text.includes(keyword)) {
-            row.style.display = 'flex';
-        } else {
-            row.style.display = 'none';
-        }
-    });
-}
-
-// --- LOGIC XẾP LỊCH ---
-
-async function onNutBamXepLich() {
+// Hàm này sẽ được Main.js gán vào window.onNutBamXepLich
+export async function onNutBamXepLich() {
     const btn = document.querySelector('button[onclick="onNutBamXepLich()"]');
-    const originalText = btn.innerText;
-    btn.innerText = "⏳ Đang tính toán...";
-    btn.disabled = true;
+    const originalText = btn ? btn.innerText : "Xếp Lịch";
+    if(btn) {
+        btn.innerText = "⏳ Đang tính toán...";
+        btn.disabled = true;
+    }
 
     try {
+        // 1. Lấy dữ liệu user chọn từ UI
         const userWants = [];
         const fixed = {};
-        
-        const checkboxes = document.querySelectorAll('.chk-course:checked');
+        const checkboxes = document.querySelectorAll('.selected-item');
         
         if (checkboxes.length === 0) {
             alert("Bạn chưa chọn môn học nào!");
-            return;
+            throw new Error("No subjects selected");
         }
 
-        checkboxes.forEach(chk => {
-            const subjID = chk.value;
+        checkboxes.forEach(item => {
+            // ID dạng "sel-item-CSC001" -> lấy CSC001
+            const subjID = item.id.replace('sel-item-', '');
             userWants.push(subjID);
-            const dropdown = document.getElementById(`sel-${subjID}`);
+            
+            const dropdown = item.querySelector('.class-dropdown');
             if (dropdown && dropdown.value !== "") {
                 fixed[subjID] = dropdown.value;
             }
         });
 
-        const pref = parseInt(document.getElementById('sel-session-pref').value);
+        const prefElement = document.getElementById('sel-session-pref');
+        const pref = prefElement ? parseInt(prefElement.value) : 0;
 
-        // Gọi Engine
+        // 2. Lấy dữ liệu nguồn (Ưu tiên LocalStorage)
+        // Lưu ý: Main.js đã đảm bảo data được load vào UI, 
+        // nhưng Engine cần đọc lại để lấy full thông tin các lớp.
+        let rawData = [];
+        const localData = localStorage.getItem('courses_db_offline');
+        
+        if (localData) {
+            rawData = JSON.parse(localData);
+        } else {
+            // Fallback tải lại file json nếu lỡ tay xóa storage mà chưa reload trang
+            const res = await fetch('./js/tkb/Course_db.json');
+            rawData = await res.json();
+        }
+
+        if (!rawData || rawData.length === 0) {
+            throw new Error("Không tìm thấy dữ liệu môn học!");
+        }
+
+        // 3. CHUẨN HÓA DỮ LIỆU (QUAN TRỌNG)
+        // Dữ liệu từ Portal chỉ có schedule string ["T2(1-3)"], chưa có bitmask.
+        // Engine cần bitmask. Hàm này sẽ tạo bitmask cho engine.
+        const normalizedDB = normalizeDataForEngine(rawData);
+
+        // 4. Chạy Engine
         if (runScheduleSolver) {
-            // setTimeout để UI kịp update
             setTimeout(() => {
-                const ketQua = runScheduleSolver(GLOBAL_COURSE_DB, userWants, fixed, pref);
-                console.log("Kết quả:", ketQua);
+                const ketQua = runScheduleSolver(normalizedDB, userWants, fixed, pref);
                 renderScheduleResults(ketQua);
-                btn.innerText = originalText;
-                btn.disabled = false;
+                
+                if(btn) {
+                    btn.innerText = originalText;
+                    btn.disabled = false;
+                }
             }, 50);
         } else {
-            alert("Engine chưa tải xong!");
-            btn.innerText = originalText;
-            btn.disabled = false;
+            throw new Error("Engine chưa tải xong");
         }
 
     } catch (e) {
         console.error(e);
-        alert("Lỗi: " + e.message);
-        btn.innerText = originalText;
-        btn.disabled = false;
-    }
-}
-
-function decodeScheduleMask(parts) {
-    let slots = [];
-    for (let i = 0; i < 4 && i < parts.length; i++) {
-        let part = parts[i];
-        for (let bit = 0; bit < 32; bit++) {
-            if ((part & (1 << bit)) !== 0) {
-                let totalBit = i * 32 + bit;
-                let day = Math.floor(totalBit / 10);
-                let period = totalBit % 10;
-                if (day < 7) slots.push({ day: day, period: period });
-            }
+        if (e.message !== "No subjects selected") alert("Lỗi: " + e.message);
+        if(btn) {
+            btn.innerText = originalText;
+            btn.disabled = false;
         }
     }
-    return slots;
 }
 
-function renderScheduleResults(results) {
-    const container = document.getElementById('schedule-results-area');
-    container.innerHTML = ''; 
-    container.style.display = 'block';
-
-    if (!results || results.length === 0) {
-        container.innerHTML = '<div style="text-align:center; padding:20px; color:red">Không tìm thấy lịch học phù hợp!</div>';
-        return;
-    }
-
-    const days = ["Hai", "Ba", "Tư", "Năm", "Sáu", "Bảy", "CN"];
-
-    results.forEach((opt, index) => {
-        let grid = Array(10).fill(null).map(() => Array(7).fill(null));
-
-        opt.schedule.forEach(subject => {
-            const timeSlots = decodeScheduleMask(subject.mask);
-            timeSlots.forEach(slot => {
-                if (slot.period < 10) {
-                    const cellContent = `
-                        <div style="font-size:11px; font-weight:bold; color:#005a8d">${subject.subjectID}</div>
-                        <div style="font-size:10px; opacity:0.8">${subject.classID}</div>
-                    `;
-                    // Nối nội dung nếu trùng lịch
-                    if(grid[slot.period][slot.day]) grid[slot.period][slot.day] += "<hr style='margin:2px 0'>" + cellContent;
-                    else grid[slot.period][slot.day] = cellContent;
-                }
-            });
+// Hàm chuẩn hóa dữ liệu cho Engine
+function normalizeDataForEngine(data) {
+    if (!Array.isArray(data)) return [];
+    
+    return data.map(subj => {
+        const processedClasses = subj.classes.map(cls => {
+            // Nếu chưa có mask (data từ Portal), thì tính từ schedule string
+            let mask = cls.mask;
+            if (!mask && cls.schedule) {
+                mask = encodeScheduleToMask(cls.schedule);
+            }
+            // Nếu data từ JSON file cũ đã có mask thì giữ nguyên
+            return {
+                id: cls.id,
+                schedule: cls.schedule || [],
+                mask: mask || [0, 0, 0, 0] 
+            };
         });
 
-        let tableHTML = `
-            <div class="schedule-option">
-                <div class="schedule-header">
-                    <span>OPTION ${opt.option}</span>
-                    <span>Điểm: ${opt.fitness.toFixed(0)}</span>
-                </div>
-                <table class="tkb-grid">
-                    <thead>
-                        <tr>
-                            <th class="period-col">Tiết</th>
-                            ${days.map(d => `<th>${d}</th>`).join('')}
-                        </tr>
-                    </thead>
-                    <tbody>
-        `;
-
-        for (let p = 0; p < 10; p++) {
-            tableHTML += `<tr>`;
-            tableHTML += `<td class="period-col">${p + 1}</td>`;
-            for (let d = 0; d < 7; d++) {
-                const content = grid[p][d];
-                if (content) {
-                    tableHTML += `<td class="tkb-cell-active" title="Môn học">${content}</td>`;
-                } else {
-                    tableHTML += `<td></td>`;
-                }
-            }
-            tableHTML += `</tr>`;
-        }
-
-        tableHTML += `</tbody></table></div>`;
-        container.insertAdjacentHTML('beforeend', tableHTML);
+        return {
+            id: subj.id,
+            name: subj.name,
+            credits: subj.credits,
+            classes: processedClasses
+        };
     });
-    
-    container.scrollIntoView({ behavior: 'smooth' });
 }
