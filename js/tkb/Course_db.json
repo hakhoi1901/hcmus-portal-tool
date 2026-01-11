@@ -6640,10 +6640,42 @@
         ]
       }
     ]
+  },{
+    "id": "CSC11003",
+    "name": "Lập trình mạng",
+    "classes": [
+      {
+        "id": "24TNT1TN",
+        "mask": [
+          3221225472,
+          3,
+          0,
+          0
+        ]
+      },
+      {
+        "id": "24CTT5",
+        "mask": [
+          0,
+          120,
+          0,
+          0
+        ]
+      },
+      {
+        "id": "24CTT4",
+        "mask": [
+          0,
+          3932160,
+          0,
+          0
+        ]
+      }
+    ]
   },
   {
     "id": "PHY00002",
-    "name": "Vật l‎‎ý đại cương 2 (Điện từ - Quang)",
+    "name": "Vật lý đại cương 2 (Điện từ - Quang)",
     "classes": [
       {
         "id": "24CTT1",

@@ -1,14 +1,206 @@
-<!doctype html>
-<html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="./vite.svg" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>my-figma-project</title>
-    <script type="module" crossorigin src="./js/App.js"></script>
-    <link rel="stylesheet" crossorigin href="./css/Style.css">
-  </head>
-  <body>
-    <div id="root"></div>
-  </body>
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HCMUS Portal Tool - New UI</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        ::-webkit-scrollbar { width: 8px; height: 8px; }
+        ::-webkit-scrollbar-track { background: #f1f1f1; }
+        ::-webkit-scrollbar-thumb { background: #c1c1c1; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #a8a8a8; }
+        /* Class để ẩn trang */
+        .hidden { display: none !important; }
+    </style>
+</head>
+<body class="bg-gray-50 text-sm">
+    <div id="root">
+        <div class="flex h-screen bg-gray-50">
+            
+            <aside class="bg-[#004A98] text-white flex flex-col transition-all duration-300 ease-in-out w-64" style="font-family: Inter, system-ui, sans-serif;">
+                <div class="p-6 relative">
+                    <div class="flex items-center gap-3">
+                        <div class="w-10 h-10 bg-white rounded-lg flex items-center justify-center flex-shrink-0">
+                            <span id="sidebar-logo-text" class="text-[#004A98]" style="font-weight: 600;">LMS</span>
+                        </div>
+                        <div class="min-w-0">
+                            <h3 id="sidebar-app-name" class="text-white truncate" style="font-weight: 600;">HCMUS</h3>
+                            <p id="sidebar-app-desc" class="text-blue-200 text-sm truncate" style="font-weight: 400;">Cổng SV</p>
+                        </div>
+                    </div>
+                    <button onclick="toggleSidebar()" class="absolute -right-3 top-8 w-6 h-6 bg-white rounded-full shadow-md flex items-center justify-center hover:bg-gray-100 transition-colors border border-gray-200" aria-label="Thu gọn sidebar">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-chevron-left w-4 h-4 text-[#004A98]" aria-hidden="true"><path d="m15 18-6-6 6-6"></path></svg>
+                    </button>
+                </div>
+
+                <nav id="sidebar-menu-area" class="flex-1 px-3 py-4 overflow-y-auto">
+                    </nav>
+            </aside>
+
+            <div class="flex-1 flex flex-col overflow-hidden">
+                <header class="bg-white border-b border-gray-200 shadow-sm">
+                    <div class="px-8 py-4">
+                        <div class="flex items-center justify-between">
+                            <div class="flex items-center gap-4">
+                                <h2 class="text-gray-900" style="font-weight: 600;">Cổng thông tin sinh viên CNTT</h2>
+                                <div class="relative">
+                                    <button class="flex items-center gap-2 px-4 py-2 bg-[#004A98] text-white rounded-full hover:bg-[#003A78] transition-colors">
+                                        <span id="header-semester" class="text-sm" style="font-weight: 500;">Học kỳ...</span>
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-chevron-down w-4 h-4 transition-transform"><path d="m6 9 6 6 6-6"></path></svg>
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="flex items-center gap-3">
+                                <button class="relative p-2.5 hover:bg-gray-100 rounded-lg transition-colors group">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-bell w-5 h-5 text-gray-600 group-hover:text-gray-900"><path d="M10.268 21a2 2 0 0 0 3.464 0"></path><path d="M3.262 15.326A1 1 0 0 0 4 17h16a1 1 0 0 0 .74-1.673C19.41 13.956 18 12.499 18 8A6 6 0 0 0 6 8c0 4.499-1.411 5.956-2.738 7.326"></path></svg>
+                                    <span id="header-notif-count" class="absolute top-1 right-1 min-w-[18px] h-[18px] bg-red-500 text-white text-xs rounded-full flex items-center justify-center px-1" style="font-weight: 600;">0</span>
+                                </button>
+                                <div class="h-10 w-px bg-gray-200"></div>
+                                <div class="flex items-center gap-3 px-3 py-2 hover:bg-gray-50 rounded-lg transition-colors cursor-pointer">
+                                    <div class="w-10 h-10 rounded-full bg-gradient-to-br from-[#004A98] to-[#0066CC] flex items-center justify-center shadow-sm">
+                                        <span id="header-avatar-text" class="text-white text-sm" style="font-weight: 600;">SV</span>
+                                    </div>
+                                    <div class="text-left">
+                                        <p id="header-user-name" class="text-gray-900 text-sm" style="font-weight: 500;">Sinh viên</p>
+                                        <p id="header-user-mssv" class="text-gray-500 text-xs" style="font-weight: 400;">MSSV: ...</p>
+                                    </div>
+                                </div>
+                                <div class="h-10 w-px bg-gray-200"></div>
+                                <button onclick="window.clearAppCache && window.clearAppCache()" class="flex items-center gap-2 px-4 py-2.5 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-all shadow-sm hover:shadow-md">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-log-out w-4 h-4"><path d="m16 17 5-5-5-5"></path><path d="M21 12H9"></path><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path></svg>
+                                    <span style="font-weight: 500;">Đăng xuất</span>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </header>
+
+                <main class="flex-1 overflow-y-auto bg-white">
+                    <div class="p-6">
+                        <div class="max-w-[1600px] mx-auto">
+                            
+                            <div id="page-roadmap" class="page-content flex h-full gap-6">
+                                
+                                <div class="flex-1 overflow-y-auto pb-20">
+                                    <div class="mb-6">
+                                        <h1 class="text-2xl font-bold text-gray-900 mb-2">Lộ trình học tập</h1>
+                                        <p class="text-gray-600">Chọn môn học và xem lịch trực quan với phát hiện xung đột thời gian.</p>
+                                    </div>
+
+                                    <div class="flex gap-2 mb-6 border-b border-gray-200">
+                                        <button onclick="switchViewMode('select')" id="tab-select" class="flex items-center gap-2 px-6 py-3 border-b-2 border-[#004A98] text-[#004A98] font-medium transition-colors"><span>Chọn môn &amp; Học phí</span></button>
+                                        <button onclick="switchViewMode('schedule')" id="tab-schedule" class="flex items-center gap-2 px-6 py-3 border-b-2 border-transparent text-gray-600 hover:text-gray-900 font-medium transition-colors"><span>Lịch dự kiến</span></button>
+                                    </div>
+
+                                    <div class="flex items-center gap-4 mb-6">
+                                        <div class="flex-1 relative">
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.34-4.34"/></svg>
+                                            <input id="inp-search" onkeyup="filterCourses()" placeholder="Tìm kiếm theo tên môn học hoặc mã môn..." class="w-full pl-10 pr-4 py-2.5 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#004A98] focus:border-transparent" type="text">
+                                        </div>
+                                    </div>
+
+                                    <div class="mb-6 p-4 bg-blue-50 border border-blue-200 rounded-lg flex items-start gap-3">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-blue-600 flex-shrink-0 mt-0.5"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg>
+                                        <div class="flex-1">
+                                            <p class="text-sm text-blue-900 font-medium">Hướng dẫn</p>
+                                            <p class="text-xs text-blue-700 mt-1">
+                                                <span class="inline-block w-2 h-2 rounded-full bg-green-500 mr-1"></span>Sẵn sàng: Có lớp mở
+                                                <span class="inline-block w-2 h-2 rounded-full bg-red-500 mx-1"></span>Học lại: Rớt môn cũ
+                                                <span class="inline-block w-2 h-2 rounded-full bg-gray-400 mx-1"></span>Chưa đủ ĐK: Thiếu môn tiên quyết
+                                            </p>
+                                        </div>
+                                    </div>
+
+                                    <div id="course-list-container" class="space-y-6">
+                                        <div class="text-center py-10">
+                                            <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-[#004A98] mx-auto"></div>
+                                            <p class="mt-2 text-gray-500">Đang tải dữ liệu môn học...</p>
+                                        </div>
+                                    </div>
+                                    
+                                    <div id="schedule-results-area" class="hidden mt-6"></div>
+                                </div>
+
+                                <div class="w-80 bg-white rounded-xl shadow-lg border border-gray-200 flex flex-col sticky top-6" style="height: calc(100vh - 140px);">
+                                    <div class="p-4 border-b border-gray-200 flex-shrink-0">
+                                        <h3 class="text-gray-900 font-semibold">Giỏ môn học</h3>
+                                        <p class="text-sm text-gray-600 mt-1"><span id="basket-count">0</span> môn học đã chọn</p>
+                                    </div>
+                                    <div id="basket-list" class="flex-1 overflow-y-auto p-4 space-y-3">
+                                        <div class="text-center py-12"><p class="text-gray-400 text-sm">Chưa có môn nào</p></div>
+                                    </div>
+                                    <div class="border-t border-gray-200 p-4 bg-white flex-shrink-0 rounded-b-xl">
+                                        <div class="mb-4">
+                                            <div class="flex items-center justify-between mb-2">
+                                                <span class="text-sm text-gray-600">Tổng tín chỉ:</span>
+                                                <span class="text-lg font-bold text-gray-900" id="total-credits">0</span>
+                                            </div>
+                                            <div class="w-full bg-gray-200 rounded-full h-2.5">
+                                                <div id="credit-progress" class="h-2.5 rounded-full transition-all bg-[#004A98]" style="width: 0%"></div>
+                                            </div>
+                                        </div>
+                                        <div class="mb-4 p-3 bg-gradient-to-br from-blue-50 to-indigo-50 rounded-lg border border-blue-100">
+                                            <p class="text-xs text-gray-600 mb-1">Tổng học phí dự kiến</p>
+                                            <p class="text-2xl font-bold text-[#004A98]" id="total-tuition">0</p>
+                                            <p class="text-[10px] text-gray-500 mt-1">VNĐ (đã bao gồm các khoản phí)</p>
+                                        </div>
+                                        <select id="sel-session-pref" class="px-4 py-2.5 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#004A98] text-sm text-gray-700">
+    <option value="0">Không ưu tiên</option>
+    <option value="1">Ưu tiên Sáng</option>
+    <option value="2">Ưu tiên Chiều</option>
+</select>
+                                        <button onclick="onNutBamXepLich()" class="w-full py-3 rounded-lg font-medium transition-all bg-[#004A98] text-white hover:bg-[#003A78] shadow-md">Xếp Lịch Ngay</button>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div id="page-overview" class="page-content hidden">
+                                <h1 class="text-2xl font-bold mb-4">Tổng quan</h1>
+                                <p>Đang cập nhật...</p>
+                            </div>
+                            <div id="page-grades" class="page-content hidden">
+                                <h1 class="text-2xl font-bold mb-4">Quản lý điểm</h1>
+                                <p>Đang cập nhật...</p>
+                            </div>
+                            <div id="page-tuition" class="page-content hidden">
+                                <h1 class="text-2xl font-bold mb-4">Học phí</h1>
+                                <p>Đang cập nhật...</p>
+                            </div>
+                            <div id="page-timetable" class="page-content hidden">
+                                <h1 class="text-2xl font-bold mb-4">Thời khóa biểu</h1>
+                                <p>Lịch đã chốt...</p>
+                            </div>
+                            <div id="page-settings" class="page-content hidden">
+                                <h1 class="text-2xl font-bold mb-4">Cài đặt</h1>
+                            </div>
+                        </div>
+                    </div>
+                </main>
+            </div>
+        </div>
+    </div>
+
+    <script type="module">
+        import { initApp } from './js/Utils.js';
+        import { renderNewUI, renderSidebar, updateHeaderUI } from './js/render/NewUI.js';
+        
+        // Gắn hàm render vào window
+        window.renderCourseList = (courses) => {
+            renderNewUI(courses);
+            updateHeaderUI();
+        };
+
+        // Khởi động
+        document.addEventListener('DOMContentLoaded', () => {
+            // 1. Vẽ Sidebar ngay lập tức
+            renderSidebar('roadmap');
+            updateHeaderUI(); 
+            // 2. Load dữ liệu logic
+            initApp(); 
+        });
+    </script>
+</body>
 </html>
