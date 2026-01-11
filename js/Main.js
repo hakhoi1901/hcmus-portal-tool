@@ -7,6 +7,7 @@ import { setupBookmarklet, openPortal } from './PortalHandler.js';
 import { initApp, processPortalData } from './Utils.js';
 import { onNutBamXepLich } from './Logic.js';
 import { renderNewUI, toggleNewRow, filterCourses, openInfoModal, openPrereqModal, closeModal } from './render/NewUI.js';
+import { console } from './styleLog.js';
 
 // --- 1. SETUP BAN ĐẦU ---
 setupBookmarklet();
@@ -52,3 +53,4 @@ window.addEventListener("message", (event) => {
 window.onload = () => {
     initApp();
 };
+

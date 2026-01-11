@@ -1,7 +1,12 @@
+/**
+ * Recommender.js - Bộ não tư vấn môn học
+ * Logic: Phân tích điểm -> Check Tiên quyết -> Check Nhóm ngành -> Gợi ý
+ */
+
 class PrerequisiteGraph {
     constructor(prereqData) {
-        this.hardConstraints = {};
-        this.softConstraints = {};
+        this.hardConstraints = {}; // Tiên quyết cứng (phải học trước)
+        this.softConstraints = {}; // Song hành/Bổ trợ
         this.buildGraph(prereqData);
     }
 
@@ -24,42 +29,46 @@ class PrerequisiteGraph {
         });
     }
 
-    // Tìm môn "tổ tiên" chặn đường (Root Blocker)
+    // Đệ quy tìm "nút thắt cổ chai" (Root Blocker)
+    // Nếu môn A cần B, B cần C -> Trả về C (nếu chưa học C)
     findBlockingPrereq(courseId, passedCourses) {
-        if (passedCourses.has(courseId)) return null; // Đã học rồi
-        const reqs = this.hardConstraints[courseId] || [];
+        if (passedCourses.has(courseId)) return null; // Đã học rồi thì thôi
         
+        const reqs = this.hardConstraints[courseId] || [];
         for (const req of reqs) {
             if (!passedCourses.has(req)) {
-                // Đệ quy tìm sâu hơn
+                // Đệ quy tìm sâu hơn xem thằng req này có bị ai chặn không
                 return this.findBlockingPrereq(req, passedCourses) || req;
             }
         }
-        return courseId; // Không bị chặn bởi ai -> Chính nó là môn cần học
+        // Không bị ai chặn -> Chính nó là môn cần học
+        return courseId; 
     }
 }
 
 export class CourseRecommender {
+    // Constructor giữ nguyên để tương thích với Utils.js
     constructor(studentData, openCourses, prereqs, allCoursesMeta, categories) {
         this.studentData = studentData;
-        this.openCourses = openCourses || []; // Danh sách lớp mở (CourseDB)
+        this.openCourses = openCourses || []; 
         this.prereqs = prereqs || [];
-        this.allCoursesMeta = allCoursesMeta || []; // Metadata (Credits, Type...)
-        this.categories = categories || {}; // Cấu trúc nhóm ngành
+        this.allCoursesMeta = allCoursesMeta || []; 
+        this.categories = categories || {}; 
 
-        // Map lưu kết quả: Key = CourseID, Value = status_code
+        // Map kết quả: Key = CourseID, Value = status_code (Để tô màu UI)
         this.recommendationsMap = new Map();
         
-        // Tạo Map tra cứu nhanh metadata
+        // Map tra cứu nhanh metadata (Số tín chỉ, Tên môn...)
         this.coursesMetaMap = new Map();
         this.allCoursesMeta.forEach(c => this.coursesMetaMap.set(c.course_id, c));
     }
 
+    // Phân tích bảng điểm sinh viên
     getStudentStatus() {
         const passed = new Set();
         const studying = new Set();
         const failed = new Set();
-        const passedCreditsMap = new Map(); // Lưu số tín chỉ thực tế đã tích lũy của môn đó
+        const passedCreditsMap = new Map(); // Lưu số tín chỉ thực tế đã tích lũy
 
         const grades = this.studentData?.grades || [];
 
@@ -91,18 +100,18 @@ export class CourseRecommender {
         return { passed, failed, studying, passedCreditsMap };
     }
 
-    // Hàm thêm gợi ý với độ ưu tiên
+    // Hàm thêm gợi ý với độ ưu tiên (QUAN TRỌNG CHO UI)
     addRec(id, status) {
         const priorities = {
-            'RETAKE': 4,            // Cao nhất: Học lại
-            'MANDATORY': 3,         // Môn bắt buộc
-            'ELECTIVE_REQUIRED': 2, // Thiếu tín chỉ nhóm
-            'SUGGESTED': 1          // Gợi ý bổ trợ
+            'RETAKE': 4,            // Màu Đỏ (Quan trọng nhất)
+            'MANDATORY': 3,         // Màu Xanh Dương
+            'ELECTIVE_REQUIRED': 2, // Màu Tím (Thiếu tín chỉ nhóm)
+            'SUGGESTED': 1          // Màu Xanh Lá (Gợi ý thêm)
         };
 
         if (this.recommendationsMap.has(id)) {
             const currentStatus = this.recommendationsMap.get(id);
-            // Nếu trạng thái mới quan trọng hơn trạng thái cũ thì ghi đè
+            // Chỉ ghi đè nếu trạng thái mới quan trọng hơn
             if (priorities[status] > priorities[currentStatus]) {
                 this.recommendationsMap.set(id, status);
             }
@@ -111,26 +120,28 @@ export class CourseRecommender {
         }
     }
 
-    // Kiểm tra nhóm tự chọn (Đệ quy)
+    // Kiểm tra nhóm tự chọn (Logic tính tín chỉ chuẩn xác)
     checkGroupRequirement(requiredCredits, courseList, passed, passedCreditsMap, studying, graph) {
         let currentCredits = 0;
         
-        // Tính tổng tín chỉ đã đạt trong nhóm này
+        // 1. Tính tổng tín chỉ đã đạt trong nhóm này
         courseList.forEach(cid => {
             if (passed.has(cid)) {
-                // Lấy tín chỉ thực tế hoặc từ meta
+                // Ưu tiên lấy tín chỉ thực tế từ bảng điểm, nếu không có thì lấy từ file config
                 const cr = passedCreditsMap.get(cid) || this.coursesMetaMap.get(cid)?.credits || 0;
-                currentCredits += cr;
+                currentCredits += parseInt(cr);
             }
         });
 
-        // Nếu chưa đủ tín chỉ -> Gợi ý các môn chưa học trong nhóm
+        // 2. Nếu chưa đủ tín chỉ -> Gợi ý các môn còn lại
         if (currentCredits < requiredCredits) {
             courseList.forEach(cid => {
+                // Chỉ gợi ý môn chưa học và không đang học
                 if (!passed.has(cid) && !studying.has(cid)) {
                     // Tìm môn tiên quyết chặn nó (nếu có)
                     const target = graph.findBlockingPrereq(cid, passed);
-                    // Nếu target khả dụng (chưa học, không đang học)
+                    
+                    // Nếu target tìm được chưa học -> Gợi ý target đó
                     if (target && !passed.has(target) && !studying.has(target)) {
                         this.addRec(target, 'ELECTIVE_REQUIRED');
                     }
@@ -139,54 +150,68 @@ export class CourseRecommender {
         }
     }
 
-    // Hàm duyệt cây Categories (Đệ quy)
+    // Duyệt cây Categories (Đệ quy - Hỗ trợ cả cấu trúc breakdown và sub_groups)
     traverseCategories(obj, passed, passedCreditsMap, studying, graph) {
+        // Case 1: Cấu trúc breakdown (như file categories.json của bạn)
+        if (obj.breakdown) {
+            Object.values(obj.breakdown).forEach(sub => {
+                this.traverseCategories(sub, passed, passedCreditsMap, studying, graph);
+            });
+            return;
+        }
+
+        // Case 2: Cấu trúc sub_groups (dự phòng)
         if (obj.sub_groups) {
             obj.sub_groups.forEach(sub => {
-                this.checkGroupRequirement(
-                    sub.credits_required, sub.courses, 
-                    passed, passedCreditsMap, studying, graph
-                );
+                this.traverseCategories(sub, passed, passedCreditsMap, studying, graph);
             });
-        } else if (obj.courses && obj.credits_required) {
+            return;
+        }
+
+        // Case 3: Nút lá (Leaf Node) chứa danh sách môn và yêu cầu tín chỉ
+        if (obj.courses && (obj.credits || obj.credits_required)) {
+            // Lấy số tín chỉ yêu cầu (ưu tiên field credits_required, fallback sang credits)
+            const req = obj.credits_required || obj.credits || 0;
+            
             this.checkGroupRequirement(
-                obj.credits_required, obj.courses,
+                req, 
+                obj.courses, 
                 passed, passedCreditsMap, studying, graph
             );
         } else {
-            // Duyệt sâu hơn vào các object con
+            // Case 4: Object lồng nhau thuần túy -> Duyệt tiếp
             for (const key in obj) {
-                if (typeof obj[key] === 'object' && obj[key] !== null) {
+                if (typeof obj[key] === 'object' && obj[key] !== null && key !== 'courses') {
                     this.traverseCategories(obj[key], passed, passedCreditsMap, studying, graph);
                 }
             }
         }
     }
 
+    // HÀM CHÍNH (MAIN FUNCTION)
     recommend() {
-        console.log("🔍 Recommender: Đang chạy logic mới...");
+        console.log("🔍 Recommender: Đang phân tích...");
         
         // 1. Chuẩn bị dữ liệu
         const { passed, failed, studying, passedCreditsMap } = this.getStudentStatus();
         const graph = new PrerequisiteGraph(this.prereqs);
         
-        // Tạo map để check nhanh môn mở
+        // Map để check môn có mở lớp không
         const openClassesMap = new Map();
         this.openCourses.forEach(c => openClassesMap.set(c.id, c));
 
-        // --- BƯỚC 1: MÔN RỚT (RETAKE) ---
+        // --- BƯỚC 1: ƯU TIÊN MÔN RỚT (RETAKE) ---
         failed.forEach(cid => {
             const target = graph.findBlockingPrereq(cid, passed);
-            // Chỉ gợi ý nếu chưa pass và không đang học
             if (target && !passed.has(target) && !studying.has(target)) {
                 this.addRec(target, 'RETAKE');
             }
         });
 
-        // --- BƯỚC 2: MÔN BẮT BUỘC (MANDATORY) ---
+        // --- BƯỚC 2: MÔN BẮT BUỘC CHUNG (MANDATORY) ---
+        // Duyệt qua file courses.json, tìm môn loại 'BB'
         this.allCoursesMeta.forEach(c => {
             const cid = c.course_id;
-            // Type 'BB' là bắt buộc
             if (c.course_type === 'BB' && !passed.has(cid) && !studying.has(cid)) {
                 const target = graph.findBlockingPrereq(cid, passed);
                 if (target && !passed.has(target) && !studying.has(target)) {
@@ -195,20 +220,19 @@ export class CourseRecommender {
             }
         });
 
-        // --- BƯỚC 3: NHÓM NGÀNH (ELECTIVE_REQUIRED) ---
+        // --- BƯỚC 3: XÉT NHÓM NGÀNH (ELECTIVE_REQUIRED) ---
         if (this.categories) {
             this.traverseCategories(this.categories, passed, passedCreditsMap, studying, graph);
         }
 
-        // --- BƯỚC 4: MÔN BỔ TRỢ (SUGGESTED - Soft Constraints) ---
-        // Chỉ xét những môn đã nằm trong danh sách gợi ý, xem nó có môn bổ trợ nào không
+        // --- BƯỚC 4: MÔN BỔ TRỢ (Soft Constraints) ---
+        // (Chỉ gợi ý môn bổ trợ cho các môn ĐÃ ĐƯỢC CHỌN ở trên)
         const currentIds = Array.from(this.recommendationsMap.keys());
         currentIds.forEach(cid => {
             const softReqs = graph.softConstraints[cid] || [];
             softReqs.forEach(p => {
                 if (!passed.has(p) && !this.recommendationsMap.has(p) && !studying.has(p)) {
                     const validP = graph.findBlockingPrereq(p, passed);
-                    // Nếu môn bổ trợ đó học được ngay (ko bị chặn)
                     if (validP === p) {
                         this.addRec(p, 'SUGGESTED');
                     }
@@ -216,20 +240,25 @@ export class CourseRecommender {
             });
         });
 
-        // --- BƯỚC 5: KHỚP VỚI LỚP MỞ (OUTPUT) ---
+        // --- BƯỚC 5: KHỚP VỚI LỚP MỞ & TRẢ VỀ ---
         const finalOutput = [];
+        
+        // Duyệt qua map gợi ý
         this.recommendationsMap.forEach((statusCode, cid) => {
+            // Chỉ trả về nếu môn đó CÓ MỞ LỚP (nằm trong openCourses)
             if (openClassesMap.has(cid)) {
                 const courseData = openClassesMap.get(cid);
-                // Trả về object môn học kèm status mới
+                
+                // Clone object để không ảnh hưởng dữ liệu gốc
+                // Thêm thuộc tính status để UI hiển thị màu
                 finalOutput.push({
                     ...courseData,
-                    recommendationStatus: statusCode // Thêm thuộc tính này để UI vẽ màu
+                    recommendationStatus: statusCode 
                 });
             }
         });
 
-        console.log(`✅ Recommender: Gợi ý được ${finalOutput.length} môn.`);
+        console.log(`✅ Recommender: Đề xuất ${finalOutput.length} môn học.`);
         return finalOutput;
     }
 }

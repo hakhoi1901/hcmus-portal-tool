@@ -5,6 +5,7 @@
 
 import { CourseRecommender } from './tkb/Recommender.js';
 import { renderNewUI, updateHeaderUI } from './render/NewUI.js';
+import { logStatus, logSuccess, logWarning, logAlgo, logData, logError} from './styleLog.js';
 
 // Dữ liệu phụ trợ (Metadata) dùng chung
 export let AUX_DATA = {
@@ -18,7 +19,7 @@ export let GLOBAL_COURSE_DB = [];
 
 // --- 1. KHỞI TẠO ỨNG DỤNG (INIT) ---
 export async function initApp() {
-    console.log("🚀 Utils: Đang khởi động ứng dụng...");
+    logStatus("Utils: Đang khởi động ứng dụng...");
 
     // B1: Check trạng thái giao diện (Login vs Dashboard)
     checkLocalStorageState();
@@ -30,22 +31,59 @@ export async function initApp() {
     const courses = await loadCourseData();
     const studentData = getStudentData();
 
-    // B4: Chạy Recommender & Render
-    if (courses.length > 0) {
-        GLOBAL_COURSE_DB = applyRecommendation(courses, studentData);
-        
-        // Render giao diện chính
-        if (typeof renderNewUI === 'function') {
-            renderNewUI(GLOBAL_COURSE_DB);
-        }
-        
-        // Cập nhật Header (Avatar, Tên SV)
-        if (typeof updateHeaderUI === 'function') {
-            updateHeaderUI();
-        }
+    if(!courses || courses.length === 0) {
+        logWarning('Utils: Không có lớp mở nào được tải.');
     } else {
-        console.warn("⚠️ Utils: Chưa có dữ liệu lớp học nào.");
+        logSuccess(`Utils: Đã tải xong ${courses.length} lớp mở.`);
+        logData(courses);
     }
+
+    if (!studentData || Object.keys(studentData).length === 0) {
+        logWarning('Utils: Không có dữ liệu sinh viên được tải.');
+    } else {
+        logSuccess('Utils: Đã tải xong dữ liệu sinh viên.'); 
+        logData(studentData)
+    }
+
+    // B3: Chạy Recommender & Render
+    if (courses.length > 0) {
+        // 3. Chỉ chạy gợi ý KHI VÀ CHỈ KHI có dữ liệu sinh viên
+        if (studentData) {
+            logAlgo("Đang chạy thuật toán gợi ý môn học...");
+            // Biến đổi danh sách: Gán nhãn + Sắp xếp lại
+            GLOBAL_COURSE_DB = applyRecommendation(courses, studentData);
+        } else {
+            // Nếu không có SV -> Dùng danh sách gốc (từ file hoặc cache thô)
+            GLOBAL_COURSE_DB = courses;
+        }
+
+        logSuccess("Utils: Đã hoàn tất gợi ý và sắp xếp môn học.");
+        
+        // 4. Vẽ ra màn hình
+        renderNewUI(GLOBAL_COURSE_DB);
+    } else {
+        logWarning("Utils: Chưa có dữ liệu lớp học nào.");
+    }
+
+    window.addEventListener("message", (event) => {
+    // Security check
+    if (!event.data || !event.data.type) return;
+
+    const { type, payload } = event.data;
+
+    // Case A: Dữ liệu Sinh Viên (Điểm, Lịch thi...)
+    if (type === 'PORTAL_DATA') {
+        logStatus("Main: Đã nhận dữ liệu Sinh viên.");
+        // Lưu và xử lý bên Utils (để đồng bộ logic)
+        processPortalData(null, payload); 
+    }
+
+    // Case B: Dữ liệu Lớp Mở (Quan trọng cho xếp lịch)
+    if (type === 'OPEN_CLASS_DATA') {
+        logSuccess(`Main: Đã nhận ${payload.length} lớp mở.`);
+        processPortalData(payload, null);
+    }
+}, false);
 }
 
 // --- 2. QUẢN LÝ DỮ LIỆU (DATA HANDLERS) ---
@@ -87,9 +125,9 @@ async function loadAuxiliaryData() {
         AUX_DATA.prerequisites = prereq;
         AUX_DATA.allCourses = allCourses;
         AUX_DATA.categories = cats;
-        console.log("📚 Utils: Đã tải xong Metadata.");
+        logSuccess("Utils: Đã tải xong Metadata.");
     } catch (e) {
-        console.error("❌ Utils: Lỗi tải Metadata:", e);
+        logError("Utils: Lỗi tải Metadata:", e);
     }
 }
 
@@ -100,7 +138,7 @@ async function loadCourseData() {
         try {
             const parsed = JSON.parse(cached);
             if (Array.isArray(parsed) && parsed.length > 0) {
-                console.log("💾 Utils: Sử dụng dữ liệu Offline.");
+                logStatus("Utils: Đang sử dụng dữ liệu Offline (lớp mở).");
                 return parsed;
             }
         } catch (e) {
@@ -108,7 +146,7 @@ async function loadCourseData() {
         }
     }
 
-    console.log("🌐 Utils: Đang tải dữ liệu mẫu (Fallback)...");
+    logAlgo("Utils: Đang tải dữ liệu mẫu (Fallback)...");
     return await fetchJson('./js/tkb/Course_db.json');
 }
 
@@ -118,35 +156,49 @@ function getStudentData() {
     } catch (e) { return null; }
 }
 
-// --- 3. LOGIC GỢI Ý (RECOMMENDER) ---
+// --- 3. LOGIC GỢI Ý (RECOMMENDER - ĐÃ FIX CHỈ HIỆN MÔN GỢI Ý) ---
 function applyRecommendation(courses, studentData) {
+    // Nếu không có dữ liệu SV hoặc không có tiên quyết, trả về toàn bộ danh sách gốc
     if (!studentData || !AUX_DATA.prerequisites.length) return courses;
 
     try {
         const recommender = new CourseRecommender(
-            studentData, courses, AUX_DATA.prerequisites, AUX_DATA.allCourses, AUX_DATA.categories
+            studentData, 
+            courses, 
+            AUX_DATA.prerequisites, 
+            AUX_DATA.allCourses, 
+            AUX_DATA.categories
         );
-        const recommendations = recommender.recommend();
         
-        // Map status vào danh sách gốc
-        const statusMap = new Map();
-        recommendations.forEach(c => statusMap.set(c.id, c.recommendationStatus));
+        // Lấy danh sách các môn ĐƯỢC GỢI Ý từ bộ não Recommender
+        // (Lưu ý: Recommender.js của bạn trả về finalOutput là danh sách đã lọc rồi)
+        const recommendedCourses = recommender.recommend();
+        
+        // Nếu không có gợi ý nào (SV học hết rồi chẳng hạn), có thể trả về rỗng hoặc full
+        if (!recommendedCourses || recommendedCourses.length === 0) {
+            logWarning("Không có môn nào được gợi ý.");
+            return []; // Hoặc return courses nếu muốn fallback về hiện tất cả
+        }
 
-        courses.forEach(c => {
-            c.recommendationStatus = statusMap.get(c.id) || null;
-            // Fix data thiếu mask nếu cần
+        // Đảm bảo dữ liệu chuẩn hóa (tính bitmask cho lịch học nếu thiếu)
+        recommendedCourses.forEach(c => {
             if (!c.mask && c.schedule) c.mask = encodeScheduleToMask(c.schedule);
         });
 
-        // Sắp xếp
-        courses.sort((a, b) => {
+        // Sắp xếp lại lần cuối cho chắc chắn (Ưu tiên: Học lại -> Bắt buộc -> Nhóm ngành -> Bổ trợ)
+        recommendedCourses.sort((a, b) => {
             const priority = { 'RETAKE': 4, 'MANDATORY': 3, 'ELECTIVE_REQUIRED': 2, 'SUGGESTED': 1, null: 0 };
-            return (priority[b.recommendationStatus] || 0) - (priority[a.recommendationStatus] || 0);
+            // Lấy status từ object (Recommender đã gán sẵn key recommendationStatus vào rồi)
+            const pA = priority[a.recommendationStatus] || 0;
+            const pB = priority[b.recommendationStatus] || 0;
+            return pB - pA; // Cao xếp trước
         });
 
-        return courses;
+        return recommendedCourses; // <--- TRẢ VỀ DANH SÁCH ĐÃ LỌC
+
     } catch (e) {
-        console.error("❌ Utils: Recommender Error:", e);
+        logError("Utils: Recommender Error:", e);
+        // Nếu lỗi, fallback về hiện tất cả để user vẫn dùng được tool
         return courses;
     }
 }
