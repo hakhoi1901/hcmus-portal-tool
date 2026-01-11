@@ -12,7 +12,6 @@
         ::-webkit-scrollbar-track { background: #f1f1f1; }
         ::-webkit-scrollbar-thumb { background: #c1c1c1; border-radius: 4px; }
         ::-webkit-scrollbar-thumb:hover { background: #a8a8a8; }
-        /* Class để ẩn trang */
         .hidden { display: none !important; }
     </style>
 </head>
@@ -69,9 +68,14 @@
                                     </div>
                                 </div>
                                 <div class="h-10 w-px bg-gray-200"></div>
-                                <button onclick="window.clearAppCache && window.clearAppCache()" class="flex items-center gap-2 px-4 py-2.5 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-all shadow-sm hover:shadow-md">
+                                <a id="bookmark-btn">
+                                <button id="btn-logout" onclick="window.clearAppCache && window.clearAppCache()"hidden class="flex items-center gap-2 px-4 py-2.5 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-all shadow-sm hover:shadow-md">
                                     <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-log-out w-4 h-4"><path d="m16 17 5-5-5-5"></path><path d="M21 12H9"></path><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path></svg>
                                     <span style="font-weight: 500;">Đăng xuất</span>
+                                </button>
+                                </a>
+                                <button id="btn-open-portal" onclick="window.openPortal && window.openPortal()" class="flex items-center gap-2 px-4 py-2.5 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-all shadow-sm hover:shadow-md">
+                                    <span style="font-weight: 500;">Đăng nhập</span>
                                 </button>
                             </div>
                         </div>
@@ -148,10 +152,10 @@
                                             <p class="text-[10px] text-gray-500 mt-1">VNĐ (đã bao gồm các khoản phí)</p>
                                         </div>
                                         <select id="sel-session-pref" class="px-4 py-2.5 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#004A98] text-sm text-gray-700">
-    <option value="0">Không ưu tiên</option>
-    <option value="1">Ưu tiên Sáng</option>
-    <option value="2">Ưu tiên Chiều</option>
-</select>
+                                            <option value="0">Không ưu tiên</option>
+                                            <option value="1">Ưu tiên Sáng</option>
+                                            <option value="2">Ưu tiên Chiều</option>
+                                        </select>
                                         <button onclick="onNutBamXepLich()" class="w-full py-3 rounded-lg font-medium transition-all bg-[#004A98] text-white hover:bg-[#003A78] shadow-md">Xếp Lịch Ngay</button>
                                     </div>
                                 </div>
@@ -186,6 +190,7 @@
     <script type="module">
         import { initApp } from './js/Utils.js';
         import { renderNewUI, renderSidebar, updateHeaderUI } from './js/render/NewUI.js';
+        import { openPortal } from './js/PortalHandler.js'
         
         // Gắn hàm render vào window
         window.renderCourseList = (courses) => {

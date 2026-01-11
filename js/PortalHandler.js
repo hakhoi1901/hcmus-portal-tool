@@ -36,3 +36,6 @@ export function openPortal() {
     // Mở trang portal login
     window.open(PORTAL_URL, 'PortalWindow');
 }
+
+window.openPortal = openPortal;
+window.setupBookmarklet = setupBookmarklet;
