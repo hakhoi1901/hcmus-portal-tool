@@ -81,15 +81,15 @@ async function loadAuxiliaryData() {
             fetchJson('./assets/data/prerequisites.json'),
             fetchJson('./assets/data/courses.json'),
             fetchJson('./assets/data/categories.json'),
-            fetchJson('./assets/data/tuition_rates.json') // <--- Load file mới
+            fetchJson('./assets/data/tuition_rates.json')
         ]);
         AUX_DATA.prerequisites = prereq;
         AUX_DATA.allCourses = allCourses;
         AUX_DATA.categories = cats;
         AUX_DATA.tuitionRates = rates; // <--- Lưu vào biến toàn cục
-        console.log("📚 Utils: Đã tải xong Metadata và Bảng giá.");
+        logSuccess("Utils: Đã tải xong Metadata và Bảng giá.");
     } catch (e) {
-        console.error("❌ Utils: Lỗi tải Metadata:", e);
+        logError("Utils: Lỗi tải Metadata:", e);
     }
 }
 
@@ -178,14 +178,6 @@ function checkLocalStorageState() {
 // hàm tính học phí
 // 3. --- HÀM TÍNH HỌC PHÍ (LOGIC CHÍNH) ---
 /**
- * Tính học phí cho 1 môn học
- * @param {string} courseId - Mã môn (VD: CSC10001)
- * @param {number} credits - Số tín chỉ
- * @returns {number} - Số tiền (VNĐ)
- */
-// js/Utils.js
-
-/**
  * Tính học phí dựa trên Tín chỉ thực tế (Tín chỉ học phí)
  * Công thức: (Lý thuyết + Thực hành + Bài tập) / 15 * Đơn giá
  */
@@ -214,6 +206,8 @@ export function calculateTuition(courseId, defaultCredits) {
     // 2. Xác định Số tín chỉ học phí (Billing Credits)
     let billingCredits = defaultCredits || 0;
 
+    let tuition_log = '';
+
     // Tìm thông tin chi tiết môn học để lấy số tiết
     if (AUX_DATA.allCourses) {
         const meta = AUX_DATA.allCourses.find(c => c.course_id === courseId);
@@ -228,14 +222,15 @@ export function calculateTuition(courseId, defaultCredits) {
 
             // Nếu có dữ liệu số tiết > 0 thì tính theo công thức
             if (totalHours > 0) {
-                // Công thức: Tổng tiết / 15
+                // Công thức: Tổng tiết / `15
                 billingCredits = totalHours / 15;
-                
-                // Debug để bạn kiểm tra
-                // console.log(`Môn ${courseId}: ${lt}LT + ${th}TH + ${bt}BT = ${totalHours} tiết -> ${billingCredits} TC học phí`);
+                tuition_log += `Môn ${courseId}: ${lt}LT + ${th}TH + ${bt}BT = ${totalHours} tiết -> ${billingCredits} TC học phí\n`
             }
         }
     }
+
+    logAlgo("Đang chạy thuật toán tính học phí...")
+    console.log(tuition_log);
 
     // 3. Tính tiền
     return billingCredits * pricePerCredit;
