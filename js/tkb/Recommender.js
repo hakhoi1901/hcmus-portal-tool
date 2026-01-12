@@ -88,7 +88,7 @@ export class CourseRecommender {
 
             const score = parseFloat(scoreRaw);
             if (!isNaN(score)) {
-                if (score >= 5.0) {
+                if (score >= 9.0) {
                     passed.add(cid);
                     passedCreditsMap.set(cid, credits);
                 } else {
@@ -129,7 +129,7 @@ export class CourseRecommender {
         
         // 1. Tính tổng tín chỉ đã đạt trong nhóm này
         courseList.forEach(cid => {
-            if (passed.has(cid)) {
+            if (passed.has(cid) || studying.has(cid)) {
                 // Ưu tiên lấy tín chỉ thực tế từ bảng điểm, nếu không có thì lấy từ file config
                 const cr = passedCreditsMap.get(cid) || this.coursesMetaMap.get(cid)?.credits || 0;
                 currentCredits += parseInt(cr);

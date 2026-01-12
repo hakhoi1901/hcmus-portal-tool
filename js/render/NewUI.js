@@ -1,6 +1,7 @@
 import { AUX_DATA } from '../Utils.js'
 import { encodeScheduleToMask, decodeScheduleMask, calculateTuition } from '../Utils.js';
 import { GLOBAL_COURSE_DB } from '../Utils.js'
+import { logStatus, logSuccess, logWarning, logAlgo, logData, logError} from '../styleLog.js';
 
 const MAX_CREDITS = 25; // Giới hạn tín chỉ tối đa
 
@@ -82,6 +83,11 @@ let GLOBAL_COURSES_REF = [];
 // --- HÀM 1: RENDER UI CHÍNH (ĐÃ TỐI ƯU HTML & LOGIC LỌC) ---
 export function renderNewUI(courses) {
     if (!courses || courses.length === 0) return;
+
+    if (SELECTED_COURSES.size === 0) {
+        loadBasket();
+    }
+    
     GLOBAL_COURSES_REF = courses;
     
     window.switchPage('roadmap'); 
@@ -219,6 +225,8 @@ export function renderNewUI(courses) {
         // Fallback nếu không có file Categories
         renderDefaultGroups(courses, container);
     }
+
+    updateBasketUI();
 }
 
 // --- HÀM 2: VẼ CARD MÔN HỌC (1 DÒNG) ---
@@ -366,6 +374,7 @@ window.toggleNewRow = (id) => {
         document.getElementById(`row-${id}`).querySelector('.border').classList.remove('ring-1', 'ring-[#004A98]', 'bg-blue-50/30');
     }
     updateBasketUI();
+    saveBasket();
 }
 
 // --- 2. HÀM MỞ MODAL THÔNG TIN (INFO) ---
@@ -722,7 +731,7 @@ export function updateHeaderUI() {
                 studentInfo.id = parsed.studentId;
             }
         } catch (e) {
-            console.error("Lỗi đọc dữ liệu sinh viên:", e);
+            logError("Lỗi đọc dữ liệu sinh viên:", e);
         }
     }
 
@@ -824,8 +833,8 @@ export function setText(elementId, value) {
         // Nếu value rỗng hoặc null thì điền "..." nhìn cho đẹp
         el.innerText = value || "..."; 
     } else {
-        console.warn(`⚠️ Không tìm thấy thẻ có ID: "${elementId}" để điền text.`);
-    }
+        logWarning('Không tìm thấy thẻ có ID: "${elementId}" để điền text.');
+    }   
 }
 
 /**
@@ -857,13 +866,13 @@ export function setHTML(elementId, htmlString) {
 // --- HÀM TỰ ĐỘNG ĐIỀN THÔNG TIN SINH VIÊN ---
 
 export function fillStudentProfile() {
-    console.log("👤 Đang điền thông tin sinh viên...");
+    logStatus("Đang điền thông tin sinh viên...");
 
     // 1. Mò vào kho lấy dữ liệu
     const rawData = localStorage.getItem('student_db_full');
     
     if (!rawData) {
-        console.warn("⚠️ Chưa có dữ liệu sinh viên trong LocalStorage!");
+        logWarning("Chưa có dữ liệu sinh viên trong LocalStorage!");
         setText('header-user-name', 'Chưa đăng nhập');
         setText('header-user-mssv', '---');
         return;
@@ -900,7 +909,7 @@ export function fillStudentProfile() {
         }
 
     } catch (e) {
-        console.error("❌ Lỗi khi đọc dữ liệu sinh viên:", e);
+        logError("Lỗi khi đọc dữ liệu sinh viên:", e);
     }
 }
 
@@ -1068,4 +1077,27 @@ function getColorForSubject(str) {
         "bg-neutral-50 border-neutral-500 text-neutral-900", "bg-stone-50 border-stone-500 text-stone-900"
     ];
     return colors[Math.abs(hash) % colors.length];
+}
+
+// 1. Lưu giỏ hàng hiện tại vào LocalStorage
+function saveBasket() {
+    // Set không lưu trực tiếp được, phải chuyển sang Array
+    const basketArray = Array.from(SELECTED_COURSES);
+    localStorage.setItem('selected_courses_basket', JSON.stringify(basketArray));
+}
+
+// 2. Nạp giỏ hàng từ LocalStorage (Gọi khi bắt đầu render)
+function loadBasket() {
+    const raw = localStorage.getItem('selected_courses_basket');
+    if (raw) {
+        try {
+            const basketArray = JSON.parse(raw);
+            // Chuyển Array ngược lại thành Set
+            SELECTED_COURSES = new Set(basketArray);
+            logSuccess(`Đã khôi phục ${SELECTED_COURSES.size} môn từ giỏ hàng cũ.`);
+        } catch (e) {
+            logWarning("Lỗi đọc giỏ hàng cũ:", e);
+            SELECTED_COURSES = new Set();
+        }
+    }
 }
