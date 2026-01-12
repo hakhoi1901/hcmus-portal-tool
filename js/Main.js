@@ -7,6 +7,13 @@ import { setupBookmarklet, openPortal } from './PortalHandler.js';
 import { initApp, processPortalData } from './Utils.js';
 import { onNutBamXepLich } from './Logic.js';
 import { renderNewUI, renderSidebar, updateHeaderUI } from './render/NewUI.js';
+import {
+    handleSaveSchedule, 
+    openSavedSchedulesModal, 
+    loadSavedSchedule, 
+    removeSavedSchedule,
+    renderScheduleResults
+} from './render/NewUI.js'
 
 // --- 1. SETUP BAN ĐẦU ---
 setupBookmarklet();
@@ -19,7 +26,12 @@ Object.assign(window, {
     filterCourses,      // Tìm kiếm môn
     openInfoModal,      // Popup Info
     openPrereqModal,    // Popup Flowchart
-    closeModal          // Đóng Popup
+    closeModal,         // Đóng Popup
+    handleSaveSchedule, 
+    openSavedSchedulesModal, 
+    loadSavedSchedule, 
+    removeSavedSchedule,
+    renderScheduleResults
 });
 
 // Gắn sự kiện cho nút tĩnh (nếu có)

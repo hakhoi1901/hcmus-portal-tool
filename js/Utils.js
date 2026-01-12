@@ -328,6 +328,52 @@ export async function initApp() {
 }, false);
 }
 
+
+
+// Lưu TKB
+
+// js/Utils.js
+
+// Biến lưu kết quả vừa tính toán (để khi bấm Save còn biết lưu cái gì)
+export let LAST_SOLVER_RESULTS = [];
+
+export function setSolverResults(results) {
+    LAST_SOLVER_RESULTS = results;
+}
+
+// --- QUẢN LÝ LỊCH ĐÃ LƯU (SAVED SCHEDULES) ---
+
+const STORAGE_KEY_TKB = 'user_saved_schedules';
+
+export function getSavedSchedules() {
+    try {
+        const raw = localStorage.getItem(STORAGE_KEY_TKB);
+        return raw ? JSON.parse(raw) : [];
+    } catch (e) {
+        return [];
+    }
+}
+
+export function saveScheduleToStorage(name, scheduleData) {
+    const list = getSavedSchedules();
+    const newEntry = {
+        id: Date.now().toString(), // ID duy nhất
+        name: name,
+        timestamp: new Date().toLocaleDateString('vi-VN'),
+        data: scheduleData // Dữ liệu các lớp
+    };
+    list.push(newEntry);
+    localStorage.setItem(STORAGE_KEY_TKB, JSON.stringify(list));
+    return true;
+}
+
+export function deleteSavedSchedule(id) {
+    let list = getSavedSchedules();
+    list = list.filter(item => item.id !== id);
+    localStorage.setItem(STORAGE_KEY_TKB, JSON.stringify(list));
+    return list;
+}
+
 // ====== HÀM TIỆN ÍCH GLOBLE
 
 // Gán trực tiếp vào window tại đây để file nào cũng gọi được

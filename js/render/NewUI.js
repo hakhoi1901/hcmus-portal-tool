@@ -2,6 +2,8 @@ import { AUX_DATA } from '../Utils.js'
 import { encodeScheduleToMask, decodeScheduleMask, calculateTuition } from '../Utils.js';
 import { GLOBAL_COURSE_DB } from '../Utils.js'
 import { logStatus, logSuccess, logWarning, logAlgo, logData, logError} from '../styleLog.js';
+import { LAST_SOLVER_RESULTS, saveScheduleToStorage, getSavedSchedules, deleteSavedSchedule, setSolverResults } from '../Utils.js';
+
 
 const MAX_CREDITS = 25; // Giới hạn tín chỉ tối đa
 
@@ -939,36 +941,62 @@ export function fillStudentProfile() {
 }
 
 export function renderScheduleResults(results) {
+    // 1. Validate & Setup
+    if (!results || !Array.isArray(results)) {
+        console.error("❌ Lỗi hiển thị: 'results' không hợp lệ.", results);
+        return;
+    }
+    setSolverResults(results); // Lưu vào biến tạm để dùng cho nút Lưu
+
     const container = document.getElementById('schedule-results-area');
+    if (!container) return;
     container.innerHTML = '';
     container.style.display = 'block';
 
-    if (!results || results.length === 0) {
-        container.innerHTML = `<div class="text-center py-8 text-gray-500">Không tìm thấy lịch học phù hợp!</div>`;
+    // 2. Header khu vực kết quả
+    if (results.length === 0) {
+        container.innerHTML = `<div class="text-center py-12 text-gray-500 bg-gray-50 rounded-xl border border-gray-200">
+            <p>😔 Không tìm thấy lịch học phù hợp!</p>
+            <p class="text-xs mt-2">Thử bỏ bớt môn hoặc thay đổi tùy chọn Sáng/Chiều.</p>
+        </div>`;
         return;
     }
 
+    // Thanh công cụ phía trên
+    const topBar = `
+        <div class="flex justify-between items-center mb-6 animate-fadeIn">
+            <h3 class="text-xl font-bold text-gray-800">
+                Tìm thấy <span class="text-[#004A98] font-extrabold text-2xl">${results.length}</span> phương án
+            </h3>
+            <button onclick="window.openSavedSchedulesModal()" class="flex items-center gap-2 px-4 py-2 bg-white border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 shadow-sm transition-all text-sm font-medium group">
+                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-gray-500 group-hover:text-[#004A98]"><path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1 0-5H20"/></svg>
+                <span>Mở lịch đã lưu</span>
+            </button>
+        </div>
+    `;
+    container.insertAdjacentHTML('beforeend', topBar);
+
     const days = ["Hai", "Ba", "Tư", "Năm", "Sáu", "Bảy", "CN"];
 
-    results.forEach((opt) => {
+    // 3. Render từng phương án
+    results.forEach((opt, index) => {
+        // --- LOGIC XỬ LÝ GRID (Của bạn) ---
         // MA TRẬN 20 DÒNG (Mỗi tiết 2 dòng con)
         let grid = Array(20).fill(null).map(() => Array(7).fill(null));
 
         opt.schedule.forEach(subject => {
-            const timeSlots = decodeScheduleMask(subject.mask);
+            const timeSlots = decodeScheduleMask(subject.mask); // Hàm này phải được import
             
-            // Tìm tên môn học từ dữ liệu gốc
+            // Tìm tên môn học
             let courseName = subject.subjectID; 
-            // 1. Tìm trong danh sách lớp đang chọn
             const courseInDB = GLOBAL_COURSE_DB.find(c => c.id === subject.subjectID);
             if (courseInDB) courseName = courseInDB.name;
-            // 2. Nếu không thấy, tìm trong dữ liệu phụ trợ (courses.json)
             else if (AUX_DATA && AUX_DATA.allCourses) {
                 const meta = AUX_DATA.allCourses.find(c => c.course_id === subject.subjectID);
                 if (meta) courseName = meta.course_name;
             }
 
-            // Gom nhóm tiết theo ngày
+            // Gom nhóm tiết
             const groupedSlots = {}; 
             timeSlots.forEach(slot => {
                 if (!groupedSlots[slot.day]) groupedSlots[slot.day] = [];
@@ -988,7 +1016,7 @@ export function renderScheduleResults(results) {
                         let startRow = startPeriod * 2;
                         let span = count * 2;
 
-                        // Logic nối tiết (Sáng: Hết P2 nối P3 / Chiều: Hết P7 nối P8)
+                        // Logic nối tiết
                         if (endPeriod === 1) span += 1;
                         else if (startPeriod === 2) startRow += 1;
                         if (endPeriod === 6) span += 1;
@@ -997,7 +1025,7 @@ export function renderScheduleResults(results) {
                         if (startRow < 20) {
                             grid[startRow][day] = {
                                 subjectID: subject.subjectID,
-                                subjectName: courseName, // Lưu tên môn
+                                subjectName: courseName,
                                 classID: subject.classID,
                                 span: span,
                                 type: 'main'
@@ -1017,22 +1045,36 @@ export function renderScheduleResults(results) {
             }
         });
 
-        // VẼ HTML
+        // --- VẼ HTML BẢNG ---
         let tableHTML = `
-            <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden mb-8 transition-all hover:shadow-md">
-                <div class="px-6 py-4 border-b border-gray-100 flex justify-between items-center bg-gray-50">
+            <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden mb-10 transition-all hover:shadow-md animate-fadeIn">
+                
+                <div class="px-6 py-4 border-b border-gray-100 flex flex-wrap gap-4 justify-between items-center bg-gray-50/50">
                     <div>
-                        <h3 class="text-[#004A98] font-bold text-lg">Phương án ${opt.option}</h3>
-                        <p class="text-xs text-gray-500 mt-1">Độ phù hợp: ${opt.fitness.toFixed(0)} điểm</p>
+                        <h3 class="text-[#004A98] font-bold text-lg flex items-center gap-2">
+                            <span class="bg-[#004A98] text-white w-6 h-6 rounded-full flex items-center justify-center text-xs">${index + 1}</span>
+                            Phương án ${index + 1}
+                        </h3>
+                        <p class="text-xs text-gray-500 mt-1 ml-8">Độ ưu tiên: ${opt.fitness ? opt.fitness.toFixed(0) : 'N/A'}</p>
                     </div>
-                    <button class="px-3 py-1.5 bg-white border border-gray-200 text-gray-600 text-xs rounded hover:bg-gray-50 transition-colors">
-                        Chi tiết
-                    </button>
+                    
+                    <div class="flex gap-2">
+                        <button onclick="window.handleSaveSchedule(${index})" class="flex items-center gap-1.5 px-3 py-1.5 bg-green-50 border border-green-200 text-green-700 text-xs font-medium rounded-lg hover:bg-green-100 transition-colors">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+                            Lưu
+                        </button>
+                        
+                        <button onclick="window.viewScheduleDetail(${index})" class="flex items-center gap-1.5 px-3 py-1.5 bg-white border border-gray-200 text-gray-600 text-xs font-medium rounded-lg hover:bg-gray-50 transition-colors">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.34-4.34"/></svg>
+                            Chi tiết
+                        </button>
+                    </div>
                 </div>
-                <div class="overflow-x-auto">
-                    <table class="w-full text-sm border-collapse table-fixed">
+
+                <div class="overflow-x-auto p-1">
+                    <table class="w-full text-sm border-collapse table-fixed min-w-[800px]">
                         <thead>
-                            <tr class="bg-gray-50 text-gray-500 text-xs uppercase tracking-wider text-center h-10 border-b border-gray-200">
+                            <tr class="bg-gray-50 text-gray-500 text-[10px] uppercase tracking-wider text-center h-10 border-b border-gray-200">
                                 <th class="border-r border-gray-100 w-10">Tiết</th>
                                 ${days.map(d => `<th class="border-r border-gray-100">${d}</th>`).join('')}
                             </tr>
@@ -1044,34 +1086,33 @@ export function renderScheduleResults(results) {
             const isEndOfPeriod = (r % 2 !== 0);
             const rowBorderClass = isEndOfPeriod ? "border-b border-gray-200" : "";
             
-            tableHTML += `<tr class="h-7 ${rowBorderClass}">`;
+            tableHTML += `<tr class="h-8 ${rowBorderClass}">`; // Tăng chiều cao h-8 cho thoáng
 
             if (r % 2 === 0) {
                 const periodNum = (r / 2) + 1;
-                tableHTML += `<td class="text-center font-medium text-gray-400 border-r border-gray-200 bg-gray-50/20 text-xs align-middle" rowspan="2">${periodNum}</td>`;
+                tableHTML += `<td class="text-center font-bold text-gray-400 border-r border-gray-200 bg-gray-50/30 text-xs align-middle" rowspan="2">${periodNum}</td>`;
             }
 
             for (let d = 0; d < 7; d++) {
                 const cell = grid[r][d];
                 if (!cell) {
-                    tableHTML += `<td class="border-r border-gray-100"></td>`;
+                    tableHTML += `<td class="border-r border-gray-100 hover:bg-gray-50/50 transition-colors"></td>`;
                 } else if (cell.type === 'merged') {
                     continue; 
                 } else if (cell.type === 'main') {
                     const colorClass = getColorForSubject(cell.subjectID);
                     
-                    // Render ô có Tên môn + Mã lớp + Mã môn
                     tableHTML += `
                         <td class="border-r border-gray-100 p-0.5 align-top relative z-10" rowspan="${cell.span}">
-                            <div class="w-full h-full rounded p-1.5 border-l-4 shadow-sm flex flex-col justify-start gap-0.5 cursor-pointer hover:brightness-95 transition-all ${colorClass}" style="min-height: ${cell.span * 1.75}rem;">
+                            <div class="w-full h-full rounded-md p-2 border-l-[3px] shadow-sm flex flex-col justify-start gap-0.5 cursor-pointer hover:brightness-95 hover:shadow-md transition-all ${colorClass}" style="min-height: ${cell.span * 2}rem;">
                                 
-                                <span class="font-bold text-[10px] leading-tight line-clamp-2" title="${cell.subjectName}">
+                                <span class="font-bold text-[11px] leading-tight line-clamp-2" title="${cell.subjectName}">
                                     ${cell.subjectName}
                                 </span>
                                 
-                                <div class="flex flex-wrap gap-1 mt-0.5">
-                                    <span class="text-[9px] opacity-70 uppercase tracking-tighter">${cell.subjectID}</span>
-                                    <span class="text-[9px] bg-white/60 px-1 rounded font-medium ml-auto">${cell.classID}</span>
+                                <div class="flex flex-wrap gap-1 mt-1 items-center">
+                                    <span class="text-[9px] opacity-80 font-mono tracking-tighter">${cell.subjectID}</span>
+                                    <span class="text-[9px] bg-white/80 px-1.5 py-0.5 rounded text-black font-bold ml-auto shadow-sm">${cell.classID}</span>
                                 </div>
                             </div>
                         </td>
@@ -1126,3 +1167,201 @@ function loadBasket() {
         }
     }
 }
+
+// --- HÀM VẼ KẾT QUẢ XẾP LỊCH (CÓ NÚT LƯU) ---
+// --- HÀM VẼ KẾT QUẢ XẾP LỊCH (ĐÃ FIX LỖI CRASH) ---
+// export function renderScheduleResults(results) {
+//     // 1. Kiểm tra đầu vào cấp 1
+//     if (!results || !Array.isArray(results)) {
+//         console.error("❌ Lỗi hiển thị: 'results' không phải là mảng.", results);
+//         return;
+//     }
+
+//     // Lưu tạm vào biến toàn cục để dùng cho nút Save
+//     setSolverResults(results);
+
+//     const container = document.getElementById('schedule-results-area');
+//     if (!container) return;
+    
+//     let validCount = 0;
+
+//     // Header kết quả
+//     let html = `
+//         <div class="flex justify-between items-center mb-4">
+//             <h3 class="text-xl font-bold text-gray-800">
+//                 Kết quả xếp lịch
+//             </h3>
+//             <button onclick="window.openSavedSchedulesModal()" class="flex items-center gap-2 px-4 py-2 bg-white border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 shadow-sm transition-all text-xs font-medium">
+//                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1 0-5H20"/></svg>
+//                 <span>Mở lịch đã lưu</span>
+//             </button>
+//         </div>
+//         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+//     `;
+
+//     // Render từng Card kết quả
+//     results.forEach((schedule, index) => {
+//         // --- 2. QUAN TRỌNG: Kiểm tra đầu vào cấp 2 ---
+//         // Nếu schedule không phải mảng (ví dụ bị null hoặc là object lỗi), bỏ qua ngay
+//         if (!schedule || !Array.isArray(schedule)) {
+//             console.warn(`⚠️ Bỏ qua phương án ${index} vì dữ liệu bị hỏng:`, schedule);
+//             return; 
+//         }
+        
+//         validCount++;
+
+//         // Tính toán sơ bộ
+//         const days = new Set();
+//         schedule.forEach(c => {
+//             if (c.schedule) {
+//                 const day = c.schedule.split('(')[0]; 
+//                 days.add(day);
+//             }
+//         });
+
+//         html += `
+//             <div class="bg-white border border-gray-200 rounded-xl p-4 shadow-sm hover:shadow-md transition-all relative group animate-fadeIn">
+//                 <div class="flex justify-between items-start mb-2">
+//                     <h4 class="font-bold text-[#004A98]">Phương án ${index + 1}</h4>
+//                     <span class="text-xs bg-gray-100 text-gray-600 px-2 py-1 rounded">Học ${days.size} buổi/tuần</span>
+//                 </div>
+                
+//                 <div class="space-y-1 text-sm text-gray-600 mb-4">
+//                     <p>• Số môn: <span class="font-medium text-gray-900">${schedule.length}</span></p>
+//                     <p>• Trạng thái: <span class="text-green-600">Hợp lệ</span></p>
+//                 </div>
+
+//                 <div class="flex gap-2">
+//                     <button onclick="window.viewScheduleDetail(${index})" class="flex-1 flex items-center justify-center gap-1 px-3 py-2 bg-blue-50 text-[#004A98] rounded-lg hover:bg-blue-100 font-medium text-xs transition-colors">
+//                         <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.34-4.34"/></svg>
+//                         Chi tiết
+//                     </button>
+
+//                     <button onclick="window.handleSaveSchedule(${index})" class="flex-1 flex items-center justify-center gap-1 px-3 py-2 bg-green-50 text-green-700 rounded-lg hover:bg-green-100 font-medium text-xs transition-colors border border-green-200">
+//                         <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+//                         Lưu
+//                     </button>
+//                 </div>
+//             </div>
+//         `;
+//     });
+
+//     html += `</div>`;
+    
+//     // Cập nhật lại số lượng tìm thấy chính xác
+//     if (validCount === 0) {
+//         container.innerHTML = `<div class="p-4 text-center text-gray-500">Không tìm thấy phương án xếp lịch phù hợp hoặc dữ liệu bị lỗi.</div>`;
+//     } else {
+//         // Inject HTML nhưng sửa lại số lượng tìm thấy
+//         container.innerHTML = html.replace('Kết quả xếp lịch', `Tìm thấy <span class="text-[#004A98]">${validCount}</span> phương án`);
+//     }
+    
+//     container.classList.remove('hidden');
+// }
+
+// --- LOGIC XỬ LÝ NÚT BẤM (Export ra Window) ---
+
+// 1. Xử lý bấm nút Lưu
+export function handleSaveSchedule(index) {
+    if (!LAST_SOLVER_RESULTS[index]) return;
+
+    const name = prompt("Đặt tên cho Thời khóa biểu này (VD: Phương án A - Rảnh sáng T2):");
+    if (name) {
+        saveScheduleToStorage(name, LAST_SOLVER_RESULTS[index]);
+        alert("✅ Đã lưu thành công! Bạn có thể xem lại trong mục 'Mở lịch đã lưu'.");
+    }
+}
+
+// 2. Mở Modal danh sách đã lưu
+export function openSavedSchedulesModal() {
+    const list = getSavedSchedules();
+    
+    let contentHtml = '';
+    if (list.length === 0) {
+        contentHtml = `<div class="text-center py-8 text-gray-500">Chưa có lịch nào được lưu.</div>`;
+    } else {
+        contentHtml = `<div class="space-y-3 max-h-[60vh] overflow-y-auto pr-2">`;
+        list.forEach(item => {
+            contentHtml += `
+                <div class="flex justify-between items-center p-3 bg-gray-50 rounded-lg border border-gray-200 hover:border-[#004A98] transition-colors" id="saved-item-${item.id}">
+                    <div class="flex-1 min-w-0 mr-4">
+                        <h4 class="font-bold text-gray-800 truncate">${item.name}</h4>
+                        <p class="text-xs text-gray-500">Lưu ngày: ${item.timestamp} • ${item.data.length} môn</p>
+                    </div>
+                    <div class="flex gap-2 flex-shrink-0">
+                        <button onclick="window.loadSavedSchedule('${item.id}')" class="px-3 py-1.5 bg-[#004A98] text-white text-xs rounded hover:bg-[#003A78]">
+                            Xem Lại
+                        </button>
+                        <button onclick="window.removeSavedSchedule('${item.id}')" class="p-1.5 text-red-500 hover:bg-red-50 rounded">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/></svg>
+                        </button>
+                    </div>
+                </div>
+            `;
+        });
+        contentHtml += `</div>`;
+    }
+
+    const modalHtml = `
+        <div class="bg-white rounded-xl shadow-2xl max-w-lg w-full p-6 animate-fadeIn">
+            <div class="flex justify-between items-center mb-4 border-b pb-2">
+                <h3 class="text-lg font-bold text-gray-900">Danh sách TKB đã lưu</h3>
+                <button onclick="window.closeModal()" class="text-gray-500 hover:text-gray-800">✕</button>
+            </div>
+            ${contentHtml}
+        </div>
+    `;
+    
+    // Hàm showModalOverlay bạn đã có sẵn (hoặc copy từ code cũ)
+    // Giả sử hàm này nằm trong NewUI.js hoặc Utils.js
+    showModalOverlay(modalHtml); 
+}
+
+// 3. Load lại một lịch đã lưu
+export function loadSavedSchedule(id) {
+    const list = getSavedSchedules();
+    const found = list.find(x => x.id === id);
+    if (found) {
+        // Đóng modal
+        window.closeModal();
+        
+        // Render lại UI với chỉ 1 kết quả này
+        // Lưu ý: renderScheduleResults nhận vào MẢNG các kết quả
+        renderScheduleResults([found.data]); 
+        
+        // Chuyển tab sang tab Lịch
+        if (window.switchViewMode) window.switchViewMode('schedule');
+        
+        // Thông báo nhỏ (Optional)
+        // alert(`Đang xem lại: ${found.name}`);
+    }
+}
+
+// 4. Xóa lịch
+export function removeSavedSchedule(id) {
+    if (confirm("Bạn có chắc muốn xóa lịch này?")) {
+        deleteSavedSchedule(id);
+        // Refresh lại modal bằng cách đóng rồi mở lại (hơi thủ công nhưng nhanh)
+        // Hoặc update DOM trực tiếp:
+        const el = document.getElementById(`saved-item-${id}`);
+        if (el) el.remove();
+        
+        // Nếu xóa hết thì hiện thông báo trống
+        const list = getSavedSchedules();
+        if (list.length === 0) window.closeModal(); // Hoặc vẽ lại text "Trống"
+    }
+}
+
+// // --- HÀM SHOW MODAL (Nếu chưa có thì bổ sung) ---
+// function showModalOverlay(innerHTML) {
+//     const old = document.getElementById('custom-modal-overlay');
+//     if (old) old.remove();
+//     const overlay = document.createElement('div');
+//     overlay.id = 'custom-modal-overlay';
+//     overlay.className = 'fixed inset-0 z-[60] flex items-center justify-center bg-black/50 backdrop-blur-sm p-4 animate-fadeIn';
+//     overlay.innerHTML = innerHTML;
+//     overlay.addEventListener('click', (e) => {
+//         if (e.target === overlay) window.closeModal();
+//     });
+//     document.body.appendChild(overlay);
+// }
