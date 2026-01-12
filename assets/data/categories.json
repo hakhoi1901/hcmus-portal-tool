@@ -7,19 +7,31 @@
         "name": "Lý luận chính trị – Pháp luật",
         "credits": 14,
         "mandatory": true,
-        "courses": []
+        "courses": [
+          "BAA00101",
+          "BAA00102",
+          "BAA00103",
+          "BAA00104",
+          "BAA00003",
+          "BAA00004"
+        ]
       },
       "GENERAL_SOCIAL": {
         "name": "Khoa học xã hội – Kinh tế – Kỹ năng",
         "credits": 2,
         "mandatory": false,
-        "courses": [],
-        "note": "Chọn 1 trong 3"
+        "note": "Chọn 1 trong 3",
+        "courses": [
+          "BAA00005",
+          "BAA00006",
+          "BAA00007"
+        ]
       },
       "GENERAL_MATH_SCIENCE": {
         "name": "Toán – Khoa học tự nhiên – Môi trường",
         "credits": 36,
         "mandatory": true,
+        "note": "Toán: 24 TC (bắt buộc) + 4 TC (chọn 1/3) + Khoa học: 6 TC + Môi trường: 2 TC",
         "courses": [
           "MTH00021",
           "MTH00022",
@@ -38,9 +50,11 @@
           "BIO00082",
           "PHY00001",
           "PHY00002",
-          "PHY00081"
-        ],
-        "note": "Toán: 24 TC (bắt buộc) + 4 TC (chọn 1/3) + Khoa học: 6 TC + Môi trường: 2 TC"
+          "PHY00081",
+          "GEO00002",
+          "ENV00001",
+          "ENV00003"
+        ]
       },
       "GENERAL_IT": {
         "name": "Tin học",
@@ -54,41 +68,32 @@
         "name": "Ngoại ngữ (Anh văn)",
         "credits": 12,
         "mandatory": false,
+        "note": "Không tính vào điểm TB và TC tích lũy. SV đạt chuẩn ngoại ngữ đầu ra không cần đăng ký",
         "courses": [
           "ADD00031",
           "ADD00032",
           "ADD00033",
           "ADD00034"
-        ],
-        "note": "Không tính vào điểm TB và TC tích lũy. SV đạt chuẩn ngoại ngữ đầu ra không cần đăng ký"
+        ]
       },
       "GENERAL_PE": {
         "name": "Giáo dục thể chất",
         "credits": 4,
         "mandatory": true,
+        "note": "Không tính vào điểm TB, tính vào TC tích lũy",
         "courses": [
           "BAA00021",
           "BAA00022"
-        ],
-        "note": "Không tính vào điểm TB, tính vào TC tích lũy"
+        ]
       },
       "GENERAL_DEFENSE": {
         "name": "Giáo dục quốc phòng – An ninh",
         "credits": 4,
         "mandatory": true,
+        "note": "Không tính vào điểm TB, tính vào TC tích lũy",
         "courses": [
-          "BAA00101",
-          "BAA00102",
-          "BAA00103",
-          "BAA00104",
-          "BAA00003",
-          "BAA00004",
-          "BAA00005",
-          "BAA00006",
-          "BAA00007",
           "BAA00030"
-        ],
-        "note": "Không tính vào điểm TB, tính vào TC tích lũy"
+        ]
       }
     }
   },
@@ -141,42 +146,55 @@
       "CSC11120",
       "CSC15003",
       "CSC15005",
-      "CSC13005",
-      "CSC13007",
-      "CSC13009",
-      "CSC13001",
-      "CSC13101",
-      "CSC13102",
-      "CSC13103",
-      "CSC13107",
-      "CSC13117",
-      "CSC18001",
-      "CSC18101",
-      "CSC18102",
-      "CSC18103",
-      "CSC18104",
-      "CSC14001",
-      "CSC14002",
-      "CSC14006",
-      "CSC14008",
-      "CSC14105",
       "CSC14112",
       "CSC14113",
+      "CSC14117",
       "CSC14007",
+      "CSC15002",
+      "CSC15004",
+      "CSC15006",
+      "CSC15007",
       "CSC15009",
+      "CSC15011",
+      "CSC15012",
       "CSC15109",
+      "CSC15010",
       "CSC15102",
+      "CSC15107",
       "CSC15108",
       "CSC16001",
       "CSC16002",
+      "CSC16003",
+      "CSC16004",
+      "CSC16005",
       "CSC16101",
       "CSC16102",
       "CSC16105",
+      "CSC16106",
+      "CSC16107",
+      "CSC16109",
       "CSC16113",
       "CSC16114",
       "CSC10108",
+      "CSC14119",
+      "CSC17001",
+      "CSC17104",
       "CSC17102",
-      "CSC17103"
+      "CSC17103",
+      "CSC17106",
+      "CSC11111",
+      "CSC11112",
+      "CSC11119",
+      "CSC11114",
+      "CSC12112",
+      "CSC12113",
+      "CSC13119",
+      "CSC13120",
+      "CSC13121",
+      "CSC13122",
+      "CSC12002",
+      "CSC12003",
+      "CSC12004"
     ]
   },
   "MAJOR_IT": {
@@ -196,26 +214,24 @@
       }
     },
     "courses": [
-      "CSC12003",
-      "CSC12005",
-      "CSC12105",
-      "CSC17106",
-      "CSC13006",
-      "CSC13008",
-      "CSC13010",
-      "CSC13112",
-      "CSC14101",
-      "CSC14111",
-      "CSC14120",
-      "CSC14117",
-      "CSC14118",
       "CSC11114",
       "CSC12112",
       "CSC12113",
       "CSC13119",
       "CSC13120",
       "CSC13121",
-      "CSC13122"
+      "CSC13122",
+      "CSC17001",
+      "CSC17104",
+      "CSC15107",
+      "CSC15012",
+      "CSC15002",
+      "CSC15010",
+      "CSC12001",
+      "CSC16003",
+      "CSC16106",
+      "CSC16107",
+      "CSC16109"
     ]
   },
   "GRADUATION": {
@@ -225,23 +241,32 @@
       {
         "type": "THESIS",
         "credits": 10,
-        "course_ids": [
+        "courses": [
           "CSC10251"
         ]
       },
       {
         "type": "INTERNSHIP",
         "credits": 10,
-        "course_ids": [
+        "courses": [
           "CSC10252"
         ]
       },
       {
         "type": "PROJECT",
         "credits": 10,
-        "course_ids": [
+        "courses": [
           "CSC10204",
-          "CSC1xxxx"
+          "CSC11111",
+          "CSC11112",
+          "CSC11119",
+          "CSC10202",
+          "CSC10203",
+          "CSC13123",
+          "CSC13116",
+          "CSC16110",
+          "CSC16111",
+          "CSC16112"
         ]
       }
     ]

@@ -1,7 +1,7 @@
 import { AUX_DATA } from '../Utils.js'
 
 // --- CẤU HÌNH MENU ---
-const SIDEBAR_CONFIG = [
+export const SIDEBAR_CONFIG = [
     {
         category: "Chính",
         items: [
@@ -218,7 +218,7 @@ export function renderNewUI(courses) {
 }
 
 // --- HÀM 2: VẼ CARD MÔN HỌC (1 DÒNG) ---
-function renderCourseCard(course) {
+export function renderCourseCard(course) {
     const isSelected = SELECTED_COURSES.has(course.id);
     
     // Tín chỉ Fallback
@@ -337,7 +337,7 @@ window.filterCourses = () => {
 
 // Các hàm phụ trợ khác (formatCategoryName, toggleNewRow, updateHeaderInfo, openModal...)
 // Bạn giữ nguyên như cũ.
-function formatCategoryName(key) {
+export function formatCategoryName(key) {
     const map = {
         "GENERAL_EDUCATION": "Giáo dục Đại cương",
         "FOUNDATION": "Cơ sở Nhóm ngành",
@@ -362,55 +362,6 @@ window.toggleNewRow = (id) => {
         document.getElementById(`row-${id}`).querySelector('.border').classList.remove('ring-1', 'ring-[#004A98]', 'bg-blue-50/30');
     }
     updateBasketUI();
-}
-
-// --- 4. SMART FILTER (LỌC CẢ NHÓM NẾU RỖNG) ---
-window.filterCourses = () => {
-    const key = document.getElementById('inp-search').value.toLowerCase().trim();
-    
-    // BƯỚC 1: Lọc từng dòng môn học (Ẩn/Hiện môn)
-    const rows = document.querySelectorAll('.course-row');
-    rows.forEach(row => {
-        // Lấy mã môn và tên môn từ HTML và data-attribute
-        const codeText = row.querySelector('.text-gray-900.font-semibold') 
-            ? row.querySelector('.text-gray-900.font-semibold').innerText.toLowerCase() 
-            : "";
-        const nameText = (row.dataset.name || "").toLowerCase();
-        
-        const fullText = codeText + " " + nameText;
-
-        if (fullText.includes(key)) {
-            row.classList.remove('hidden'); 
-            // Xóa inline style để nó nhận lại display flex/block từ CSS gốc
-            row.style.removeProperty('display'); 
-        } else {
-            row.classList.add('hidden');
-            // Thêm display none cứng để đảm bảo ẩn tuyệt đối
-            row.style.display = 'none'; 
-        }
-    });
-
-    // BƯỚC 2: Xử lý các Nhóm (Ẩn nhóm cha nếu không còn con nào hiện)
-    const groups = document.querySelectorAll('.filterable-group');
-    
-    // Mẹo: Duyệt ngược mảng (từ dưới lên) không quá quan trọng ở đây 
-    // vì ta dùng querySelector kiểm tra sâu (deep check).
-    
-    groups.forEach(group => {
-        // Câu lệnh "Thần thánh": Tìm xem bên trong nhóm này (kể cả con, cháu, chắt...)
-        // có thằng .course-row nào KHÔNG CÓ class 'hidden' hay không?
-        const hasVisibleCourse = group.querySelector('.course-row:not(.hidden)');
-
-        if (hasVisibleCourse) {
-            // Nếu còn ít nhất 1 môn -> Hiện nhóm
-            group.classList.remove('hidden');
-            group.style.removeProperty('display');
-        } else {
-            // Nếu không còn môn nào -> Ẩn nhóm
-            group.classList.add('hidden');
-            group.style.display = 'none';
-        }
-    });
 }
 
 // --- 2. HÀM MỞ MODAL THÔNG TIN (INFO) ---
@@ -554,7 +505,7 @@ window.openPrereqModal = (courseId) => {
 }
 
 // --- HÀM UTILS: HIỂN THỊ OVERLAY ---
-function showModalOverlay(innerHTML) {
+export function showModalOverlay(innerHTML) {
     // Xóa modal cũ nếu có
     const old = document.getElementById('custom-modal-overlay');
     if (old) old.remove();
@@ -578,7 +529,7 @@ window.closeModal = () => {
 }
 
 
-function updateBasketUI() {
+export function updateBasketUI() {
     const list = document.getElementById('basket-list');
     const countEl = document.getElementById('basket-count');
     const credEl = document.getElementById('total-credits');
@@ -613,7 +564,7 @@ function updateBasketUI() {
     prog.style.width = Math.min((totalCred/24)*100, 100) + '%';
 }
 
-function updateHeaderInfo() {
+export function updateHeaderInfo() {
     const raw = localStorage.getItem('student_db_full');
     if (raw) {
         try {
@@ -650,28 +601,6 @@ window.switchViewMode = (mode) => {
         btnSel.classList.add('border-transparent', 'text-gray-600');
     }
 }
-
-// Hàm Filter Search
-window.filterCourses = () => {
-    const key = document.getElementById('inp-search').value.toLowerCase();
-    document.querySelectorAll('.course-row').forEach(row => {
-        const text = row.innerText.toLowerCase() + " " + row.dataset.name;
-        row.style.display = text.includes(key) ? 'block' : 'none';
-    });
-}
-
-
-
-
-
-
-
-
-
-
-
-
-/// Render dữ liệu
 
 
 // --- HÀM CẬP NHẬT HEADER (GỌI KHI LOAD TRANG) ---
@@ -720,7 +649,7 @@ export function updateHeaderUI() {
 }
 
 // --- HÀM TÍNH HỌC KỲ TỰ ĐỘNG ---
-function updateSemesterInfo() {
+export function updateSemesterInfo() {
     const elSemester = document.getElementById('header-semester');
     if (!elSemester) return;
 
@@ -747,7 +676,7 @@ function updateSemesterInfo() {
 }
 
 // --- HÀM XỬ LÝ THÔNG BÁO ---
-function updateNotificationCount() {
+export function updateNotificationCount() {
     const elCount = document.getElementById('header-notif-count');
     if (!elCount) return;
 
@@ -775,4 +704,101 @@ if (!window.clearAppCache) {
             window.location.reload();
         }
     };
+}
+
+
+
+
+// --- BỘ CÔNG CỤ ĐIỀN DỮ LIỆU (HELPER) ---
+
+/**
+ * 1. Hàm điền Văn bản (Text)
+ * Dùng cho: Tên, MSSV, Khoa, Lớp
+ * @param {string} elementId - ID của thẻ HTML (ví dụ: 'user-name')
+ * @param {string} value - Giá trị muốn điền (ví dụ: 'Nguyễn Văn A')
+ */
+export function setText(elementId, value) {
+    const el = document.getElementById(elementId);
+    if (el) {
+        // Nếu value rỗng hoặc null thì điền "..." nhìn cho đẹp
+        el.innerText = value || "..."; 
+    } else {
+        console.warn(`⚠️ Không tìm thấy thẻ có ID: "${elementId}" để điền text.`);
+    }
+}
+
+/**
+ * 2. Hàm điền Ảnh (Image Source)
+ * Dùng cho: Avatar, Banner
+ * @param {string} elementId - ID của thẻ <img>
+ * @param {string} url - Link ảnh
+ */
+export function setImage(elementId, url) {
+    const el = document.getElementById(elementId);
+    if (el && el.tagName === 'IMG') {
+        // Nếu không có url, dùng ảnh mặc định (bạn tự thay link nhé)
+        el.src = url || './assets/default-avatar.png';
+    }
+}
+
+/**
+ * 3. Hàm điền HTML (Inner HTML)
+ * Dùng cho: Những chỗ cần in đậm, xuống dòng
+ */
+export function setHTML(elementId, htmlString) {
+    const el = document.getElementById(elementId);
+    if (el) {
+        el.innerHTML = htmlString || "";
+    }
+}
+
+
+// --- HÀM TỰ ĐỘNG ĐIỀN THÔNG TIN SINH VIÊN ---
+
+export function fillStudentProfile() {
+    console.log("👤 Đang điền thông tin sinh viên...");
+
+    // 1. Mò vào kho lấy dữ liệu
+    const rawData = localStorage.getItem('student_db_full');
+    
+    if (!rawData) {
+        console.warn("⚠️ Chưa có dữ liệu sinh viên trong LocalStorage!");
+        setText('header-user-name', 'Chưa đăng nhập');
+        setText('header-user-mssv', '---');
+        return;
+    }
+
+    try {
+        const data = JSON.parse(rawData);
+        
+        // 2. Phân tích cấu trúc dữ liệu (Vì Portal trả về hơi lằng nhằng)
+        // Ta ưu tiên tìm trong data.info trước, nếu không có thì tìm ở ngoài
+        const info = data.info || data; 
+
+        const name = info.display_name || info.name || "Sinh viên";
+        const mssv = info.student_id || info.id || "Chưa có MSSV";
+        const image = info.image || null; // Ảnh (nếu có)
+
+        // 3. GỌI CÁC HÀM HELPER ĐỂ ĐIỀN (Thay ID dưới đây bằng ID thật trong HTML của bạn)
+        
+        // -> Điền Tên
+        setText('header-user-name', name); 
+        setText('profile-name', name); // Nếu có trang profile riêng
+
+        // -> Điền MSSV
+        setText('header-user-mssv', mssv);
+        setText('profile-mssv', mssv);
+
+        // -> Điền Avatar (Lấy chữ cái đầu nếu không có ảnh)
+        const avatarEl = document.getElementById('header-avatar-text');
+        if (avatarEl) {
+            // Lấy tên cuối cùng (Ví dụ: "Hà Đăng Khôi" -> lấy chữ "K")
+            const words = name.trim().split(' ');
+            const lastWord = words[words.length - 1];
+            avatarEl.innerText = lastWord.charAt(0).toUpperCase();
+        }
+
+    } catch (e) {
+        console.error("❌ Lỗi khi đọc dữ liệu sinh viên:", e);
+    }
 }

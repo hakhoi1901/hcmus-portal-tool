@@ -4,8 +4,10 @@
  */
 
 import { CourseRecommender } from './tkb/Recommender.js';
-import { renderNewUI, updateHeaderUI } from './render/NewUI.js';
+import { renderNewUI, updateHeaderUI, fillStudentProfile  } from './render/NewUI.js';
 import { logStatus, logSuccess, logWarning, logAlgo, logData, logError} from './styleLog.js';
+
+
 
 // Dữ liệu phụ trợ (Metadata) dùng chung
 export let AUX_DATA = {
@@ -83,6 +85,8 @@ export async function initApp() {
         logSuccess(`Main: Đã nhận ${payload.length} lớp mở.`);
         processPortalData(payload, null);
     }
+
+    fillStudentProfile();
 }, false);
 }
 
@@ -112,6 +116,33 @@ export function processPortalData(rawCourses, rawStudent) {
         renderNewUI(GLOBAL_COURSE_DB);
         alert(`✅ Đã cập nhật ${processedDB.length} môn học vào hệ thống!`);
     }
+}
+
+function decodeScheduleMask(parts) {
+    // Logic decode mask ngược lại (dùng cho render table)
+    let slots = [];
+    for (let i = 0; i < 4 && i < parts.length; i++) {
+        for (let bit = 0; bit < 32; bit++) {
+            if ((parts[i] & (1 << bit)) !== 0) {
+                let totalBit = i * 32 + bit;
+                let day = Math.floor(totalBit / 10);
+                let period = totalBit % 10;
+                if (day < 7) slots.push({ day, period });
+            }
+        }
+    }
+    return slots;
+}
+
+function getColorForSubject(str) {
+    let hash = 0;
+    for (let i = 0; i < str.length; i++) { hash = str.charCodeAt(i) + ((hash << 5) - hash); }
+    const colors = [
+        "bg-blue-50 border-blue-500 text-blue-900", "bg-emerald-50 border-emerald-500 text-emerald-900",
+        "bg-violet-50 border-violet-500 text-violet-900", "bg-amber-50 border-amber-500 text-amber-900",
+        "bg-rose-50 border-rose-500 text-rose-900", "bg-cyan-50 border-cyan-500 text-cyan-900"
+    ];
+    return colors[Math.abs(hash) % colors.length];
 }
 
 // Tải Metadata (JSON tĩnh)

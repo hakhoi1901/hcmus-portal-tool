@@ -15,7 +15,7 @@ export async function setupBookmarklet() {
         btn.setAttribute('href', href);
         
         // Khôi phục trạng thái
-        btn.innerText = "Kéo tôi lên thanh Bookmark";
+        btn.innerText = "Bookmark";
         btn.style.opacity = "1";
         
         // Chặn click chuột trái (vì bookmarklet phải kéo thả)

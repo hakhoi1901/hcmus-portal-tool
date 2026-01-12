@@ -6,8 +6,7 @@
 import { setupBookmarklet, openPortal } from './PortalHandler.js';
 import { initApp, processPortalData } from './Utils.js';
 import { onNutBamXepLich } from './Logic.js';
-import { renderNewUI, toggleNewRow, filterCourses, openInfoModal, openPrereqModal, closeModal } from './render/NewUI.js';
-import { console } from './styleLog.js';
+import { renderNewUI, renderSidebar, updateHeaderUI } from './render/NewUI.js';
 
 // --- 1. SETUP BAN ĐẦU ---
 setupBookmarklet();
@@ -15,7 +14,7 @@ setupBookmarklet();
 // Export các hàm Global cần thiết cho HTML (onClick events)
 Object.assign(window, {
     openPortal,         // Mở trang Portal
-    onNutBamXepLich,    // Bấm nút xếp lịch
+    onNutBamXepLich,
     toggleNewRow,       // Tick chọn môn
     filterCourses,      // Tìm kiếm môn
     openInfoModal,      // Popup Info
@@ -54,3 +53,20 @@ window.onload = () => {
     initApp();
 };
 
+// --- QUAN TRỌNG: Gán hàm vào window để HTML gọi được ---
+window.onNutBamXepLich = onNutBamXepLich;
+
+// Gắn hàm render vào window
+window.renderCourseList = (courses) => {
+    renderNewUI(courses);
+    updateHeaderUI();
+};
+
+// Khởi động
+document.addEventListener('DOMContentLoaded', () => {
+    // 1. Vẽ Sidebar ngay lập tức
+    renderSidebar('roadmap');
+    updateHeaderUI(); 
+    // 2. Load dữ liệu logic
+    initApp(); 
+});
