@@ -28,7 +28,7 @@ export function runScheduleSolver(rawData, userWants, fixedClasses, sessionPref)
                 selectedCourses.push(course);
             }
         } else {
-            console.warn(`⚠️ Scheduler: Không tìm thấy môn [${cleanID}] trong DB.`);
+            console.warn('⚠️ Scheduler: Không tìm thấy môn [${cleanID}] trong DB.');
         }
     });
 

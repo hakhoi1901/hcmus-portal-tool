@@ -1365,3 +1365,85 @@ export function removeSavedSchedule(id) {
 //     });
 //     document.body.appendChild(overlay);
 // }
+
+
+// js/render/NewUI.js
+
+// --- HÀM 3: RENDER LỊCH THI (TỪ STORAGE) ---
+export function renderExamSchedule() {
+    const container = document.getElementById(' aaaaaaaaaaaaaaaaaaaaaaaaaaaa ');
+    if (!container) return;
+
+    // 1. Lấy dữ liệu từ LocalStorage
+    const rawStudent = localStorage.getItem('student_db_full');
+    if (!rawStudent) {
+        container.innerHTML = '<p class="text-gray-500 p-6">Chưa có dữ liệu lịch thi. Vui lòng chạy Tool lấy dữ liệu.</p>';
+        return;
+    }
+
+    try {
+        const studentData = JSON.parse(rawStudent);
+        const exams = studentData.exams;
+
+        if (!exams || (!exams.midterm && !exams.final)) {
+            container.innerHTML = '<p class="text-gray-500 p-6">Không tìm thấy lịch thi nào.</p>';
+            return;
+        }
+
+        // 2. Hàm vẽ bảng con
+        const renderTable = (list, title, colorClass) => {
+            if (!list || list.length === 0) return '';
+            
+            let rows = list.map((item, idx) => `
+                <tr class="hover:bg-gray-50 transition-colors border-b border-gray-100 last:border-0">
+                    <td class="px-4 py-3 text-center text-gray-500 font-medium">${idx + 1}</td>
+                    <td class="px-4 py-3 font-bold text-[#004A98]">${item.id}</td>
+                    <td class="px-4 py-3 font-medium text-gray-900">${item.name}</td>
+                    <td class="px-4 py-3 text-center whitespace-nowrap">
+                        <span class="bg-gray-100 text-gray-800 py-1 px-2 rounded font-mono text-xs">${item.date}</span>
+                    </td>
+                    <td class="px-4 py-3 text-center font-bold text-gray-700">${item.time}</td>
+                    <td class="px-4 py-3 text-center">
+                        <span class="${colorClass} py-1 px-3 rounded-full text-xs font-bold">${item.room}</span>
+                    </td>
+                </tr>
+            `).join('');
+
+            return `
+                <div class="mb-8 animate-fadeIn">
+                    <h3 class="text-xl font-bold text-gray-800 mb-4 flex items-center gap-2">
+                        ${title} 
+                        <span class="bg-gray-200 text-gray-600 text-xs px-2 py-1 rounded-full">${list.length} môn</span>
+                    </h3>
+                    <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+                        <table class="w-full text-sm text-left">
+                            <thead class="bg-gray-50 text-gray-500 uppercase text-xs font-semibold">
+                                <tr>
+                                    <th class="px-4 py-3 text-center w-12">STT</th>
+                                    <th class="px-4 py-3 w-32">Mã HP</th>
+                                    <th class="px-4 py-3">Tên học phần</th>
+                                    <th class="px-4 py-3 text-center w-32">Ngày thi</th>
+                                    <th class="px-4 py-3 text-center w-24">Giờ</th>
+                                    <th class="px-4 py-3 text-center w-24">Phòng</th>
+                                </tr>
+                            </thead>
+                            <tbody>${rows}</tbody>
+                        </table>
+                    </div>
+                </div>
+            `;
+        };
+
+        // 3. Ghép HTML
+        let html = '<div class="p-6 max-w-6xl mx-auto">';
+        html += renderTable(exams.midterm, "📅 Lịch thi Giữa kỳ", "bg-blue-100 text-blue-800");
+        html += renderTable(exams.final, "🏁 Lịch thi Cuối kỳ", "bg-red-100 text-red-800");
+        html += '</div>';
+
+        container.innerHTML = html;
+
+    } catch (e) {
+        console.error("Lỗi render lịch thi:", e);
+        container.innerHTML = '<p class="text-red-500 p-6">Lỗi hiển thị dữ liệu lịch thi.</p>';
+    }
+}

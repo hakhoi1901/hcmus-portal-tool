@@ -12,7 +12,8 @@ import {
     openSavedSchedulesModal, 
     loadSavedSchedule, 
     removeSavedSchedule,
-    renderScheduleResults
+    renderScheduleResults,
+    renderExamSchedule
 } from './render/NewUI.js'
 
 // --- 1. SETUP BAN ĐẦU ---
@@ -31,7 +32,8 @@ Object.assign(window, {
     openSavedSchedulesModal, 
     loadSavedSchedule, 
     removeSavedSchedule,
-    renderScheduleResults
+    renderScheduleResults,
+    renderExamSchedule
 });
 
 // Gắn sự kiện cho nút tĩnh (nếu có)

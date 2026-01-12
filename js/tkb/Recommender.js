@@ -88,7 +88,7 @@ export class CourseRecommender {
 
             const score = parseFloat(scoreRaw);
             if (!isNaN(score)) {
-                if (score >= 9.0) {
+                if (score >= 5.0) {
                     passed.add(cid);
                     passedCreditsMap.set(cid, credits);
                 } else {
@@ -261,7 +261,7 @@ export class CourseRecommender {
             }
         });
 
-        logSuccess(`Recommender: Đề xuất ${finalOutput.length} môn học.`);
+        logSuccess('Recommender: Đề xuất ${finalOutput.length} môn học.');
         return finalOutput;
     }
 }

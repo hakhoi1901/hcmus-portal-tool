@@ -4,7 +4,7 @@
  */
 
 import { CourseRecommender } from './tkb/Recommender.js';
-import { renderNewUI, updateHeaderUI, fillStudentProfile  } from './render/NewUI.js';
+import { renderNewUI, updateHeaderInfo, fillStudentProfile  } from './render/NewUI.js';
 import { logStatus, logSuccess, logWarning, logAlgo, logData, logError} from './styleLog.js';
 
 
@@ -70,8 +70,11 @@ export function decodeScheduleMask(parts) {
 // lấy dữ liệu sinh viên từ LocalStorage
 function getStudentData() {
     try {
-        return JSON.parse(localStorage.getItem('student_db_full'));
-    } catch (e) { return null; }
+        const raw = localStorage.getItem('student_db_full');
+        return raw ? JSON.parse(raw) : null;
+    } catch (e) {
+        return null;
+    }
 }
 
 // Tải Metadata - JSON
@@ -259,73 +262,78 @@ export function processPortalData(rawCourses, rawStudent) {
 
 // Khởi tạo ứng dụng
 export async function initApp() {
-    logStatus("Utils: Đang khởi động ứng dụng...");
+    console.log("🚀 Utils: Đang khởi động ứng dụng...");
 
-    // B1: Check trạng thái giao diện (Login vs Dashboard)
-    checkLocalStorageState();
-
-    // B2: Tải dữ liệu phụ trợ (Metadata)
+    // B1: Tải dữ liệu phụ trợ (Metadata: Tên môn đầy đủ, Tín chỉ, Tiên quyết...)
     await loadAuxiliaryData();
 
-    // B3: Load dữ liệu chính (Lớp mở + Sinh viên)
-    const courses = await loadCourseData();
-    const studentData = getStudentData();
+    // B2: Load dữ liệu từ LocalStorage (Cache cũ)
+    const storedCourses = localStorage.getItem('course_db_offline');
+    const storedStudent = localStorage.getItem('student_db_full');
 
-    if(!courses || courses.length === 0) {
-        logWarning('Utils: Không có lớp mở nào được tải.');
+    let courses = [];
+    let studentData = null;
+
+    // Parse Dữ liệu Sinh viên
+    if (storedStudent) {
+        try {
+            studentData = JSON.parse(storedStudent);
+            console.log("👤 Đã tải dữ liệu sinh viên từ Cache.");
+        } catch (e) { console.error("Lỗi đọc cache SV:", e); }
     } else {
-        logSuccess(`Utils: Đã tải xong ${courses.length} lớp mở.`);
-        logData(courses);
+        console.warn("⚠️ Chưa có dữ liệu sinh viên (Cần chạy Bookmarklet).");
     }
 
-    if (!studentData || Object.keys(studentData).length === 0) {
-        logWarning('Utils: Không có dữ liệu sinh viên được tải.');
+    // Parse Dữ liệu Môn học
+    if (storedCourses) {
+        try {
+            courses = JSON.parse(storedCourses);
+            console.log(`📚 Đã tải ${courses.length} môn học từ Cache.`);
+        } catch (e) { console.error("Lỗi đọc cache Môn học:", e); }
     } else {
-        logSuccess('Utils: Đã tải xong dữ liệu sinh viên.'); 
-        logData(studentData)
+        // Nếu không có cache, thử load file JSON mặc định (nếu bạn có)
+        courses = await loadCourseData(); 
     }
 
-    // B3: Chạy Recommender & Render
-    if (courses.length > 0) {
-        // 3. Chỉ chạy gợi ý KHI VÀ CHỈ KHI có dữ liệu sinh viên
+    // B3: Logic Kết hợp & Hiển thị
+    if (courses && courses.length > 0) {
         if (studentData) {
-            logAlgo("Đang chạy thuật toán gợi ý môn học...");
-            // Biến đổi danh sách: Gán nhãn + Sắp xếp lại
+            // Nếu có cả 2 -> Chạy thuật toán gợi ý tối ưu
             GLOBAL_COURSE_DB = applyRecommendation(courses, studentData);
         } else {
-            // Nếu không có SV -> Dùng danh sách gốc (từ file hoặc cache thô)
+            // Nếu chỉ có môn học -> Hiển thị thô
             GLOBAL_COURSE_DB = courses;
         }
-
-        logSuccess("Utils: Đã hoàn tất gợi ý và sắp xếp môn học.");
         
-        // 4. Vẽ ra màn hình
+        // Render UI
         renderNewUI(GLOBAL_COURSE_DB);
     } else {
-        logWarning("Utils: Chưa có dữ liệu lớp học nào.");
+        console.warn("⚠️ Không có dữ liệu môn học nào để hiển thị.");
+        // Có thể hiển thị màn hình hướng dẫn "Vui lòng chạy Tool lấy dữ liệu"
     }
-
     window.addEventListener("message", (event) => {
-    // Security check
-    if (!event.data || !event.data.type) return;
+        // Security check
+        if (!event.data || !event.data.type) return;
 
-    const { type, payload } = event.data;
+        const { type, payload } = event.data;
 
-    // Case A: Dữ liệu Sinh Viên (Điểm, Lịch thi...)
-    if (type === 'PORTAL_DATA') {
-        logStatus("Main: Đã nhận dữ liệu Sinh viên.");
-        // Lưu và xử lý bên Utils (để đồng bộ logic)
-        processPortalData(null, payload); 
-    }
+        // Case A: Dữ liệu Sinh Viên (Điểm, Lịch thi...)
+        if (type === 'PORTAL_DATA') {
+            logStatus("Main: Đã nhận dữ liệu Sinh viên.");
+            // Lưu và xử lý bên Utils (để đồng bộ logic)
+            processPortalData(null, payload); 
+        }
 
-    // Case B: Dữ liệu Lớp Mở (Quan trọng cho xếp lịch)
-    if (type === 'OPEN_CLASS_DATA') {
-        logSuccess(`Main: Đã nhận ${payload.length} lớp mở.`);
-        processPortalData(payload, null);
-    }
+        // Case B: Dữ liệu Lớp Mở (Quan trọng cho xếp lịch)
+        if (type === 'OPEN_CLASS_DATA') {
+            logSuccess(`Main: Đã nhận ${payload.length} lớp mở.`);
+            processPortalData(payload, null);
+        }
 
-    fillStudentProfile();
-}, false);
+        fillStudentProfile();
+    }, false);
+    // Cập nhật Header lần cuối
+    updateHeaderInfo();
 }
 
 
