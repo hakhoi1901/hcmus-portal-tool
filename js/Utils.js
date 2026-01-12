@@ -206,8 +206,6 @@ export function calculateTuition(courseId, defaultCredits) {
     // 2. Xác định Số tín chỉ học phí (Billing Credits)
     let billingCredits = defaultCredits || 0;
 
-    let tuition_log = '';
-
     // Tìm thông tin chi tiết môn học để lấy số tiết
     if (AUX_DATA.allCourses) {
         const meta = AUX_DATA.allCourses.find(c => c.course_id === courseId);
@@ -224,14 +222,9 @@ export function calculateTuition(courseId, defaultCredits) {
             if (totalHours > 0) {
                 // Công thức: Tổng tiết / `15
                 billingCredits = totalHours / 15;
-                tuition_log += `Môn ${courseId}: ${lt}LT + ${th}TH + ${bt}BT = ${totalHours} tiết -> ${billingCredits} TC học phí\n`
             }
         }
     }
-
-    logAlgo("Đang chạy thuật toán tính học phí...")
-    console.log(tuition_log);
-
     // 3. Tính tiền
     return billingCredits * pricePerCredit;
 }

@@ -545,12 +545,12 @@ export function updateBasketUI() {
     
     let totalCred = 0;
     let totalMoney = 0; // Biến tính tổng tiền mới
-    
+    let tuition_log = '';
+
     if (SELECTED_COURSES.size === 0) {
         list.innerHTML = `<div class="text-center py-12"><p class="text-gray-400 text-sm">Chưa có môn nào</p></div>`;
     } else {
         SELECTED_COURSES.forEach(cid => {
-            // ... (Logic tìm môn & Fallback giữ nguyên như cũ) ...
             let c = GLOBAL_COURSES_REF.find(x => x.id === cid);
             let name = c ? c.name : cid;
             let credits = c ? c.credits : 0;
@@ -567,9 +567,32 @@ export function updateBasketUI() {
                 const credNum = parseInt(credits) || 0;
                 totalCred += credNum;
 
+                let billingCredits = 0;
+
+                // Tìm thông tin chi tiết môn học để lấy số tiết
+                if (AUX_DATA.allCourses) {
+                    const meta = AUX_DATA.allCourses.find(c => c.course_id === cid);
+                    
+                    if (meta) {
+                        // Lấy số tiết, đảm bảo không bị undefined
+                        const lt = parseInt(meta.theory_hours) || 0;   // Lý thuyết
+                        const th = parseInt(meta.lab_hours) || 0;      // Thực hành/Thí nghiệm
+                        const bt = parseInt(meta.exercise_hours) || 0; // Bài tập
+
+                        const totalHours = lt + th + bt;
+
+                        // Nếu có dữ liệu số tiết > 0 thì tính theo công thức
+                        if (totalHours > 0) {
+                            // Công thức: Tổng tiết / `15
+                            billingCredits = totalHours / 15;
+                        }
+                    }
+                }
+
                 // --- TÍNH TIỀN CHO MÔN NÀY ---
                 const courseFee = calculateTuition(cid, credNum);
                 totalMoney += courseFee;
+                tuition_log = `Môn ${cid}: ${credits} tín chỉ - ${billingCredits} tín chỉ HP - Đơn giá: ${courseFee/billingCredits}đ/TC \n \tTổng: ${courseFee.toLocaleString('vi-VN')} đ\n`;
                 // -----------------------------
 
                 // Format tiền để hiển thị trong từng dòng (Optional)
@@ -589,6 +612,8 @@ export function updateBasketUI() {
             }
         });
     }
+
+    console.log(tuition_log);
 
     // Cập nhật UI Tổng
     if(countEl) countEl.innerText = SELECTED_COURSES.size;
@@ -1032,7 +1057,15 @@ function getColorForSubject(str) {
     const colors = [
         "bg-blue-50 border-blue-500 text-blue-900", "bg-emerald-50 border-emerald-500 text-emerald-900",
         "bg-violet-50 border-violet-500 text-violet-900", "bg-amber-50 border-amber-500 text-amber-900",
-        "bg-rose-50 border-rose-500 text-rose-900", "bg-cyan-50 border-cyan-500 text-cyan-900"
+        "bg-rose-50 border-rose-500 text-rose-900", "bg-cyan-50 border-cyan-500 text-cyan-900",
+        "bg-indigo-50 border-indigo-500 text-indigo-900", "bg-fuchsia-50 border-fuchsia-500 text-fuchsia-900",
+        "bg-lime-50 border-lime-500 text-lime-900", "bg-orange-50 border-orange-500 text-orange-900",
+        "bg-pink-50 border-pink-500 text-pink-900", "bg-sky-50 border-sky-500 text-sky-900",
+        "bg-yellow-50 border-yellow-500 text-yellow-900", "bg-gray-50 border-gray-500 text-gray-900",
+        "bg-red-50 border-red-500 text-red-900", "bg-green-50 border-green-500 text-green-900",
+        "bg-purple-50 border-purple-500 text-purple-900", "bg-teal-50 border-teal-500 text-teal-900",
+        "bg-zinc-50 border-zinc-500 text-zinc-900", "bg-slate-50 border-slate-500 text-slate-900",
+        "bg-neutral-50 border-neutral-500 text-neutral-900", "bg-stone-50 border-stone-500 text-stone-900"
     ];
     return colors[Math.abs(hash) % colors.length];
 }
