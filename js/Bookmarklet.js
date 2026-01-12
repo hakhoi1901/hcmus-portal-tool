@@ -277,18 +277,65 @@
         return parseHTML(text); // Trả về Doc ảo mới
     }
 
+    // Hàm lấy trang điểm "Tất cả các kỳ"
+    async function getFullGradesPage() {
+        const url = CONFIG.URL_DIEM;
+        let doc = await fetchVirtualPage(url);
+
+        // Kiểm tra xem đã hiển thị tất cả chưa
+        // Dấu hiệu: Dropdown Năm học có value = "" hoặc "0" hoặc Text="--Tất cả--"
+        // (Tùy Portal, thường chọn Tất cả thì value gửi đi là 0 hoặc rỗng)
+        
+        // Cách chắc ăn nhất: Gửi luôn request POST chọn "Tất cả"
+        // ID các control trên trang Xem Điểm (pid=211)
+        const viewState = doc.getElementById('__VIEWSTATE')?.value;
+        const viewStateGen = doc.getElementById('__VIEWSTATEGENERATOR')?.value;
+        const eventValidation = doc.getElementById('__EVENTVALIDATION')?.value;
+        
+        if (!viewState) return doc; // Không post được thì dùng tạm trang hiện tại
+
+        const formData = new URLSearchParams();
+        formData.append('__EVENTTARGET', '');
+        formData.append('__EVENTARGUMENT', '');
+        formData.append('__VIEWSTATE', viewState);
+        if(viewStateGen) formData.append('__VIEWSTATEGENERATOR', viewStateGen);
+        if(eventValidation) formData.append('__EVENTVALIDATION', eventValidation);
+
+        // Tham số quan trọng để lấy "Tất cả"
+        // ID này lấy từ Portal HCMUS thực tế
+        formData.append('ctl00$ContentPlaceHolder1$ctl00$cboNamHoc_gvDKHPLichThi$ob_CbocboNamHoc_gvDKHPLichThiTB', '--Tất cả--'); 
+        formData.append('ctl00$ContentPlaceHolder1$ctl00$cboNamHoc_gvDKHPLichThi', '0'); // Value = 0 thường là All
+        formData.append('ctl00$ContentPlaceHolder1$ctl00$cboHocKy_gvDKHPLichThi$ob_CbocboHocKy_gvDKHPLichThiTB', ''); // HK để trống
+        formData.append('ctl00$ContentPlaceHolder1$ctl00$cboHocKy_gvDKHPLichThi', '0'); 
+        formData.append('ctl00$ContentPlaceHolder1$ctl00$btnXemDiemThi', 'Xem Kết Quả Học Tập'); // Nút bấm
+
+        const res = await fetch(url, {
+            method: 'POST',
+            body: formData,
+            headers: { 'Content-Type': 'application/x-www-form-urlencoded' }
+        });
+        const text = await res.text();
+        return parseHTML(text);
+    }
+
     // === 3. MAIN RUNNER ===
     try {
-        // --- BƯỚC 1: LẤY DỮ LIỆU CƠ BẢN (Điểm + Học phí) ---
-        showLoading("Đang tải dữ liệu Sinh viên (1/3)...");
+        // --- BƯỚC 1: LẤY DỮ LIỆU CƠ BẢN (Điểm Full + Học phí) ---
+        showLoading("Đang tải Bảng điểm đầy đủ & Học phí (1/3)...");
         
-        // Chỉ lấy Điểm và Học phí trước (Bỏ Lịch thi ra để xử lý riêng)
-        const [docDiem, docHocPhi] = await Promise.all([
-            fetchVirtualPage(CONFIG.URL_DIEM),
+        // Chạy song song: Lấy Điểm (Full) và Học phí
+        const [docDiemFull, docHocPhi] = await Promise.all([
+            getFullGradesPage(),          // <--- Dùng hàm mới này thay vì fetchVirtualPage thường
             fetchVirtualPage(CONFIG.URL_HOCPHI)
         ]);
 
-        const gradeData = scrapeGrades(docDiem);
+        const gradeData = scrapeGrades(docDiemFull);
+        
+        // Validate nhẹ: Nếu ít điểm quá (ví dụ < 5 môn) thì cảnh báo nhẹ (optional)
+        if (gradeData.grades.length < 5) {
+            console.warn("⚠️ Số lượng môn học lấy được khá ít (" + gradeData.grades.length + "). Có thể chưa lấy được 'Tất cả'.");
+        }
+
         const tuitionData = scrapeBackgroundData(docHocPhi, 'TUITION');
 
         // --- BƯỚC 2: XỬ LÝ LỊCH THI (MỚI THÊM) ---
