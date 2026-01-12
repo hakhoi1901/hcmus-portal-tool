@@ -264,6 +264,9 @@ export function processPortalData(rawCourses, rawStudent) {
 export async function initApp() {
     console.log("🚀 Utils: Đang khởi động ứng dụng...");
 
+    // B1: Check trạng thái giao diện (Login vs Dashboard)
+    checkLocalStorageState();
+
     // B1: Tải dữ liệu phụ trợ (Metadata: Tên môn đầy đủ, Tín chỉ, Tiên quyết...)
     await loadAuxiliaryData();
 
@@ -311,6 +314,7 @@ export async function initApp() {
         console.warn("⚠️ Không có dữ liệu môn học nào để hiển thị.");
         // Có thể hiển thị màn hình hướng dẫn "Vui lòng chạy Tool lấy dữ liệu"
     }
+    
     window.addEventListener("message", (event) => {
         // Security check
         if (!event.data || !event.data.type) return;

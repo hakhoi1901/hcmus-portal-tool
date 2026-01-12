@@ -1,12 +1,14 @@
 (async function() {
     console.clear();
     
-    // === 1. CẤU HÌNH CƠ BẢN ===
-    const URLS = {
-        DIEM: "/SinhVien.aspx?pid=211",
-        LICHTHI: "/SinhVien.aspx?pid=212",
-        HOCPHI: "/SinhVien.aspx?pid=331",
-        LOPMO: "/SinhVien.aspx?pid=327"
+    // === 1. CẤU HÌNH ===
+    const CONFIG = {
+        URL_DIEM: "/SinhVien.aspx?pid=211",
+        URL_LICHTHI: "/SinhVien.aspx?pid=180",
+        URL_HOCPHI: "/SinhVien.aspx?pid=331",
+        URL_LOPMO: "/SinhVien.aspx?pid=327",
+        TARGET_YEAR: "25-26", // Năm học mong muốn
+        TARGET_SEM: "1"       // Học kỳ mong muốn
     };
 
     // UI: Hiển thị trạng thái loading lên màn hình hiện tại
@@ -28,114 +30,6 @@
 
     // Helper: Chuyển text HTML thành DOM ảo để query
     const parseHTML = (html) => new DOMParser().parseFromString(html, 'text/html');
-
-
-    // cam kết
-
-    function showPrivacyAndConfigModal() {
-        return new Promise((resolve, reject) => {
-            // Xóa modal cũ nếu có
-            document.getElementById('hcmus-tool-modal')?.remove();
-
-            const modal = document.createElement('div');
-            modal.id = 'hcmus-tool-modal';
-            modal.style.cssText = "position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:999999;display:flex;justify-content:center;align-items:center;font-family:'Segoe UI', sans-serif;";
-            
-            modal.innerHTML = `
-                <div style="background:#fff;width:500px;max-width:95%;border-radius:12px;box-shadow:0 10px 25px rgba(0,0,0,0.2);overflow:hidden;animation:slideDown 0.3s ease-out;">
-                    <div style="background:#004A98;padding:15px 20px;color:white;">
-                        <h3 style="margin:0;font-size:18px;font-weight:600;">Thu thập dữ liệu Portal</h3>
-                    </div>
-                    
-                    <div style="padding:20px;max-height:80vh;overflow-y:auto;">
-                        <div style="background:#f0f9ff;border-left:4px solid #004A98;padding:15px;margin-bottom:20px;font-size:13px;color:#333;line-height:1.6;border-radius:4px;">
-                            <strong style="color:#004A98;font-size:14px;display:block;margin-bottom:8px;">🛡️ Cam kết Bảo mật & Miễn trừ trách nhiệm:</strong>
-                            <ul style="margin:0;padding-left:20px;list-style-type:disc;">
-                                <li><strong>Lưu trữ cục bộ:</strong> Toàn bộ dữ liệu (Điểm, Lịch thi, MSSV) chỉ được xử lý trên trình duyệt và lưu vào <code>localStorage</code> trên chính thiết bị này.</li>
-                                <li><strong>Không thu thập:</strong> Chúng tôi cam kết <strong>hoàn toàn không</strong> có hành vi gửi, sao chép hay lưu trữ dữ liệu của bạn lên bất kỳ máy chủ nào.</li>
-                                <li><strong>Trách nhiệm:</strong> Người dùng tự chịu trách nhiệm bảo vệ thiết bị cá nhân. Chúng tôi không chịu trách nhiệm cho bất kỳ rò rỉ dữ liệu nào xuất phát từ phía người dùng (mất máy, cho người khác sử dụng máy để truy cập, v.v.).</li>
-                            </ul>
-                            <div style="margin-top:10px;font-style:italic;color:#555;border-top:1px solid #dae1e7;padding-top:8px;">
-                                Bằng việc nhấn "Đồng ý", bạn xác nhận đã hiểu rõ cơ chế hoạt động và chấp nhận các điều khoản trên.
-                            </div>
-                        </div>
-
-                        <div style="display:flex;flex-direction:column;gap:15px;">
-                            
-                            <div style="display:flex;gap:20px;">
-                                <label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-weight:500;">
-                                    <input type="checkbox" id="opt-info" checked disabled> Thông tin & Điểm
-                                </label>
-                                <label style="display:flex;align-items:center;gap:8px;cursor:pointer;">
-                                    <input type="checkbox" id="opt-tuition" checked> Học phí
-                                </label>
-                            </div>
-
-                            <hr style="border:0;border-top:1px solid #eee;margin:5px 0;">
-
-                            <div>
-                                <label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-weight:600;margin-bottom:8px;">
-                                    <input type="checkbox" id="opt-exam" checked onchange="document.getElementById('grp-exam').style.opacity = this.checked ? 1 : 0.5; document.getElementById('grp-exam').style.pointerEvents = this.checked ? 'auto' : 'none';"> 
-                                    Lấy Lịch Thi
-                                </label>
-                                <div id="grp-exam" style="display:flex;gap:10px;padding-left:24px;">
-                                    <input type="text" id="exam-year" value="25-26" placeholder="Năm (vd: 25-26)" style="width:100px;padding:6px;border:1px solid #ccc;border-radius:4px;">
-                                    <select id="exam-sem" style="padding:6px;border:1px solid #ccc;border-radius:4px;">
-                                        <option value="1">Học kỳ 1</option>
-                                        <option value="2">Học kỳ 2</option>
-                                        <option value="3">Học kỳ 3</option>
-                                    </select>
-                                </div>
-                            </div>
-
-                            <div>
-                                <label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-weight:600;margin-bottom:8px;">
-                                    <input type="checkbox" id="opt-class" checked onchange="document.getElementById('grp-class').style.opacity = this.checked ? 1 : 0.5; document.getElementById('grp-class').style.pointerEvents = this.checked ? 'auto' : 'none';"> 
-                                    Lấy Danh Sách Lớp Mở
-                                </label>
-                                <div id="grp-class" style="display:flex;gap:10px;padding-left:24px;">
-                                    <input type="text" id="class-year" value="25-26" placeholder="Năm (vd: 25-26)" style="width:100px;padding:6px;border:1px solid #ccc;border-radius:4px;">
-                                    <select id="class-sem" style="padding:6px;border:1px solid #ccc;border-radius:4px;">
-                                        <option value="1">Học kỳ 1</option>
-                                        <option value="2">Học kỳ 2</option>
-                                        <option value="3">Học kỳ 3</option>
-                                    </select>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div style="background:#f9fafb;padding:15px 20px;display:flex;justify-content:flex-end;gap:10px;border-top:1px solid #eee;">
-                        <button id="btn-cancel" style="padding:8px 16px;border:1px solid #ccc;background:white;border-radius:6px;cursor:pointer;font-weight:500;">Hủy</button>
-                        <button id="btn-agree" style="padding:8px 16px;border:none;background:#004A98;color:white;border-radius:6px;cursor:pointer;font-weight:500;box-shadow:0 2px 5px rgba(0,74,152,0.3);">Đồng ý & Bắt đầu</button>
-                    </div>
-                </div>
-                <style>@keyframes slideDown{from{opacity:0;transform:translateY(-20px)}to{opacity:1;transform:translateY(0)}}</style>
-            `;
-
-            document.body.appendChild(modal);
-
-            // Xử lý sự kiện
-            document.getElementById('btn-cancel').onclick = () => {
-                modal.remove();
-                reject("User cancelled");
-            };
-
-            document.getElementById('btn-agree').onclick = () => {
-                const config = {
-                    getTuition: document.getElementById('opt-tuition').checked,
-                    getExam: document.getElementById('opt-exam').checked,
-                    examYear: document.getElementById('exam-year').value,
-                    examSem: document.getElementById('exam-sem').value,
-                    getClass: document.getElementById('opt-class').checked,
-                    classYear: document.getElementById('class-year').value,
-                    classSem: document.getElementById('class-sem').value,
-                };
-                modal.remove();
-                resolve(config);
-            };
-        });
-    }
 
     // === 2. CÁC HÀM CÀO DỮ LIỆU (Đã sửa để nhận tham số 'doc') ===
 
@@ -223,6 +117,8 @@
 
                 return result;
             }
+
+            // ... (Giữ nguyên phần TUITION cũ của bạn ở đây) ...
             if (type === 'TUITION') {
                 const details = [];
                 doc.querySelectorAll('.dkhp-table tbody tr').forEach(row => {
@@ -241,6 +137,7 @@
 
         } catch (e) { 
             console.error("Lỗi cào dữ liệu background: ", e);
+            // Trả về cấu trúc an toàn để không bị crash code chính
             return type === 'EXAM' ? { midterm: [], final: [] } : { total: "0", details: [] }; 
         }
         return [];
@@ -347,14 +244,16 @@
         return parseHTML(text);
     }
 
-    // Hàm giả lập Submit Form để đổi học kỳ (Quan trọng)
-    async function postToGetSemester(url, originalDoc, elementIds, targetYear, targetSem) {
+    // Hàm giả lập Submit Form để đổi học kỳ (Đã nâng cấp để dùng chung)
+    async function postToGetSemester(url, originalDoc, elementIds) {
+        // 1. Lấy ViewState
         const viewState = originalDoc.getElementById('__VIEWSTATE')?.value;
         const viewStateGen = originalDoc.getElementById('__VIEWSTATEGENERATOR')?.value;
         const eventValidation = originalDoc.getElementById('__EVENTVALIDATION')?.value;
 
-        if (!viewState) throw new Error("Mất kết nối (ViewState). Vui lòng F5 trang Portal và thử lại.");
+        if (!viewState) throw new Error("Không lấy được ViewState. Session có thể đã hết hạn.");
 
+        // 2. Tạo Form Data
         const formData = new URLSearchParams();
         formData.append('__EVENTTARGET', '');
         formData.append('__EVENTARGUMENT', '');
@@ -362,11 +261,12 @@
         if(viewStateGen) formData.append('__VIEWSTATEGENERATOR', viewStateGen);
         if(eventValidation) formData.append('__EVENTVALIDATION', eventValidation);
 
-        // Dùng tham số truyền vào thay vì CONFIG
-        formData.append(elementIds.year, targetYear); 
-        formData.append(elementIds.sem, targetSem);   
-        formData.append(elementIds.btn, elementIds.btnValue || "Xem");
+        // 3. Append các tham số Dropdown theo ID được truyền vào
+        formData.append(elementIds.year, CONFIG.TARGET_YEAR); 
+        formData.append(elementIds.sem, CONFIG.TARGET_SEM);   
+        formData.append(elementIds.btn, elementIds.btnValue || "Xem"); // Giá trị nút bấm (VD: "Xem" hoặc "Xem Lịch Thi")
 
+        // 4. Gửi Request
         const res = await fetch(url, {
             method: 'POST',
             body: formData,
@@ -374,124 +274,128 @@
         });
         
         const text = await res.text();
-        return parseHTML(text);
+        return parseHTML(text); // Trả về Doc ảo mới
     }
 
     // === 3. MAIN RUNNER ===
     try {
-        // 1. Hiển thị Modal & Chờ người dùng cấu hình
-        const config = await showPrivacyAndConfigModal();
+        // --- BƯỚC 1: LẤY DỮ LIỆU CƠ BẢN (Điểm + Học phí) ---
+        showLoading("Đang tải dữ liệu Sinh viên (1/3)...");
         
-        // Bắt đầu cào
-        showLoading("Đang khởi tạo & Lấy dữ liệu cơ bản...");
+        // Chỉ lấy Điểm và Học phí trước (Bỏ Lịch thi ra để xử lý riêng)
+        const [docDiem, docHocPhi] = await Promise.all([
+            fetchVirtualPage(CONFIG.URL_DIEM),
+            fetchVirtualPage(CONFIG.URL_HOCPHI)
+        ]);
 
-        // Khởi tạo Object chứa dữ liệu
-        let gradeData = { mssv: "Unknown", grades: [] };
-        let tuitionData = { total: "0", details: [] };
-        let examData = { midterm: [], final: [] };
-        let courses = [];
+        const gradeData = scrapeGrades(docDiem);
+        const tuitionData = scrapeBackgroundData(docHocPhi, 'TUITION');
 
-        // 2. Chạy các tác vụ Song Song (Parallel) cho dữ liệu tĩnh
-        const tasks = [fetchVirtualPage(URLS.DIEM)]; // Luôn lấy điểm
-        if (config.getTuition) tasks.push(fetchVirtualPage(URLS.HOCPHI));
+        // --- BƯỚC 2: XỬ LÝ LỊCH THI (MỚI THÊM) ---
+        showLoading(`Đang lấy Lịch thi HK${CONFIG.TARGET_SEM}/${CONFIG.TARGET_YEAR}...`);
         
-        const results = await Promise.all(tasks);
-        const docDiem = results[0];
-        gradeData = scrapeGrades(docDiem);
+        // 2a. Lấy trang lịch thi mặc định
+        let docThi = await fetchVirtualPage(CONFIG.URL_LICHTHI);
 
-        if (config.getTuition) {
-            tuitionData = scrapeBackgroundData(results[1], 'TUITION');
+        // 2b. Định nghĩa ID của trang Lịch Thi (Dựa trên HTML bạn cung cấp)
+        const examPageIds = {
+            year: "ctl00$ContentPlaceHolder1$ctl00$cboNamHoc_gvDKHPLichThi",
+            sem: "ctl00$ContentPlaceHolder1$ctl00$cboHocKy_gvDKHPLichThi",
+            btn: "ctl00$ContentPlaceHolder1$ctl00$btnXemLichThi",
+            btnValue: "Xem Lịch Thi"
+        };
+
+        // 2c. Kiểm tra xem có đúng năm/kỳ không (Dựa vào value của input hidden hoặc select)
+        // Lưu ý: Obout combobox thường render input hidden có ID chứa 'ctl00_..._cboNamHoc...TB' hoặc value nằm trong thẻ input text
+        const curExamYear = docThi.getElementById("ctl00_ContentPlaceHolder1_ctl00_cboNamHoc_gvDKHPLichThi_ob_CbocboNamHoc_gvDKHPLichThiTB")?.value 
+                         || docThi.querySelector("input[name$='cboNamHoc_gvDKHPLichThi$ob_CbocboNamHoc_gvDKHPLichThiTB']")?.value;
+        
+        const curExamSem = docThi.getElementById("ctl00_ContentPlaceHolder1_ctl00_cboHocKy_gvDKHPLichThi_ob_CbocboHocKy_gvDKHPLichThiTB")?.value
+                        || docThi.querySelector("input[name$='cboHocKy_gvDKHPLichThi$ob_CbocboHocKy_gvDKHPLichThiTB']")?.value;
+
+        if (curExamYear !== CONFIG.TARGET_YEAR || curExamSem !== CONFIG.TARGET_SEM) {
+            showLoading("Đang chuyển Học kỳ Lịch thi...");
+            // Gọi hàm POST với bộ ID của trang Lịch thi
+            docThi = await postToGetSemester(CONFIG.URL_LICHTHI, docThi, examPageIds);
+        }
+        
+        // 2d. Cào dữ liệu lịch thi từ trang đã chuẩn
+        const examData = scrapeBackgroundData(docThi, 'EXAM');
+
+
+        // --- BƯỚC 3: XỬ LÝ LỚP MỞ ---
+        showLoading(`Đang truy cập Lớp mở HK${CONFIG.TARGET_SEM}/${CONFIG.TARGET_YEAR} (2/3)...`);
+        
+        let docLopMo = await fetchVirtualPage(CONFIG.URL_LOPMO);
+        
+        // Định nghĩa ID của trang Lớp Mở (Thường là ID ngắn gọn hơn)
+        const openClassPageIds = {
+            year: "ctl00$ContentPlaceHolder1$ctl00$cboNamHoc",
+            sem: "ctl00$ContentPlaceHolder1$ctl00$cboHocKy",
+            btn: "ctl00$ContentPlaceHolder1$ctl00$btnXem",
+            btnValue: "Xem"
+        };
+
+        // Kiểm tra năm/kỳ trang Lớp mở
+        const curClassYear = docLopMo.getElementById("ctl00_ContentPlaceHolder1_ctl00_cboNamHoc")?.value;
+        const curClassSem = docLopMo.getElementById("ctl00_ContentPlaceHolder1_ctl00_cboHocKy")?.value;
+
+        if (curClassYear !== CONFIG.TARGET_YEAR || curClassSem !== CONFIG.TARGET_SEM) {
+            showLoading("Đang chuyển Học kỳ Lớp mở...");
+            // Gọi hàm POST với bộ ID của trang Lớp mở
+            docLopMo = await postToGetSemester(CONFIG.URL_LOPMO, docLopMo, openClassPageIds);
         }
 
-        // 3. Xử lý Lịch thi (Nếu được chọn)
-        if (config.getExam) {
-            showLoading(`Đang lấy Lịch thi HK${config.examSem}/${config.examYear}...`);
-            let docThi = await fetchVirtualPage(URLS.LICHTHI);
-            
-            // ID trang lịch thi
-            const examPageIds = {
-                year: "ctl00$ContentPlaceHolder1$ctl00$cboNamHoc_gvDKHPLichThi",
-                sem: "ctl00$ContentPlaceHolder1$ctl00$cboHocKy_gvDKHPLichThi",
-                btn: "ctl00$ContentPlaceHolder1$ctl00$btnXemLichThi",
-                btnValue: "Xem Lịch Thi"
-            };
-
-            // Check năm/kỳ
-            const curExamYear = docThi.getElementById("ctl00_ContentPlaceHolder1_ctl00_cboNamHoc_gvDKHPLichThi_ob_CbocboNamHoc_gvDKHPLichThiTB")?.value 
-                             || docThi.querySelector("input[name$='cboNamHoc_gvDKHPLichThi$ob_CbocboNamHoc_gvDKHPLichThiTB']")?.value;
-            const curExamSem = docThi.getElementById("ctl00_ContentPlaceHolder1_ctl00_cboHocKy_gvDKHPLichThi_ob_CbocboHocKy_gvDKHPLichThiTB")?.value
-                            || docThi.querySelector("input[name$='cboHocKy_gvDKHPLichThi$ob_CbocboHocKy_gvDKHPLichThiTB']")?.value;
-
-            if (curExamYear !== config.examYear || curExamSem !== config.examSem) {
-                // Override config global tạm thời để hàm postToGetSemester dùng
-                // Hoặc tốt hơn là sửa hàm postToGetSemester nhận year/sem làm tham số (nhưng để ít sửa code nhất ta dùng biến cục bộ ở đây)
-                const tempConfigIds = { ...examPageIds, btnValue: "Xem Lịch Thi" };
-                
-                // Hack nhẹ: Truyền year/sem vào hàm postToGetSemester (Cần sửa hàm postToGetSemester 1 xíu ở dưới hoặc dùng biến global)
-                // Cách an toàn nhất: Sửa hàm postToGetSemester để nhận targetYear, targetSem
-                docThi = await postToGetSemester(URLS.LICHTHI, docThi, examPageIds, config.examYear, config.examSem);
-            }
-            examData = scrapeBackgroundData(docThi, 'EXAM');
-        }
-
-        // 4. Xử lý Lớp Mở (Nếu được chọn)
-        if (config.getClass) {
-            showLoading(`Đang truy cập Lớp mở HK${config.classSem}/${config.classYear}...`);
-            let docLopMo = await fetchVirtualPage(URLS.LOPMO);
-            
-            const openClassPageIds = {
-                year: "ctl00$ContentPlaceHolder1$ctl00$cboNamHoc",
-                sem: "ctl00$ContentPlaceHolder1$ctl00$cboHocKy",
-                btn: "ctl00$ContentPlaceHolder1$ctl00$btnXem",
-                btnValue: "Xem"
-            };
-
-            const curClassYear = docLopMo.getElementById("ctl00_ContentPlaceHolder1_ctl00_cboNamHoc")?.value;
-            const curClassSem = docLopMo.getElementById("ctl00_ContentPlaceHolder1_ctl00_cboHocKy")?.value;
-
-            if (curClassYear !== config.classYear || curClassSem !== config.classSem) {
-                showLoading("Đang chuyển Học kỳ Lớp mở...");
-                docLopMo = await postToGetSemester(URLS.LOPMO, docLopMo, openClassPageIds, config.classYear, config.classSem);
-            }
-
-            courses = await scrapeOpenClassesAsync(docLopMo);
-        }
+        // --- BƯỚC 4: QUÉT LỚP THỰC HÀNH & HOÀN TẤT ---
+        // (Giữ nguyên code cũ từ đây trở xuống)
+        const courses = await scrapeOpenClassesAsync(docLopMo);
 
         hideLoading();
 
-        // 5. Đóng gói và Gửi
+        // --- BƯỚC 4: KẾT QUẢ ---
+        if (!courses || courses.length === 0) {
+            alert("⚠️ Không lấy được danh sách lớp mở. Có thể do lỗi kết nối hoặc Portal bị đổi cấu trúc.");
+            return;
+        }
+
+        // 1. Chuẩn bị gói tin Sinh viên (Giữ nguyên cấu trúc cũ của bạn)
+        const studentPayload = {
+            mssv: gradeData.mssv,
+            grades: gradeData.grades,
+            exams: examData,    // Object { midterm: [], final: [] }
+            tuition: tuitionData,
+            program: []
+        };
+
+        // 2. Đóng gói toàn bộ (Sinh viên + Lớp mở)
         const fullDataPacket = {
-            student: {
-                mssv: gradeData.mssv,
-                grades: gradeData.grades,
-                exams: examData,
-                tuition: tuitionData,
-                program: []
-            },
+            student: studentPayload,
             courses: courses
         };
 
-        console.log("🔥 PACKET:", fullDataPacket);
+        console.log("🔥 FULL DATA PACKET:", fullDataPacket);
 
+        // 3. Gửi 1 lần duy nhất về Tool
         if (window.opener) {
+            // Gửi sự kiện mới: IMPORT_FULL_DATA
             window.opener.postMessage({ type: 'IMPORT_FULL_DATA', payload: fullDataPacket }, '*');
-            alert(`✅ ĐÃ XONG!\n- Sinh viên: ${gradeData.mssv}\n- Lịch thi: ${config.getExam ? 'Đã lấy' : 'Bỏ qua'}\n- Lớp mở: ${courses.length} lớp\n\nDữ liệu đã được chuyển sang Tool.`);
+            
+            alert(`✅ HOÀN TẤT QUÁ TRÌNH!\n\nĐã gửi gói dữ liệu tổng hợp gồm:\n- Thông tin SV & Điểm thi\n- ${studentPayload.exams.midterm?.length + studentPayload.exams.final?.length} lịch thi\n- ${courses.length} lớp mở\n\nKiểm tra bên tab Tool nhé!`);
         } else {
+            // Fallback: Tải file JSON nếu chạy độc lập
             const blob = new Blob([JSON.stringify(fullDataPacket, null, 2)], {type : 'application/json'});
             const url = URL.createObjectURL(blob);
             const a = document.createElement('a');
             a.href = url;
-            a.download = `HCMUS_Data_${gradeData.mssv}.json`;
+            a.download = `HCMUS_FullData_${gradeData.mssv}.json`;
             a.click();
-            alert(`✅ Đã xong! File JSON đang tải xuống.`);
+            alert(`✅ Đã xong! File dữ liệu đang được tải xuống.`);
         }
 
     } catch (e) {
         hideLoading();
-        if (e !== "User cancelled") {
-            console.error(e);
-            alert("❌ Lỗi: " + e.message);
-        }
+        console.error(e);
+        alert("❌ Lỗi: " + e.message);
     }
 
 })();

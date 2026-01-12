@@ -47,17 +47,13 @@ window.addEventListener("message", (event) => {
 
     const { type, payload } = event.data;
 
-    // Case A: Dữ liệu Sinh Viên (Điểm, Lịch thi...)
-    if (type === 'PORTAL_DATA') {
-        console.log("📥 Main: Đã nhận dữ liệu Sinh viên.");
-        // Lưu và xử lý bên Utils (để đồng bộ logic)
-        processPortalData(null, payload); 
-    }
-
-    // Case B: Dữ liệu Lớp Mở (Quan trọng cho xếp lịch)
-    if (type === 'OPEN_CLASS_DATA') {
-        console.log(`📥 Main: Đã nhận ${payload.length} lớp mở.`);
-        processPortalData(payload, null);
+    if (type === 'IMPORT_FULL_DATA') {
+        console.log("📥 Main: Đã nhận gói dữ liệu FULL (SV + Lớp).");
+        
+        // Tách gói tin ra và gọi hàm xử lý bên Utils
+        // Tham số 1: courses (Lớp mở)
+        // Tham số 2: student (Thông tin SV)
+        processPortalData(payload.courses, payload.student);
     }
 }, false);
 
