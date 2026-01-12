@@ -1,5 +1,6 @@
 import { AUX_DATA } from '../Utils.js'
 import { encodeScheduleToMask, decodeScheduleMask, calculateTuition } from '../Utils.js';
+import { GLOBAL_COURSE_DB } from '../Utils.js'
 
 const MAX_CREDITS = 25; // Giới hạn tín chỉ tối đa
 
