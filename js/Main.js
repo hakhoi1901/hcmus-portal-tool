@@ -16,7 +16,7 @@ import {
     renderExamSchedule
 } from './render/NewUI.js'
 
-// --- 1. SETUP BAN ĐẦU ---
+// --- SETUP BAN ĐẦU ---
 setupBookmarklet();
 
 // Export các hàm Global cần thiết cho HTML (onClick events)
@@ -40,24 +40,60 @@ Object.assign(window, {
 const btnPortal = document.getElementById('btn-open-portal');
 if (btnPortal) btnPortal.addEventListener('click', openPortal);
 
-// --- 2. LẮNG NGHE DỮ LIỆU TỪ BOOKMARKLET ---
+// --- LẮNG NGHE DỮ LIỆU TỪ BOOKMARKLET ---
 window.addEventListener("message", (event) => {
     // Security check
     if (!event.data || !event.data.type) return;
 
     const { type, payload } = event.data;
 
+    // Case A: Dữ liệu Sinh Viên (Điểm, Lịch thi...) (Legacy Support - nếu cần)
+    if (type === 'PORTAL_DATA') {
+        console.log("📥 Main: Đã nhận dữ liệu Sinh viên (Legacy).");
+        processPortalData(null, payload); 
+    }
+
+    // Case B: Dữ liệu Lớp Mở (Legacy Support - nếu cần)
+    if (type === 'OPEN_CLASS_DATA') {
+        console.log(`📥 Main: Đã nhận ${payload.length} lớp mở (Legacy).`);
+        processPortalData(payload, null);
+    }
+
+    // Case C: Dữ liệu FULL (Gói mới)
     if (type === 'IMPORT_FULL_DATA') {
         console.log("📥 Main: Đã nhận gói dữ liệu FULL (SV + Lớp).");
         
-        // Tách gói tin ra và gọi hàm xử lý bên Utils
-        // Tham số 1: courses (Lớp mở)
-        // Tham số 2: student (Thông tin SV)
-        processPortalData(payload.courses, payload.student);
+        // 1. Kiểm tra payload.courses
+        let courses = payload.courses;
+        
+        // Nếu courses không tồn tại hoặc rỗng, gán là mảng rỗng để tránh lỗi
+        if (!courses || !Array.isArray(courses)) {
+            console.warn("⚠️ Cảnh báo: Dữ liệu lớp mở (courses) bị rỗng hoặc không hợp lệ.");
+            courses = []; 
+        }
+
+        // 2. Kiểm tra payload.student
+        let student = payload.student;
+        if (!student) {
+             console.error("❌ Lỗi: Không có dữ liệu sinh viên trong gói tin.");
+             return;
+        }
+
+        // 3. Gọi hàm xử lý chính
+        // Hàm processPortalData trong Utils đã được thiết kế để handle (null, student) hoặc (courses, null)
+        // nên việc truyền ([], student) hoàn toàn hợp lệ và an toàn.
+        processPortalData(courses, student);
+        
+        // Thông báo cho người dùng
+        if (courses.length > 0) {
+            alert(`✅ Đã cập nhật thành công!\n- Thông tin SV: ${student.mssv}\n- Lịch thi: ${student.exams?.midterm?.length + student.exams?.final?.length || 0} môn\n- Lớp mở: ${courses.length} môn`);
+        } else {
+            alert(`✅ Đã cập nhật thông tin Sinh viên!\n(Không có dữ liệu Lớp mở nào được nhập)`);
+        }
     }
 }, false);
 
-// --- 3. KHỞI ĐỘNG ỨNG DỤNG ---
+// ---  KHỞI ĐỘNG ỨNG DỤNG ---
 // Khi trang load xong, gọi hàm initApp bên Utils để nạp dữ liệu từ Cache
 window.onload = () => {
     initApp();
