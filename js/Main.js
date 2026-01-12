@@ -55,6 +55,9 @@ window.onload = () => {
 
 // --- QUAN TRỌNG: Gán hàm vào window để HTML gọi được ---
 window.onNutBamXepLich = onNutBamXepLich;
+window.toggleNewRow = toggleNewRow;
+window.filterCourses = filterCourses;
+
 
 // Gắn hàm render vào window
 window.renderCourseList = (courses) => {

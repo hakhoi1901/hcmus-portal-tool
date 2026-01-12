@@ -2,7 +2,7 @@
 // Cấu hình hệ thống và tạo Bookmarklet
 // =============================================
 
-// 1. CÁC URL QUAN TRỌNG
+// CÁC URL QUAN TRỌNG
 export const PORTAL_TAB_URL = {
     URL_DIEM: "/SinhVien.aspx?pid=211",
     URL_LICHTHI: "/SinhVien.aspx?pid=212",
@@ -12,7 +12,7 @@ export const PORTAL_TAB_URL = {
 
 export const PORTAL_URL = 'https://new-portal1.hcmus.edu.vn/Login.aspx?ReturnUrl=%2fSinhVien.aspx%3fpid%3d211&pid=211';
 
-// 2. HÀM TẠO BOOKMARKLET TỪ SOURCE CODE
+// Hàm nội bộ (Private)
 function createBookmarklet(sourceCode) {
     if (!sourceCode) return "";
 
@@ -37,8 +37,7 @@ function createBookmarklet(sourceCode) {
     return `javascript:${encodedCode}`;
 }
 
-// 3. HÀM ĐỌC FILE VÀ TRẢ VỀ LINK (ASYNC)
-// Đây là hàm bạn cần thêm để đọc file Bookmarklet.js
+// Các hàm Export ra ngoài
 export async function getBookmarkletHref() {
     try {
         // Tải nội dung file js/Bookmarklet.js về dạng text

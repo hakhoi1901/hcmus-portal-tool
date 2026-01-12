@@ -209,85 +209,6 @@ export function renderCourseList(courses) {
     container.innerHTML = html;
 }
 
-// Hàm vẽ bảng thời khóa biểu kết quả
-export function renderScheduleResults(results) {
-    const container = document.getElementById('schedule-results-area');
-    container.innerHTML = ''; 
-    container.style.display = 'block';
-
-    // KIỂM TRA LỖI TỪ SCHEDULER TRẢ VỀ
-    if (results && results.error) {
-        container.innerHTML = `<div style="text-align:center; padding:20px; color:red; font-weight:bold;">❌ ${results.error}</div>`;
-        return;
-    }
-
-    // Kiểm tra nếu không phải mảng hoặc mảng rỗng
-    if (!Array.isArray(results) || results.length === 0) {
-        container.innerHTML = '<div style="text-align:center; padding:20px; color:red">Không tìm thấy lịch học phù hợp (hoặc xung đột giờ)!</div>';
-        return;
-    }
-    // ---------------------------
-
-    const days = ["Hai", "Ba", "Tư", "Năm", "Sáu", "Bảy", "CN"];
-
-    results.forEach((opt, index) => {
-        // ... (Giữ nguyên logic vẽ bảng bên trong vòng lặp)
-        // Copy lại phần code vẽ bảng cũ vào đây
-        let grid = Array(10).fill(null).map(() => Array(7).fill(null));
-
-        opt.schedule.forEach(subject => {
-            if(subject.mask) {
-                // Import hàm decodeScheduleMask hoặc định nghĩa nó ở trên
-                const timeSlots = decodeScheduleMask(subject.mask); 
-                timeSlots.forEach(slot => {
-                    if (slot.period < 10) {
-                        const cellContent = `
-                            <div style="font-size:11px; font-weight:bold; color:#005a8d">${subject.subjectID}</div>
-                            <div style="font-size:10px; opacity:0.8">${subject.classID}</div>
-                        `;
-                        if(grid[slot.period][slot.day]) grid[slot.period][slot.day] += "<hr style='margin:2px 0'>" + cellContent;
-                        else grid[slot.period][slot.day] = cellContent;
-                    }
-                });
-            }
-        });
-
-        let tableHTML = `
-            <div class="schedule-option">
-                <div class="schedule-header">
-                    <span>PHƯƠNG ÁN ${opt.option}</span>
-                    <span>Fitness: ${opt.fitness ? opt.fitness.toFixed(0) : 0}</span>
-                </div>
-                <table class="tkb-grid">
-                    <thead>
-                        <tr>
-                            <th class="period-col">Tiết</th>
-                            ${days.map(d => `<th>${d}</th>`).join('')}
-                        </tr>
-                    </thead>
-                    <tbody>
-        `;
-
-        for (let p = 0; p < 10; p++) {
-            tableHTML += `<tr>`;
-            tableHTML += `<td class="period-col">${p + 1}</td>`;
-            for (let d = 0; d < 7; d++) {
-                const content = grid[p][d];
-                if (content) {
-                    tableHTML += `<td class="tkb-cell-active">${content}</td>`;
-                } else {
-                    tableHTML += `<td></td>`;
-                }
-            }
-            tableHTML += `</tr>`;
-        }
-
-        tableHTML += `</tbody></table></div>`;
-        container.insertAdjacentHTML('beforeend', tableHTML);
-    });
-    
-    container.scrollIntoView({ behavior: 'smooth' });
-}
 
 export function toggleCourse(subjID) {
     const checkbox = document.getElementById(`chk-${subjID}`);
@@ -363,21 +284,4 @@ export function filterCourses() {
     });
 }
 
-// --- 3. PHẦN HIỂN THỊ KẾT QUẢ XẾP LỊCH ---
 
-// Helper giải mã Bitmask
-function decodeScheduleMask(parts) {
-    let slots = [];
-    for (let i = 0; i < 4 && i < parts.length; i++) {
-        let part = parts[i];
-        for (let bit = 0; bit < 32; bit++) {
-            if ((part & (1 << bit)) !== 0) {
-                let totalBit = i * 32 + bit;
-                let day = Math.floor(totalBit / 10);
-                let period = totalBit % 10;
-                if (day < 7) slots.push({ day: day, period: period });
-            }
-        }
-    }
-    return slots;
-}

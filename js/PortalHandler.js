@@ -1,5 +1,6 @@
 import { getBookmarkletHref, PORTAL_URL } from './Config.js'; 
 
+// Các hàm Export ra ngoài
 export async function setupBookmarklet() {
     const btn = document.getElementById('bookmark-btn');
     

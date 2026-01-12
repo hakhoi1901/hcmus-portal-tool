@@ -18,8 +18,8 @@
 <body class="bg-gray-50 text-sm">
     <div id="root">
         <div class="flex h-screen bg-gray-50">
-            
-            <aside class="bg-[#004A98] text-white flex flex-col transition-all duration-300 ease-in-out w-64" style="font-family: Inter, system-ui, sans-serif;">
+
+            <aside id="sidebar-menu" class="bg-[#004A98] text-white flex flex-col transition-all duration-300 ease-in-out w-64" style="font-family: Inter, system-ui, sans-serif;">
                 <div class="p-6 relative">
                     <div class="flex items-center gap-3">
                         <div class="w-10 h-10 bg-white rounded-lg flex items-center justify-center flex-shrink-0">
@@ -30,7 +30,7 @@
                             <p id="sidebar-app-desc" class="text-blue-200 text-sm truncate" style="font-weight: 400;">Cổng SV</p>
                         </div>
                     </div>
-                    <button onclick="toggleSidebar()" class="absolute -right-3 top-8 w-6 h-6 bg-white rounded-full shadow-md flex items-center justify-center hover:bg-gray-100 transition-colors border border-gray-200" aria-label="Thu gọn sidebar">
+                    <button onclick="closeSidebar()" class="absolute -right-3 top-8 w-6 h-6 bg-white rounded-full shadow-md flex items-center justify-center hover:bg-gray-100 transition-colors border border-gray-200" aria-label="Thu gọn sidebar">
                         <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-chevron-left w-4 h-4 text-[#004A98]" aria-hidden="true"><path d="m15 18-6-6 6-6"></path></svg>
                     </button>
                 </div>
@@ -192,6 +192,7 @@
         </div>
     </div>
     <script type="module" src="./js/Main.js"></script>
+    <!-- <script type="module" src="./js/App.js"></script> -->
     <!-- <script type="module">
         import { initApp } from './js/Utils.js';
         import { renderNewUI, renderSidebar, updateHeaderUI } from './js/render/NewUI.js';

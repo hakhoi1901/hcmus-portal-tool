@@ -4,7 +4,8 @@
  */
 
 import { runScheduleSolver } from './tkb/Scheduler.js';
-import { GLOBAL_COURSE_DB, renderScheduleResults } from './Utils.js';
+import { GLOBAL_COURSE_DB } from './Utils.js';
+import { renderScheduleResults } from './render/NewUI.js';
 
 export async function onNutBamXepLich() {
     const btn = document.querySelector('button[onclick="onNutBamXepLich()"]');

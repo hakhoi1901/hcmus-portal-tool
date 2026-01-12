@@ -1,4 +1,7 @@
 import { AUX_DATA } from '../Utils.js'
+import { encodeScheduleToMask, decodeScheduleMask, calculateTuition } from '../Utils.js';
+
+const MAX_CREDITS = 25; // Giới hạn tín chỉ tối đa
 
 // --- CẤU HÌNH MENU ---
 export const SIDEBAR_CONFIG = [
@@ -540,28 +543,100 @@ export function updateBasketUI() {
     list.innerHTML = '';
     
     let totalCred = 0;
+    let totalMoney = 0; // Biến tính tổng tiền mới
     
     if (SELECTED_COURSES.size === 0) {
         list.innerHTML = `<div class="text-center py-12"><p class="text-gray-400 text-sm">Chưa có môn nào</p></div>`;
     } else {
         SELECTED_COURSES.forEach(cid => {
-            const c = GLOBAL_COURSES_REF.find(x => x.id === cid);
-            if (c) {
-                totalCred += parseInt(c.credits);
+            // ... (Logic tìm môn & Fallback giữ nguyên như cũ) ...
+            let c = GLOBAL_COURSES_REF.find(x => x.id === cid);
+            let name = c ? c.name : cid;
+            let credits = c ? c.credits : 0;
+
+            if (AUX_DATA && AUX_DATA.allCourses) {
+                const meta = AUX_DATA.allCourses.find(ac => ac.course_id === cid);
+                if (meta) {
+                    if (!name || name === cid) name = meta.course_name || meta.course_name_vi;
+                    if (!credits) credits = meta.credits;
+                }
+            }
+
+            if (c || credits > 0) {
+                const credNum = parseInt(credits) || 0;
+                totalCred += credNum;
+
+                // --- TÍNH TIỀN CHO MÔN NÀY ---
+                const courseFee = calculateTuition(cid, credNum);
+                totalMoney += courseFee;
+                // -----------------------------
+
+                // Format tiền để hiển thị trong từng dòng (Optional)
+                const feeText = courseFee.toLocaleString('vi-VN');
+
                 list.innerHTML += `
-                    <div class="flex justify-between items-center p-2 bg-gray-50 rounded border border-gray-100 text-xs">
-                        <span class="font-bold text-[#004A98]">${cid}</span>
-                        <span class="truncate px-2 flex-1">${c.name}</span>
-                        <button onclick="document.getElementById('chk-${cid}').click()" class="text-red-500 hover:text-red-700 font-bold">✕</button>
+                    <div class="flex justify-between items-center p-2 bg-gray-50 rounded border border-gray-100 text-xs animate-fadeIn hover:bg-white transition-colors">
+                        <div class="flex flex-col min-w-0 flex-1 mr-2">
+                            <div class="flex items-center gap-2">
+                                <span class="font-bold text-[#004A98] whitespace-nowrap">${cid}</span>
+                                <span class="px-1.5 py-0.5 bg-gray-200 text-gray-600 rounded text-[10px]">${credNum} TC</span>
+                            </div>
+                            <span class="truncate text-gray-600 mt-0.5" title="${name}">${name}</span>
+                            <span class="text-[10px] text-gray-400 mt-0.5">${feeText} đ</span> </div>
+                        <button onclick="document.getElementById('chk-${cid}').click()" class="w-6 h-6 ...">✕</button>
                     </div>`;
             }
         });
     }
 
-    countEl.innerText = SELECTED_COURSES.size;
-    credEl.innerText = totalCred;
-    moneyEl.innerText = (totalCred * 350000).toLocaleString('vi-VN');
-    prog.style.width = Math.min((totalCred/24)*100, 100) + '%';
+    // Cập nhật UI Tổng
+    if(countEl) countEl.innerText = SELECTED_COURSES.size;
+    if(credEl) credEl.innerText = totalCred;
+    if(moneyEl) moneyEl.innerText = totalMoney.toLocaleString('vi-VN');
+
+    // 3. XỬ LÝ THANH TIẾN ĐỘ & CẢNH BÁO QUÁ TẢI
+    if(prog) {
+        // Tính phần trăm (Max là 24 hoặc totalCred nếu vượt quá)
+        const displayMax = Math.max(MAX_CREDITS, totalCred);
+        const percent = Math.min((totalCred / MAX_CREDITS) * 100, 100);
+        prog.style.width = percent + '%';
+
+        // Tự động tạo thẻ cảnh báo nếu chưa có (DOM Injection)
+        // Tìm thẻ cha của thanh progress để chèn thông báo vào sau đó
+        const progContainer = prog.parentElement;
+        let warningEl = document.getElementById('credit-warning-msg');
+        
+        if (!warningEl && progContainer) {
+            warningEl = document.createElement('div');
+            warningEl.id = 'credit-warning-msg';
+            warningEl.className = 'hidden flex items-start gap-2 mt-2 p-2 bg-red-50 border border-red-100 rounded text-xs text-red-600 animate-fadeIn';
+            // Chèn ngay sau thanh tiến độ
+            progContainer.parentNode.insertBefore(warningEl, progContainer.nextSibling);
+        }
+
+        // Logic hiển thị cảnh báo
+        if (totalCred > MAX_CREDITS) {
+            // Vượt quá -> Màu đỏ
+            prog.classList.remove('bg-[#004A98]');
+            prog.classList.add('bg-red-500');
+            
+            // Hiện cảnh báo
+            if (warningEl) {
+                warningEl.classList.remove('hidden');
+                warningEl.innerHTML = `
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="flex-shrink-0"><circle cx="12" cy="12" r="10"/><line x1="12" x2="12" y1="8" y2="12"/><line x1="12" x2="12.01" y1="16" y2="16"/></svg>
+                    <span>Vượt quá giới hạn <b>${MAX_CREDITS}</b> tín chỉ! Cân nhắc bỏ bớt môn.</span>
+                `;
+            }
+        } else {
+            // Bình thường -> Màu xanh
+            prog.classList.add('bg-[#004A98]');
+            prog.classList.remove('bg-red-500');
+            
+            // Ẩn cảnh báo
+            if (warningEl) warningEl.classList.add('hidden');
+        }
+    }
 }
 
 export function updateHeaderInfo() {
@@ -801,4 +876,162 @@ export function fillStudentProfile() {
     } catch (e) {
         console.error("❌ Lỗi khi đọc dữ liệu sinh viên:", e);
     }
+}
+
+export function renderScheduleResults(results) {
+    const container = document.getElementById('schedule-results-area');
+    container.innerHTML = '';
+    container.style.display = 'block';
+
+    if (!results || results.length === 0) {
+        container.innerHTML = `<div class="text-center py-8 text-gray-500">Không tìm thấy lịch học phù hợp!</div>`;
+        return;
+    }
+
+    const days = ["Hai", "Ba", "Tư", "Năm", "Sáu", "Bảy", "CN"];
+
+    results.forEach((opt) => {
+        // MA TRẬN 20 DÒNG (Mỗi tiết 2 dòng con)
+        let grid = Array(20).fill(null).map(() => Array(7).fill(null));
+
+        opt.schedule.forEach(subject => {
+            const timeSlots = decodeScheduleMask(subject.mask);
+            
+            // Tìm tên môn học từ dữ liệu gốc
+            let courseName = subject.subjectID; 
+            // 1. Tìm trong danh sách lớp đang chọn
+            const courseInDB = GLOBAL_COURSE_DB.find(c => c.id === subject.subjectID);
+            if (courseInDB) courseName = courseInDB.name;
+            // 2. Nếu không thấy, tìm trong dữ liệu phụ trợ (courses.json)
+            else if (AUX_DATA && AUX_DATA.allCourses) {
+                const meta = AUX_DATA.allCourses.find(c => c.course_id === subject.subjectID);
+                if (meta) courseName = meta.course_name;
+            }
+
+            // Gom nhóm tiết theo ngày
+            const groupedSlots = {}; 
+            timeSlots.forEach(slot => {
+                if (!groupedSlots[slot.day]) groupedSlots[slot.day] = [];
+                groupedSlots[slot.day].push(slot.period);
+            });
+
+            for (const [dayStr, periods] of Object.entries(groupedSlots)) {
+                const day = parseInt(dayStr);
+                periods.sort((a, b) => a - b);
+
+                let startPeriod = periods[0];
+                let count = 1;
+                
+                for (let i = 1; i <= periods.length; i++) {
+                    if (i === periods.length || periods[i] !== periods[i-1] + 1) {
+                        let endPeriod = startPeriod + count - 1;
+                        let startRow = startPeriod * 2;
+                        let span = count * 2;
+
+                        // Logic nối tiết (Sáng: Hết P2 nối P3 / Chiều: Hết P7 nối P8)
+                        if (endPeriod === 1) span += 1;
+                        else if (startPeriod === 2) startRow += 1;
+                        if (endPeriod === 6) span += 1;
+                        else if (startPeriod === 7) startRow += 1;
+
+                        if (startRow < 20) {
+                            grid[startRow][day] = {
+                                subjectID: subject.subjectID,
+                                subjectName: courseName, // Lưu tên môn
+                                classID: subject.classID,
+                                span: span,
+                                type: 'main'
+                            };
+                            for (let k = 1; k < span; k++) {
+                                if (startRow + k < 20) grid[startRow + k][day] = { type: 'merged' };
+                            }
+                        }
+                        if (i < periods.length) {
+                            startPeriod = periods[i];
+                            count = 1;
+                        }
+                    } else {
+                        count++;
+                    }
+                }
+            }
+        });
+
+        // VẼ HTML
+        let tableHTML = `
+            <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden mb-8 transition-all hover:shadow-md">
+                <div class="px-6 py-4 border-b border-gray-100 flex justify-between items-center bg-gray-50">
+                    <div>
+                        <h3 class="text-[#004A98] font-bold text-lg">Phương án ${opt.option}</h3>
+                        <p class="text-xs text-gray-500 mt-1">Độ phù hợp: ${opt.fitness.toFixed(0)} điểm</p>
+                    </div>
+                    <button class="px-3 py-1.5 bg-white border border-gray-200 text-gray-600 text-xs rounded hover:bg-gray-50 transition-colors">
+                        Chi tiết
+                    </button>
+                </div>
+                <div class="overflow-x-auto">
+                    <table class="w-full text-sm border-collapse table-fixed">
+                        <thead>
+                            <tr class="bg-gray-50 text-gray-500 text-xs uppercase tracking-wider text-center h-10 border-b border-gray-200">
+                                <th class="border-r border-gray-100 w-10">Tiết</th>
+                                ${days.map(d => `<th class="border-r border-gray-100">${d}</th>`).join('')}
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-gray-50">
+        `;
+
+        for (let r = 0; r < 20; r++) {
+            const isEndOfPeriod = (r % 2 !== 0);
+            const rowBorderClass = isEndOfPeriod ? "border-b border-gray-200" : "";
+            
+            tableHTML += `<tr class="h-7 ${rowBorderClass}">`;
+
+            if (r % 2 === 0) {
+                const periodNum = (r / 2) + 1;
+                tableHTML += `<td class="text-center font-medium text-gray-400 border-r border-gray-200 bg-gray-50/20 text-xs align-middle" rowspan="2">${periodNum}</td>`;
+            }
+
+            for (let d = 0; d < 7; d++) {
+                const cell = grid[r][d];
+                if (!cell) {
+                    tableHTML += `<td class="border-r border-gray-100"></td>`;
+                } else if (cell.type === 'merged') {
+                    continue; 
+                } else if (cell.type === 'main') {
+                    const colorClass = getColorForSubject(cell.subjectID);
+                    
+                    // Render ô có Tên môn + Mã lớp + Mã môn
+                    tableHTML += `
+                        <td class="border-r border-gray-100 p-0.5 align-top relative z-10" rowspan="${cell.span}">
+                            <div class="w-full h-full rounded p-1.5 border-l-4 shadow-sm flex flex-col justify-start gap-0.5 cursor-pointer hover:brightness-95 transition-all ${colorClass}" style="min-height: ${cell.span * 1.75}rem;">
+                                
+                                <span class="font-bold text-[10px] leading-tight line-clamp-2" title="${cell.subjectName}">
+                                    ${cell.subjectName}
+                                </span>
+                                
+                                <div class="flex flex-wrap gap-1 mt-0.5">
+                                    <span class="text-[9px] opacity-70 uppercase tracking-tighter">${cell.subjectID}</span>
+                                    <span class="text-[9px] bg-white/60 px-1 rounded font-medium ml-auto">${cell.classID}</span>
+                                </div>
+                            </div>
+                        </td>
+                    `;
+                }
+            }
+            tableHTML += `</tr>`;
+        }
+        tableHTML += `</tbody></table></div></div>`;
+        container.insertAdjacentHTML('beforeend', tableHTML);
+    });
+}
+
+function getColorForSubject(str) {
+    let hash = 0;
+    for (let i = 0; i < str.length; i++) { hash = str.charCodeAt(i) + ((hash << 5) - hash); }
+    const colors = [
+        "bg-blue-50 border-blue-500 text-blue-900", "bg-emerald-50 border-emerald-500 text-emerald-900",
+        "bg-violet-50 border-violet-500 text-violet-900", "bg-amber-50 border-amber-500 text-amber-900",
+        "bg-rose-50 border-rose-500 text-rose-900", "bg-cyan-50 border-cyan-500 text-cyan-900"
+    ];
+    return colors[Math.abs(hash) % colors.length];
 }
