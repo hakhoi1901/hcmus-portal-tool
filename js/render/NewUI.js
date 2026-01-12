@@ -229,11 +229,11 @@ export function renderNewUI(courses) {
     updateBasketUI();
 }
 
-// --- HÀM 2: VẼ CARD MÔN HỌC (1 DÒNG) ---
+// --- HÀM VẼ CARD MÔN HỌC  ---
 export function renderCourseCard(course) {
     const isSelected = SELECTED_COURSES.has(course.id);
     
-    // Tín chỉ Fallback
+    // Fallback thông tin
     let credits = course.credits;
     if (!credits || credits == 0) {
         if (AUX_DATA && AUX_DATA.allCourses) {
@@ -243,58 +243,83 @@ export function renderCourseCard(course) {
         if (!credits) credits = '?';
     }
 
-    let borderClass = "border-gray-200 bg-white hover:border-[#004A98] hover:shadow-md";
+    // Xử lý màu sắc và trạng thái
+    let borderClass = "border-gray-200 bg-white hover:bg-gray-50 hover:border-gray-300";
     let statusBadge = `<span class="px-2.5 py-1 bg-green-100 text-green-700 text-xs rounded-full font-medium inline-block whitespace-nowrap">Sẵn sàng</span>`;
+    let disabledAttr = ""; // Checkbox có bị vô hiệu hóa không?
+    let opacityClass = ""; // Làm mờ nếu không đủ điều kiện
 
     if (course.recommendationStatus) {
         switch (course.recommendationStatus) {
-            case 'RETAKE': borderClass = "border-red-200 bg-red-50 hover:bg-red-100"; statusBadge = `<span class="px-2.5 py-1 bg-red-100 text-red-700 text-xs rounded-full font-medium inline-block whitespace-nowrap">Học lại</span>`; break;
-            case 'MANDATORY': borderClass = "border-blue-200 bg-blue-50 hover:bg-blue-100"; statusBadge = `<span class="px-2.5 py-1 bg-blue-100 text-blue-700 text-xs rounded-full font-medium inline-block whitespace-nowrap">Bắt buộc</span>`; break;
-            case 'ELECTIVE_REQUIRED': borderClass = "border-purple-200 bg-purple-50 hover:bg-purple-100"; statusBadge = `<span class="px-2.5 py-1 bg-purple-100 text-purple-700 text-xs rounded-full font-medium inline-block whitespace-nowrap">Tự chọn</span>`; break;
-            case 'SUGGESTED': borderClass = "border-indigo-200 bg-indigo-50 hover:bg-indigo-100"; statusBadge = `<span class="px-2.5 py-1 bg-indigo-100 text-indigo-700 text-xs rounded-full font-medium inline-block whitespace-nowrap">Bổ trợ</span>`; break;
+            case 'RETAKE': 
+                borderClass = "border-red-200 bg-red-50 hover:bg-red-100"; 
+                statusBadge = `<span class="px-2.5 py-1 bg-red-100 text-red-700 text-xs rounded-full font-medium inline-block whitespace-nowrap">Cần học lại</span>`; 
+                break;
+            case 'MANDATORY': 
+                borderClass = "border-blue-200 bg-blue-50 hover:bg-blue-100"; 
+                statusBadge = `<span class="px-2.5 py-1 bg-blue-100 text-blue-700 text-xs rounded-full font-medium inline-block whitespace-nowrap">Bắt buộc</span>`; 
+                break;
+            // Ví dụ trạng thái chưa đủ điều kiện (giả lập)
+            case 'LOCKED':
+                borderClass = "border-gray-200 bg-gray-50";
+                statusBadge = `<span class="px-2.5 py-1 bg-gray-100 text-gray-500 text-xs rounded-full font-medium inline-block whitespace-nowrap">Chưa đủ điều kiện</span>`;
+                disabledAttr = "disabled";
+                opacityClass = "opacity-60";
+                break;
         }
-    } else if (course.status === 'FAILED') {
-         borderClass = "border-red-200 bg-red-50 hover:bg-red-100";
-         statusBadge = `<span class="px-2.5 py-1 bg-red-100 text-red-700 text-xs rounded-full font-medium inline-block whitespace-nowrap">Học lại</span>`;
+    }
+
+    // Nếu đang được chọn thì highlight
+    if (isSelected) {
+        borderClass = "border-[#004A98] bg-blue-50/20 ring-1 ring-[#004A98]";
     }
 
     return `
-        <div class="group course-row flex flex-col p-0 rounded-lg transition-all duration-200 w-full" id="row-${course.id}" data-name="${course.name.toLowerCase()}">
-            <div class="flex items-center gap-3 px-4 py-2.5 border rounded-lg transition-all w-full ${borderClass}">
+        <div class="group course-row w-full transition-all duration-200 mb-2 ${opacityClass}" id="row-${course.id}" data-name="${course.name.toLowerCase()}">
+            <div class="flex items-center gap-3 px-4 py-3 border rounded-lg transition-all ${borderClass}">
+                
                 <input 
                     type="checkbox" 
-                    class="chk-course w-4 h-4 text-[#004A98] border-gray-300 rounded focus:ring-[#004A98] cursor-pointer flex-shrink-0"
+                    class="chk-course w-4 h-4 text-[#004A98] border-gray-300 rounded focus:ring-[#004A98] cursor-pointer disabled:cursor-not-allowed flex-shrink-0"
                     value="${course.id}"
                     id="chk-${course.id}"
                     onchange="window.toggleNewRow('${course.id}')"
                     ${isSelected ? 'checked' : ''}
+                    ${disabledAttr}
                 >
+
                 <div class="w-24 flex-shrink-0">
-                    <p class="text-sm font-semibold text-gray-900">${course.id}</p>
+                    <p class="text-sm font-semibold text-gray-900 truncate" title="${course.id}">${course.id}</p>
                 </div>
-                <div class="flex-1 min-w-0 flex flex-col">
+
+                <div class="flex-1 min-w-0 flex flex-col justify-center">
                     <p class="text-sm text-gray-900 truncate font-medium" title="${course.name}">${course.name}</p>
-                    <div id="area-sel-${course.id}" class="${isSelected ? '' : 'hidden'} mt-1.5 animate-fadeIn w-full">
-                        <select id="sel-${course.id}" class="text-xs border border-blue-200 rounded p-1.5 bg-blue-50 text-blue-900 focus:bg-white focus:border-[#004A98] focus:ring-1 focus:ring-[#004A98] outline-none shadow-sm w-full md:w-auto md:min-w-[200px] transition-all">
+                    
+                    <div id="area-sel-${course.id}" class="${isSelected ? '' : 'hidden'} mt-2 animate-fadeIn w-full">
+                        <select id="sel-${course.id}" class="text-xs border border-blue-200 rounded p-1.5 bg-white text-blue-900 focus:border-[#004A98] focus:ring-1 focus:ring-[#004A98] outline-none shadow-sm w-full max-w-[250px] transition-all cursor-pointer hover:border-blue-400">
                             <option value="">-- Để máy tự xếp (Tự do) --</option>
                             ${course.classes.map(cls => `<option value="${cls.id}">Lớp ${cls.id} (${cls.schedule})</option>`).join('')}
                         </select>
                     </div>
                 </div>
+
                 <div class="w-16 flex-shrink-0 text-center">
                     <span class="px-2 py-1 bg-gray-100 text-gray-700 text-xs rounded font-medium whitespace-nowrap">${credits} TC</span>
                 </div>
-                <div class="w-32 flex-shrink-0 text-right">
-                     ${statusBadge}
+
+                <div class="w-32 flex-shrink-0 hidden sm:block">
+                    ${statusBadge}
                 </div>
-                <div class="flex items-center gap-1 flex-shrink-0 ml-2">
-                    <button onclick="window.openInfoModal('${course.id}')" class="p-1.5 hover:bg-gray-200 rounded transition-colors" title="Chi tiết">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-gray-500"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg>
+
+                <div class="flex items-center gap-1 flex-shrink-0">
+                    <button onclick="window.openInfoModal('${course.id}')" class="p-1.5 hover:bg-gray-200 rounded transition-colors text-gray-500 hover:text-[#004A98]" title="Xem chi tiết">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-info"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg>
                     </button>
-                    <button onclick="window.openPrereqModal('${course.id}')" class="p-1.5 hover:bg-gray-200 rounded transition-colors" title="Tiên quyết">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-gray-500"><line x1="6" x2="6" y1="3" y2="15"/><circle cx="18" cy="6" r="3"/><circle cx="6" cy="18" r="3"/><path d="M18 9a9 9 0 0 1-9 9"/></svg>
+                    <button onclick="window.openPrereqModal('${course.id}')" class="p-1.5 hover:bg-gray-200 rounded transition-colors text-gray-500 hover:text-[#004A98]" title="Sơ đồ môn tiên quyết">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-git-branch"><line x1="6" x2="6" y1="3" y2="15"/><circle cx="18" cy="6" r="3"/><circle cx="6" cy="18" r="3"/><path d="M18 9a9 9 0 0 1-9 9"/></svg>
                     </button>
                 </div>
+
             </div>
         </div>
     `;
