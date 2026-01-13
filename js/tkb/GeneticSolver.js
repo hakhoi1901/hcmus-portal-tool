@@ -1,25 +1,13 @@
 import { CONFIG } from './Constants.js';
 import { Chromosome } from './Chromosome.js';
-import { FitnessEvaluator } from './FitnesseValuator.js';
+// Lưu ý: Kiểm tra lại tên file FitnessValuator.js hay FitnessEvaluator.js trong dự án của bạn
+import { FitnessEvaluator } from './FitnessValuator.js';
 
 export default class GeneticSolver {
-    constructor(subjects, fixedConstraints, sessionPref) {
+    // Bỏ tham số fixedConstraints, chỉ nhận danh sách môn đã lọc
+    constructor(subjects, valuator) {
         this.targetSubjects = subjects;
-        this.sessionPref = sessionPref;
-        
-        // Map Constraints
-        this.fixedConstraints = new Array(subjects.length).fill(-1);
-        Object.keys(fixedConstraints).forEach(subjID => {
-            const wantedClassID = fixedConstraints[subjID];
-            const subjIndex = subjects.findIndex(s => s.id === subjID);
-            
-            if (subjIndex !== -1) {
-                const classIndex = subjects[subjIndex].classes.findIndex(c => c.id === wantedClassID);
-                if (classIndex !== -1) {
-                    this.fixedConstraints[subjIndex] = classIndex;
-                }
-            }
-        });
+        this.valuator = valuator;
     }
 
     // --- GENETIC CORE ---
@@ -30,22 +18,21 @@ export default class GeneticSolver {
         // 1. Khởi tạo quần thể
         for (let i = 0; i < CONFIG.POPULATION_SIZE; i++) {
             const ind = this.createIndividual();
-            FitnessEvaluator.evaluate(ind, this.targetSubjects, this.sessionPref);
+            this.valuator.getFitness(ind, this.targetSubjects); 
             population.push(ind);
         }
 
         // 2. Vòng lặp tiến hóa
         for (let gen = 0; gen < CONFIG.GENERATIONS; gen++) {
-            // Sort giảm dần theo fitness
             population.sort((a, b) => b.fitness - a.fitness);
 
             const newPop = [];
             
-            // Elitism: Giữ lại top 10% ưu tú nhất không qua lai ghép
+            // Elitism: Giữ lại top 10%
             const eliteCount = Math.floor(CONFIG.POPULATION_SIZE * 0.1) || 1;
             for(let i=0; i<eliteCount; i++) newPop.push(population[i]);
 
-            // Lai ghép & Đột biến để tạo thế hệ mới
+            // Lai ghép & Đột biến
             while(newPop.length < CONFIG.POPULATION_SIZE) {
                 const p1 = this.tournamentSelect(population);
                 const p2 = this.tournamentSelect(population);
@@ -53,7 +40,7 @@ export default class GeneticSolver {
                 let child = this.crossover(p1, p2);
                 this.mutate(child);
                 
-                FitnessEvaluator.evaluate(child, this.targetSubjects, this.sessionPref);
+                this.valuator.getFitness(child, this.targetSubjects);
                 newPop.push(child);
             }
             population = newPop;
@@ -75,19 +62,17 @@ export default class GeneticSolver {
     }
 
     randomizeGene(subjectIdx) {
-        // Nếu bị khóa -> Buộc phải chọn lớp cố định
-        if (this.fixedConstraints[subjectIdx] !== -1) {
-            return this.fixedConstraints[subjectIdx];
-        }
+        // Đơn giản hóa: Chỉ random trong số lượng lớp được truyền vào
+        // Vì danh sách lớp đã được lọc ở Scheduler.js rồi
         const classes = this.targetSubjects[subjectIdx].classes;
-        if (classes.length === 0) return -1;
+        if (!classes || classes.length === 0) return -1;
+        
+        // Nếu chỉ có 1 lớp (đã ghim), nó luôn trả về 0 -> Luôn đúng
         return Math.floor(Math.random() * classes.length);
     }
 
     crossover(p1, p2) {
         const child = new Chromosome(p1.genes.length);
-        
-        // Lai ghép 1 điểm cắt
         if (p1.genes.length > 1) {
             const split = Math.floor(Math.random() * (p1.genes.length - 1)) + 1;
             for(let i=0; i < p1.genes.length; i++) {
@@ -96,21 +81,14 @@ export default class GeneticSolver {
         } else {
             child.genes = [...p1.genes];
         }
-
-        // Đảm bảo ràng buộc cố định vẫn đúng sau khi lai ghép
-        for(let i=0; i<this.fixedConstraints.length; i++) {
-            if(this.fixedConstraints[i] !== -1) child.genes[i] = this.fixedConstraints[i];
-        }
         return child;
     }
 
     mutate(chromo) {
         if (Math.random() < CONFIG.MUTATION_RATE) {
             const idx = Math.floor(Math.random() * chromo.genes.length);
-            // Chỉ đột biến những gen không bị user khóa
-            if (this.fixedConstraints[idx] === -1) {
-                chromo.genes[idx] = this.randomizeGene(idx);
-            }
+            // Nếu môn đó chỉ có 1 lớp (đã ghim), randomizeGene vẫn trả về 0 -> Không ảnh hưởng
+            chromo.genes[idx] = this.randomizeGene(idx);
         }
     }
 
@@ -129,7 +107,7 @@ export default class GeneticSolver {
         
         for(const ind of population) {
             if (results.length >= topK) break;
-            const key = ind.genes.join(','); // Tạo Key duy nhất cho bộ gen
+            const key = ind.genes.join(',');
             if (!seen.has(key)) {
                 seen.add(key);
                 results.push(ind);

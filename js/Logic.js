@@ -4,7 +4,7 @@
  */
 
 import { runScheduleSolver } from './tkb/Scheduler.js';
-import { GLOBAL_COURSE_DB } from './Utils.js';
+import { GLOBAL_COURSE_DB, getStoredPreferences } from './Utils.js';
 import { renderScheduleResults } from './render/NewUI.js';
 
 export async function onNutBamXepLich() {
@@ -24,39 +24,42 @@ export async function onNutBamXepLich() {
 
         // 2. Thu thập User Input
         const userWants = [];
-        const fixedClasses = {};
+        const fixedClasses = {}; // Object lưu: { 'MãMôn': ['LớpA', 'LớpB'] }
         
+        const savedSelection = JSON.parse(localStorage.getItem('hcmus_selected_classes') || '{}');
+
         const checkboxes = document.querySelectorAll('.chk-course:checked');
         
         if (checkboxes.length === 0) {
-            throw new Error("Bạn chưa chọn môn học nào!"); // Dùng Error để nhảy xuống catch
+            throw new Error("Bạn chưa chọn môn học nào!"); 
         }
 
         checkboxes.forEach(chk => {
             const subjID = chk.value;
             userWants.push(subjID);
             
-            // Lấy lớp cố định (Dropdown)
-            const dropdown = document.getElementById(`sel-${subjID}`);
-            if (dropdown && dropdown.value !== "") {
-                fixedClasses[subjID] = dropdown.value;
+            if (savedSelection[subjID] && Array.isArray(savedSelection[subjID]) && savedSelection[subjID].length > 0) {
+                fixedClasses[subjID] = savedSelection[subjID];
             }
         });
 
-        // 3. Lấy tùy chọn (Sáng/Chiều)
-        const prefEl = document.getElementById('sel-session-pref');
-        const sessionPref = prefEl ? parseInt(prefEl.value) : 0; 
+        const preferences = getStoredPreferences();
 
-        // 4. Gọi Engine (Chạy Async để không đơ UI)
+        console.log("Đang chạy với cấu hình:", preferences);
+
+        // 4. Gọi Engine (Chạy Async)
         if (typeof runScheduleSolver === 'function') {
             setTimeout(() => {
-                // Engine cần mảng courses chuẩn, ta dùng trực tiếp GLOBAL_COURSE_DB
-                // vì ở Utils đã encodeMask rồi.
-                const results = runScheduleSolver(GLOBAL_COURSE_DB, userWants, fixedClasses, sessionPref);
+                const results = runScheduleSolver(
+                    GLOBAL_COURSE_DB, 
+                    userWants, 
+                    fixedClasses, 
+                    preferences // <--- Tham số mới đã chuẩn
+                );
                 
                 console.log(`Logic: Tìm thấy ${results.length} phương án.`);
                 
-                // Vẽ kết quả (Hàm này lấy từ Utils)
+                // Vẽ kết quả
                 renderScheduleResults(results);
 
                 // Chuyển Tab
@@ -74,7 +77,6 @@ export async function onNutBamXepLich() {
 
     } catch (e) {
         console.error("Logic Error:", e);
-        // Chỉ alert nếu là lỗi hệ thống, còn lỗi user (chưa chọn môn) thì thông báo nhẹ
         if (e.message !== "Bạn chưa chọn môn học nào!") {
             alert(e.message);
         } else {

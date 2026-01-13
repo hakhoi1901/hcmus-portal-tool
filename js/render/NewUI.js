@@ -1,5 +1,5 @@
 import { AUX_DATA } from '../Utils.js'
-import { encodeScheduleToMask, decodeScheduleMask, calculateTuition } from '../Utils.js';
+import { encodeScheduleToMask, decodeScheduleMask, calculateTuition, loadSettingsToUI } from '../Utils.js';
 import { GLOBAL_COURSE_DB } from '../Utils.js'
 import { logStatus, logSuccess, logWarning, logAlgo, logData, logError} from '../styleLog.js';
 import { LAST_SOLVER_RESULTS, saveScheduleToStorage, getSavedSchedules, deleteSavedSchedule, setSolverResults } from '../Utils.js';
@@ -295,14 +295,20 @@ export function renderCourseCard(course) {
                 </div>
 
                 <div class="flex-1 min-w-0 flex flex-col justify-center">
-                    <p class="text-sm text-gray-900 truncate font-medium" title="${course.name}">${course.name}</p>
-                    
-                    <div id="area-sel-${course.id}" class="${isSelected ? '' : 'hidden'} mt-2 animate-fadeIn w-full">
-                        <select id="sel-${course.id}" class="text-xs border border-blue-200 rounded p-1.5 bg-white text-blue-900 focus:border-[#004A98] focus:ring-1 focus:ring-[#004A98] outline-none shadow-sm w-full max-w-[250px] transition-all cursor-pointer hover:border-blue-400">
-                            <option value="">-- Để máy tự xếp (Tự do) --</option>
-                            ${course.classes.map(cls => `<option value="${cls.id}">Lớp ${cls.id} (${cls.schedule})</option>`).join('')}
-                        </select>
+                    <div class="flex items-center justify-between gap-2">
+                        <p class="text-sm text-gray-900 truncate font-medium" title="${course.name}">${course.name}</p>
+                        
+                        <button onclick="openClassModal('${course.id}')" 
+                                class="flex items-center gap-1.5 px-2 py-1 rounded border border-gray-200 bg-white text-xs font-medium text-gray-600 hover:text-[#004A98] hover:border-blue-200 transition-colors shadow-sm"
+                                title="Bấm để lọc lớp học">
+                            <span id="label-count-${course.id}">Tất cả</span>
+                            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M7 12h10"/><path d="M10 18h4"/></svg>
+                        </button>
                     </div>
+                    
+                    <p id="desc-sel-${course.id}" class="text-[10px] text-gray-400 truncate mt-0.5">
+                        Mặc định lấy tất cả các lớp mở
+                    </p>
                 </div>
 
                 <div class="w-16 flex-shrink-0 text-center">
@@ -325,6 +331,94 @@ export function renderCourseCard(course) {
             </div>
         </div>
     `;
+}
+
+// Hàm này gọi 1 lần khi khởi động app để tạo khung Modal ẩn
+export function injectClassSelectionModal() {
+    // Kiểm tra nếu đã có rồi thì không tạo lại
+    if (document.getElementById('class-modal')) return;
+
+    const modalHTML = `
+        <div id="class-modal" class="fixed inset-0 z-[9999] hidden" aria-labelledby="modal-title" role="dialog" aria-modal="true">
+            <div class="fixed inset-0 bg-gray-900/60 backdrop-blur-sm transition-opacity" onclick="window.closeClassModal()"></div>
+
+            <div class="fixed inset-0 z-10 overflow-y-auto">
+                <div class="flex min-h-full items-center justify-center p-4 text-center sm:p-0">
+                    
+                    <div class="relative transform overflow-hidden rounded-xl bg-white text-left shadow-2xl transition-all sm:my-8 sm:w-full sm:max-w-lg border border-gray-100 flex flex-col max-h-[90vh]">
+                        
+                        <div class="px-6 py-4 border-b border-gray-100 flex justify-between items-center bg-white sticky top-0 z-20">
+                            <div>
+                                <h3 class="text-lg font-bold text-gray-800 flex items-center gap-2">
+                                    <span class="p-1.5 bg-blue-50 text-[#004A98] rounded-lg">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1 0-5H20"/></svg>
+                                    </span>
+                                    <span id="modal-course-title">Chọn lớp học phần</span>
+                                </h3>
+                                <p class="text-xs text-gray-500 mt-0.5 ml-1">Tích chọn các lớp bạn muốn xếp lịch</p>
+                            </div>
+                            
+                            <button onclick="window.closeClassModal()" class="text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-full p-2 transition-all">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+                            </button>
+                        </div>
+
+                        <div class="flex-1 overflow-hidden flex flex-col bg-white">
+                            <div class="px-6 pt-4 pb-2">
+                                <div class="relative">
+                                    <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                        <svg class="h-4 w-4 text-gray-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+                                        </svg>
+                                    </div>
+                                    <input type="text" id="modal-search-class" 
+                                        placeholder="Tìm nhanh mã lớp (vd: 22CTT...)" 
+                                        class="block w-full pl-10 pr-3 py-2.5 border-none rounded-lg bg-gray-50 text-gray-700 text-sm focus:ring-2 focus:ring-[#004A98]/20 focus:bg-white transition-all placeholder-gray-400">
+                                </div>
+                            </div>
+
+                            <div class="flex-1 overflow-y-auto px-6 pb-4 custom-scrollbar">
+                                <table class="min-w-full w-full text-left border-collapse">
+                                    <thead class="bg-white sticky top-0 z-10 shadow-[0_1px_2px_rgba(0,0,0,0.05)]">
+                                        <tr>
+                                            <th scope="col" class="py-3 pl-2 pr-3 w-10 bg-white">
+                                                <div class="flex items-center">
+                                                    <input type="checkbox" id="chk-all-modal" onchange="window.toggleAllModal(this)" 
+                                                        class="w-4 h-4 rounded border-gray-300 text-[#004A98] focus:ring-[#004A98] cursor-pointer transition-colors">
+                                                </div>
+                                            </th>
+                                            <th scope="col" class="py-3 px-2 text-xs font-bold text-gray-500 uppercase tracking-wider bg-white">Lớp</th>
+                                            <th scope="col" class="py-3 px-2 text-xs font-bold text-gray-500 uppercase tracking-wider bg-white">Lịch học</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="modal-class-list" class="divide-y divide-gray-100">
+                                        </tbody>
+                                </table>
+                            </div>
+                        </div>
+
+                        <div class="px-6 py-4 bg-gray-50 border-t border-gray-100 flex sm:flex-row-reverse gap-3 rounded-b-xl">
+                            <button type="button" onclick="window.saveModalSelection()" 
+                                    class="inline-flex w-full sm:w-auto justify-center items-center gap-2 rounded-lg bg-[#004A98] px-5 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-[#003A78] hover:shadow-md transition-all focus:ring-2 focus:ring-offset-2 focus:ring-[#004A98]">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+                                Lưu & Áp dụng
+                            </button>
+                            <button type="button" onclick="window.closeClassModal()" 
+                                    class="inline-flex w-full sm:w-auto justify-center items-center gap-2 rounded-lg bg-white border border-gray-300 px-5 py-2.5 text-sm font-medium text-gray-700 hover:bg-gray-50 hover:text-gray-900 transition-all focus:ring-2 focus:ring-gray-200">
+                                Hủy bỏ
+                            </button>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+    `;
+
+    // Tạo một thẻ div tạm, chứa HTML trên, rồi ném vào body
+    const div = document.createElement('div');
+    div.innerHTML = modalHTML;
+    document.body.appendChild(div.firstElementChild);
 }
 
 // --- HÀM 3: FILTER MỚI (FIX HOÀN TOÀN) ---
@@ -697,6 +791,29 @@ export function updateBasketUI() {
             
             // Ẩn cảnh báo
             if (warningEl) warningEl.classList.add('hidden');
+        }
+    }
+
+    // 4. CHÈN NÚT "BỘ LỌC NÂNG CAO" VÀO CẠNH NÚT XẾP LỊCH
+    const solveBtn = document.querySelector('button[onclick="onNutBamXepLich()"]');
+    if (solveBtn) {
+        const parent = solveBtn.parentElement;
+        // Kiểm tra xem đã có nút lọc chưa để tránh trùng lặp
+        if (!document.getElementById('btn-advanced-filter')) {
+            const btnFilter = document.createElement('button');
+            btnFilter.id = 'btn-advanced-filter';
+            btnFilter.onclick = window.openAdvancedSettings;
+            btnFilter.className = "px-3 py-2 bg-gray-100 text-gray-600 rounded-lg hover:bg-gray-200 transition-colors border border-gray-200";
+            btnFilter.innerHTML = `
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M7 12h10"/><path d="M10 18h4"/></svg>
+            `;
+            btnFilter.title = "Cài đặt nâng cao";
+            
+            // Chèn vào trước nút Xếp Lịch
+            parent.insertBefore(btnFilter, solveBtn);
+            
+            // Căn chỉnh lại container cho đẹp (nếu cần)
+            parent.classList.add('flex', 'gap-2', 'items-center');
         }
     }
 }
@@ -1447,3 +1564,124 @@ export function renderExamSchedule() {
         container.innerHTML = '<p class="text-red-500 p-6">Lỗi hiển thị dữ liệu lịch thi.</p>';
     }
 }
+
+
+// 1. Hàm vẽ nút mở cài đặt (Gọi hàm này trong renderSidebar hoặc chèn vào HTML tĩnh)
+export function renderAdvancedOptionsButton() {
+    return `
+        <button onclick="window.openAdvancedSettings()" class="w-full mt-2 px-4 py-2 bg-gray-100 text-gray-700 text-sm font-bold rounded-lg border border-gray-300 hover:bg-gray-200 flex items-center justify-center gap-2">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.09a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/><circle cx="12" cy="12" r="3"/></svg>
+            Bộ lọc nâng cao
+        </button>
+    `;
+}
+
+// 2. Hàm mở Modal (Export ra window để nút bấm gọi được)
+export function openAdvancedSettings() {
+    const modalHtml = `
+        <div class="bg-white rounded-xl shadow-2xl max-w-md w-full p-6 animate-fadeIn relative">
+            <h3 class="text-lg font-bold text-[#004A98] mb-4 border-b pb-2">Tùy chọn xếp lịch</h3>
+            
+            <div class="mb-4">
+                <label class="block text-sm font-bold text-gray-700 mb-2">Ngày KHÔNG học (Ưu tiên nghỉ):</label>
+                <div class="flex flex-wrap gap-2" id="pref-days-off">
+                    ${['Hai', 'Ba', 'Tư', 'Năm', 'Sáu', 'Bảy', 'CN'].map((d, i) => `
+                        <label class="cursor-pointer select-none">
+                            <input type="checkbox" value="${i}" class="peer sr-only" name="day_off">
+                            <div class="px-3 py-1 bg-gray-100 text-gray-500 rounded-md border border-gray-200 peer-checked:bg-red-50 peer-checked:text-red-600 peer-checked:border-red-300 text-xs font-medium transition-all">
+                                ${d}
+                            </div>
+                        </label>
+                    `).join('')}
+                </div>
+            </div>
+
+            <div class="mb-4">
+                <label class="block text-sm font-bold text-gray-700 mb-2">Chiến thuật phân bố:</label>
+                <div class="space-y-2">
+                    <label class="flex items-center gap-2 cursor-pointer">
+                        <input type="radio" name="strategy" value="default" checked class="accent-[#004A98]">
+                        <span class="text-sm">Mặc định (Sao cũng được)</span>
+                    </label>
+                    <label class="flex items-center gap-2 cursor-pointer">
+                        <input type="radio" name="strategy" value="compress" class="accent-[#004A98]">
+                        <span class="text-sm">Dồn lịch (Học ít ngày nhất có thể)</span>
+                    </label>
+                    <label class="flex items-center gap-2 cursor-pointer">
+                        <input type="radio" name="strategy" value="spread" class="accent-[#004A98]">
+                        <span class="text-sm">Rải đều lịch học(Tránh quá tải 1 ngày)</span>
+                    </label>
+                </div>
+            </div>
+
+            <div class="mb-4">
+                <label class="block text-sm font-bold text-gray-700 mb-2">Buổi ưu tiên</label>
+                <div class="flex gap-4">
+                    <label class="flex items-center gap-2 cursor-pointer">
+                        <input type="radio" name="session" value="0" checked class="accent-[#004A98]">
+                        <span class="text-sm">Không quan trọng</span>
+                    </label>
+                    <label class="flex items-center gap-2 cursor-pointer">
+                        <input type="radio" name="session" value="1" class="accent-[#004A98]">
+                        <span class="text-sm">Sáng</span>
+                    </label>
+                    <label class="flex items-center gap-2 cursor-pointer">
+                        <input type="radio" name="session" value="2" class="accent-[#004A98]">
+                        <span class="text-sm">Chiều</span>
+                    </label>
+                </div>
+            </div>
+
+            <div class="mb-6">
+                <label class="flex items-center gap-2 cursor-pointer p-3 bg-blue-50 rounded-lg border border-blue-100">
+                    <input type="checkbox" id="pref-gap" class="w-4 h-4 accent-[#004A98]">
+                    <span class="text-sm font-medium text-gray-700">Hạn chế trống tiết (Gap)</span>
+                </label>
+            </div>
+
+            <div class="flex justify-end gap-2">
+                <button onclick="window.closeModal()" class="px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg text-sm font-bold">Đóng</button>
+                <button onclick="window.saveAdvancedSettings()" class="px-4 py-2 bg-[#004A98] hover:bg-[#003875] text-white rounded-lg text-sm font-bold shadow-md">Lưu Cài Đặt</button>
+            </div>
+        </div>
+    `;
+    if (window.showModalOverlay) {
+        window.showModalOverlay(modalHtml);
+    } else {
+        // Fallback nếu bạn chưa có hàm showModalOverlay
+        const div = document.createElement('div');
+        div.id = "temp-modal-container";
+        div.innerHTML = `<div class="fixed inset-0 z-50 flex items-center justify-center bg-black/50">${modalHtml}</div>`;
+        document.body.appendChild(div);
+        
+        // Gán hàm đóng modal tạm
+        window.closeModal = () => div.remove();
+    }
+
+    // 2. QUAN TRỌNG: Gọi hàm load dữ liệu NGAY SAU KHI HTML được chèn vào trang
+    // Dùng setTimeout 0 để đảm bảo DOM đã render xong mới tìm element
+    setTimeout(() => {
+        loadSettingsToUI();
+    }, 0);
+}
+
+
+export function saveAdvancedSettings() {
+    const daysOff = Array.from(document.querySelectorAll('input[name="day_off"]:checked')).map(cb => parseInt(cb.value));
+    const strategy = document.querySelector('input[name="strategy"]:checked').value;
+    const session = document.querySelector('input[name="session"]:checked').value;
+    const noGaps = document.getElementById('pref-gap').checked;
+
+    const settings = { daysOff, strategy, session, noGaps };
+    
+    // Lưu vào biến global hoặc localStorage để Logic.js đọc
+    window.USER_PREFERENCES = settings; 
+    
+    window.closeModal();
+    // alert("Đã lưu cài đặt xếp lịch!");
+}
+
+
+window.openAdvancedSettings = openAdvancedSettings;
+window.saveAdvancedSettings = saveAdvancedSettings;
+//

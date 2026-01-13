@@ -4,7 +4,7 @@
  */
 
 import { CourseRecommender } from './tkb/Recommender.js';
-import { renderNewUI, updateHeaderInfo, fillStudentProfile  } from './render/NewUI.js';
+import { renderNewUI, updateHeaderInfo, fillStudentProfile, injectClassSelectionModal  } from './render/NewUI.js';
 import { logStatus, logSuccess, logWarning, logAlgo, logData, logError} from './styleLog.js';
 
 
@@ -254,6 +254,8 @@ export function processPortalData(rawCourses, rawStudent) {
 
         localStorage.setItem('course_db_offline', JSON.stringify(processedDB));
         GLOBAL_COURSE_DB = processedDB;
+
+        window.allCourses = GLOBAL_COURSE_DB;
         
         renderNewUI(GLOBAL_COURSE_DB);
         alert(`✅ Đã cập nhật ${processedDB.length} môn học vào hệ thống!`);
@@ -266,6 +268,8 @@ export async function initApp() {
 
     // B1: Check trạng thái giao diện (Login vs Dashboard)
     checkLocalStorageState();
+
+    injectClassSelectionModal();
 
     // B1: Tải dữ liệu phụ trợ (Metadata: Tên môn đầy đủ, Tín chỉ, Tiên quyết...)
     await loadAuxiliaryData();
@@ -307,6 +311,8 @@ export async function initApp() {
             // Nếu chỉ có môn học -> Hiển thị thô
             GLOBAL_COURSE_DB = courses;
         }
+
+        window.allCourses = GLOBAL_COURSE_DB;
         
         // Render UI
         renderNewUI(GLOBAL_COURSE_DB);
@@ -397,5 +403,383 @@ window.clearAppCache = () => {
 };
 
 
+// Biến toàn cục để lưu trạng thái tạm khi mở modal
+let currentEditingCourseId = null;
+// Giả sử courses là mảng chứa dữ liệu tất cả môn học của bạn
+// window.courses = [...]; 
+
+// 1. Hàm mở Modal
+function openClassModal(courseId) {
+    currentEditingCourseId = courseId;
+    const course = window.courses.find(c => c.id === courseId); // Tìm môn học trong dữ liệu gốc
+    if (!course) return;
+
+    // Cập nhật tiêu đề modal
+    document.getElementById('modal-course-title').innerText = `${course.id} - ${course.name}`;
+
+    // Lấy dữ liệu đã lưu từ localStorage
+    const savedData = JSON.parse(localStorage.getItem('hcmus_selected_classes') || '{}');
+    const selectedClasses = savedData[courseId] || []; // Mảng rỗng nghĩa là chọn hết (mặc định)
+
+    const tbody = document.getElementById('modal-class-list');
+    tbody.innerHTML = '';
+
+    // Render từng dòng trong bảng
+    course.classes.forEach(cls => {
+        // Nếu mảng saved rỗng (chưa config) hoặc có ID lớp -> checked
+        // Logic: Nếu trong localStorage không có key courseId -> Mặc định chọn hết -> Check hết
+        // Nếu có key courseId nhưng mảng rỗng -> Người dùng bỏ chọn hết -> Không check
+        // Sửa lại logic chuẩn: Nếu key không tồn tại => Check All. Nếu key tồn tại => Check theo list.
+        
+        let isChecked = true;
+        if (savedData.hasOwnProperty(courseId)) {
+             isChecked = selectedClasses.includes(cls.id);
+        }
+
+        const tr = document.createElement('tr');
+        tr.className = isChecked ? 'bg-blue-50' : ''; // Highlight nhẹ dòng được chọn
+        tr.innerHTML = `
+            <td class="whitespace-nowrap py-2 pl-3 pr-3 text-sm text-gray-500">
+                <input type="checkbox" 
+                       class="modal-chk-class rounded border-gray-300 text-[#004A98] focus:ring-[#004A98]" 
+                       value="${cls.id}"
+                       ${isChecked ? 'checked' : ''}
+                       onchange="this.closest('tr').className = this.checked ? 'bg-blue-50' : ''">
+            </td>
+            <td class="whitespace-nowrap py-2 pl-2 pr-2 text-sm font-bold text-gray-700">${cls.id}</td>
+            <td class="whitespace-nowrap py-2 pl-2 pr-2 text-xs text-gray-500 font-mono">${cls.schedule || '--'}</td>
+        `;
+        tbody.appendChild(tr);
+    });
+
+    // Show modal
+    document.getElementById('class-modal').classList.remove('hidden');
+    
+    // Update trạng thái nút "Chọn tất cả"
+    updateCheckAllState();
+}
+
+// 2. Hàm đóng Modal
+function closeClassModal() {
+    document.getElementById('class-modal').classList.add('hidden');
+    currentEditingCourseId = null;
+}
+
+// 3. Hàm Lưu vào localStorage
+function saveModalSelection() {
+    if (!currentEditingCourseId) return;
+
+    const checkboxes = document.querySelectorAll('#modal-class-list .modal-chk-class');
+    const selected = [];
+    let totalClasses = checkboxes.length;
+
+    checkboxes.forEach(chk => {
+        if (chk.checked) selected.push(chk.value);
+    });
+
+    // Lấy dữ liệu cũ
+    const savedData = JSON.parse(localStorage.getItem('hcmus_selected_classes') || '{}');
+
+    // Logic lưu:
+    // Nếu chọn tất cả => Xóa key khỏi localStorage (để tiết kiệm và mặc định là All)
+    // Hoặc nếu bạn muốn tường minh: Lưu tất cả ID. 
+    // Ở đây mình chọn cách: Nếu chọn < tổng số lớp => Lưu mảng. Nếu chọn Full => Xóa key (để reset về default).
+    
+    if (selected.length === totalClasses) {
+        delete savedData[currentEditingCourseId]; 
+        // Cập nhật UI bên ngoài
+        updateCourseRowUI(currentEditingCourseId, totalClasses, true);
+    } else {
+        savedData[currentEditingCourseId] = selected;
+        // Cập nhật UI bên ngoài
+        updateCourseRowUI(currentEditingCourseId, selected.length, false);
+    }
+
+    localStorage.setItem('hcmus_selected_classes', JSON.stringify(savedData));
+    
+    // Trigger sự kiện để tính toán lại lịch (nếu cần)
+    if (window.renderExamSchedule) window.renderExamSchedule(); // Ví dụ gọi hàm render lại
+
+    closeClassModal();
+}
+
+// 4. Hàm cập nhật UI dòng môn học (Label & Text)
+function updateCourseRowUI(courseId, count, isFull) {
+    const labelEl = document.getElementById(`label-count-${courseId}`);
+    const descEl = document.getElementById(`desc-sel-${courseId}`);
+    
+    if (isFull) {
+        labelEl.innerText = "Tất cả";
+        labelEl.className = "text-gray-600";
+        descEl.innerText = "Đang xem xét tất cả các lớp mở";
+        descEl.className = "text-[10px] text-gray-400 truncate mt-0.5";
+    } else {
+        if (count === 0) {
+            labelEl.innerText = "Bỏ qua";
+            labelEl.className = "text-red-600 font-bold";
+            descEl.innerText = "Môn này sẽ không được xếp lịch";
+            descEl.className = "text-[10px] text-red-400 truncate mt-0.5";
+        } else {
+            labelEl.innerText = `${count} lớp`;
+            labelEl.className = "text-[#004A98] font-bold";
+            descEl.innerText = `Chỉ xếp lịch dựa trên ${count} lớp đã chọn`;
+            descEl.className = "text-[10px] text-blue-400 truncate mt-0.5";
+        }
+    }
+}
+
+// 5. Tiện ích: Check all trong modal
+function toggleAllModal(source) {
+    const checkboxes = document.querySelectorAll('#modal-class-list .modal-chk-class');
+    checkboxes.forEach(chk => {
+        chk.checked = source.checked;
+        chk.closest('tr').className = source.checked ? 'bg-blue-50' : '';
+    });
+}
+
+function updateCheckAllState() {
+    const checkboxes = document.querySelectorAll('#modal-class-list .modal-chk-class');
+    const checkedCount = Array.from(checkboxes).filter(c => c.checked).length;
+    document.getElementById('chk-all-modal').checked = (checkedCount === checkboxes.length && checkboxes.length > 0);
+}
+
+// Gắn hàm vào window để HTML gọi được
+window.openClassModal = function(courseId) {
+    currentEditingCourseId = courseId;
+    
+    // Tìm môn học trong danh sách courses gốc (Biến toàn cục courses chứa dữ liệu get được)
+    // Giả sử biến global chứa tất cả môn học tên là window.coursesData hoặc tương tự
+    // Nếu bạn chưa lưu courses ra global, hãy lưu nó khi fetch xong: window.allCourses = courses;
+    const course = window.allCourses.find(c => c.id === courseId); 
+    
+    if (!course) {
+        console.error("Không tìm thấy dữ liệu môn học: " + courseId);
+        return;
+    }
+
+    // Update tiêu đề
+    document.getElementById('modal-course-title').innerText = `${course.id} - ${course.name}`;
+
+    // Lấy dữ liệu đã chọn từ localStorage
+    const savedData = JSON.parse(localStorage.getItem('hcmus_selected_classes') || '{}');
+    const selectedClasses = savedData[courseId] || []; // Mảng rỗng = chọn hết
+
+    const tbody = document.getElementById('modal-class-list');
+    tbody.innerHTML = '';
+
+    // Render danh sách lớp
+    course.classes.forEach(cls => {
+        // Logic: Nếu chưa có key trong storage -> Mặc định là check hết. 
+        // Nếu có key -> check theo list ID.
+        let isChecked = true;
+        if (savedData.hasOwnProperty(courseId)) {
+             isChecked = selectedClasses.includes(cls.id);
+        }
+
+        const tr = document.createElement('tr');
+        tr.className = isChecked ? 'bg-blue-50/50 transition-colors' : 'transition-colors hover:bg-gray-50';
+        tr.innerHTML = `
+            <td class="whitespace-nowrap py-3 pl-4 pr-3 text-sm">
+                <input type="checkbox" 
+                       class="modal-chk-class rounded border-gray-300 text-[#004A98] focus:ring-[#004A98] w-4 h-4 cursor-pointer" 
+                       value="${cls.id}"
+                       ${isChecked ? 'checked' : ''}
+                       onchange="this.closest('tr').className = this.checked ? 'bg-blue-50/50 transition-colors' : 'transition-colors hover:bg-gray-50'; window.updateCheckAllState()">
+            </td>
+            <td class="whitespace-nowrap py-3 pl-2 pr-2 text-sm font-bold text-gray-700">${cls.id}</td>
+            <td class="whitespace-nowrap py-3 pl-2 pr-2 text-xs text-gray-500 font-mono">${cls.schedule || '<span class="text-gray-300">--</span>'}</td>
+        `;
+        tbody.appendChild(tr);
+    });
+
+    // Hiển thị modal
+    document.getElementById('class-modal').classList.remove('hidden');
+    window.updateCheckAllState();
+}
+
+window.closeClassModal = function() {
+    document.getElementById('class-modal').classList.add('hidden');
+    currentEditingCourseId = null;
+}
+
+window.toggleAllModal = function(source) {
+    const checkboxes = document.querySelectorAll('#modal-class-list .modal-chk-class');
+    checkboxes.forEach(chk => {
+        chk.checked = source.checked;
+        chk.closest('tr').className = source.checked ? 'bg-blue-50/50 transition-colors' : 'transition-colors hover:bg-gray-50';
+    });
+}
+
+window.updateCheckAllState = function() {
+    const checkboxes = document.querySelectorAll('#modal-class-list .modal-chk-class');
+    const checkedCount = Array.from(checkboxes).filter(c => c.checked).length;
+    const checkAll = document.getElementById('chk-all-modal');
+    if (checkAll) {
+        checkAll.checked = (checkedCount === checkboxes.length && checkboxes.length > 0);
+        checkAll.indeterminate = (checkedCount > 0 && checkedCount < checkboxes.length);
+    }
+}
+
+window.saveModalSelection = function() {
+    if (!currentEditingCourseId) return;
+
+    const checkboxes = document.querySelectorAll('#modal-class-list .modal-chk-class');
+    const selected = [];
+    let totalClasses = checkboxes.length;
+
+    checkboxes.forEach(chk => {
+        if (chk.checked) selected.push(chk.value);
+    });
+
+    // Lưu vào LocalStorage
+    const savedData = JSON.parse(localStorage.getItem('hcmus_selected_classes') || '{}');
+    
+    // Nếu chọn Full hoặc không chọn gì (coi như full) thì xóa key để tiết kiệm
+    if (selected.length === totalClasses || selected.length === 0) {
+        delete savedData[currentEditingCourseId];
+        window.updateCourseRowUI(currentEditingCourseId, totalClasses, true);
+    } else {
+        savedData[currentEditingCourseId] = selected;
+        window.updateCourseRowUI(currentEditingCourseId, selected.length, false);
+    }
+
+    localStorage.setItem('hcmus_selected_classes', JSON.stringify(savedData));
+    
+    // Gọi hàm render lại lịch (nếu có)
+    if (typeof window.renderExamSchedule === 'function') {
+        // window.renderExamSchedule(); 
+        // Hoặc hàm trigger xếp lịch lại
+    }
+
+    window.closeClassModal();
+}
+
+// Hàm cập nhật giao diện cái thẻ bên ngoài (Cái bạn gửi ở trên)
+window.updateCourseRowUI = function(courseId, count, isFull) {
+    const labelEl = document.getElementById(`label-count-${courseId}`);
+    const descEl = document.getElementById(`desc-sel-${courseId}`);
+    
+    if (!labelEl || !descEl) return;
+
+    if (isFull) {
+        labelEl.innerText = "Tất cả";
+        labelEl.className = ""; // Reset class nếu cần
+        descEl.innerText = "Mặc định lấy tất cả các lớp mở";
+        descEl.className = "text-[10px] text-gray-400 truncate mt-0.5";
+    } else {
+        if (count === 0) {
+            // Trường hợp người dùng bỏ tick hết (nghĩa là không học môn này hoặc full options)
+            // Thường thì logic là bỏ tick hết = lấy hết, code trên đang handle logic này.
+            // Nếu bạn muốn bỏ tick hết = không học, sửa logic ở hàm save.
+            labelEl.innerText = "Tất cả"; 
+             descEl.innerText = "Mặc định lấy tất cả các lớp mở";
+        } else {
+            labelEl.innerText = `${count} lớp`;
+            // Highlight màu xanh để biết đã lọc
+            labelEl.classList.add("text-[#004A98]", "font-bold");
+            descEl.innerText = `Đã lọc ${count} lớp cụ thể`;
+            descEl.className = "text-[10px] text-[#004A98] truncate mt-0.5 font-medium";
+        }
+    }
+}
 
 
+// Tên key để lưu vào bộ nhớ trình duyệt
+const PREF_STORAGE_KEY = 'hcmus_schedule_preferences';
+
+// --- HÀM 1: Lấy cài đặt từ LocalStorage (Luôn dùng hàm này để lấy data mới nhất) ---
+export function getStoredPreferences() {
+    try {
+        const raw = localStorage.getItem(PREF_STORAGE_KEY);
+        if (raw) {
+            return JSON.parse(raw);
+        }
+    } catch (e) {
+        console.error("Lỗi đọc preferences:", e);
+    }
+    // Giá trị mặc định nếu chưa lưu gì
+    return {
+        daysOff: [],          // Mảng chứa các ngày nghỉ: 0=T2, ..., 5=T7, 6=CN
+        strategy: 'default',  // 'compress' | 'spread'
+        session: '0',         // '0': All, '1': Sáng, '2': Chiều
+        noGaps: false
+    };
+}
+
+// --- HÀM 2: Lưu cài đặt (Gắn hàm này vào nút "Lưu" ở Modal Cài đặt) ---
+export function savePreferencesToStorage(newPrefs) {
+    localStorage.setItem(PREF_STORAGE_KEY, JSON.stringify(newPrefs));
+    console.log("Đã lưu cài đặt:", newPrefs);
+    alert("Đã lưu cài đặt xếp lịch!");
+}
+
+
+// Expose hàm lưu ra window để HTML gọi được (nếu bạn dùng onclick trong HTML)
+window.saveAdvancedSettings = function() {
+    // SỬA LỖI Ở ĐÂY: đổi 'day-off' thành 'day_off'
+    const daysOff = [];
+    document.querySelectorAll('input[name="day_off"]:checked').forEach(el => {
+        daysOff.push(parseInt(el.value));
+    });
+
+    const strategyEl = document.querySelector('input[name="strategy"]:checked');
+    const strategy = strategyEl ? strategyEl.value : 'default';
+
+    const sessionEl = document.querySelector('input[name="session"]:checked');
+    const session = sessionEl ? sessionEl.value : '0';
+
+    // Sửa ID: pref-gap (khớp với HTML)
+    const noGaps = document.getElementById('pref-gap')?.checked || false;
+
+    const prefs = {
+        daysOff: daysOff,
+        strategy: strategy,
+        session: session,
+        noGaps: noGaps
+    };
+
+    // Lưu vào LocalStorage
+    localStorage.setItem('hcmus_schedule_preferences', JSON.stringify(prefs));
+    
+    console.log("✅ Đã lưu cài đặt mới:", prefs);
+    
+    if(window.closeModal) window.closeModal();
+};
+
+
+export function loadSettingsToUI() {
+    // 1. Đọc dữ liệu đã lưu
+    const raw = localStorage.getItem('hcmus_schedule_preferences');
+    if (!raw) return; // Chưa lưu gì thì thôi
+    
+    const prefs = JSON.parse(raw);
+    console.log("🔄 Đang load lại cài đặt:", prefs);
+
+    // 2. Tick lại Ngày nghỉ (Checkbox)
+    // Lưu ý: name trong HTML của bạn là "day_off"
+    if (prefs.daysOff && Array.isArray(prefs.daysOff)) {
+        prefs.daysOff.forEach(val => {
+            // Tìm ô input có value bằng ngày đã chọn
+            const chk = document.querySelector(`input[name="day_off"][value="${val}"]`);
+            if (chk) chk.checked = true;
+        });
+    }
+
+    // 3. Tick lại Chiến thuật (Radio)
+    if (prefs.strategy) {
+        const radio = document.querySelector(`input[name="strategy"][value="${prefs.strategy}"]`);
+        if (radio) radio.checked = true;
+    }
+
+    // 4. Tick lại Buổi (Radio)
+    if (prefs.session) {
+        const radio = document.querySelector(`input[name="session"][value="${prefs.session}"]`);
+        if (radio) radio.checked = true;
+    }
+
+    // 5. Tick lại Gap (Checkbox đơn)
+    if (prefs.noGaps) {
+        const gapChk = document.getElementById('pref-gap');
+        if (gapChk) gapChk.checked = true;
+    }
+}

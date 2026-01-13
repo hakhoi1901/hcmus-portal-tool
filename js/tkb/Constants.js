@@ -1,3 +1,5 @@
+// Constants.js
+
 export const CONFIG = {
     POPULATION_SIZE: 1000,
     GENERATIONS: 1000,
@@ -6,11 +8,22 @@ export const CONFIG = {
 };
 
 export const WEIGHTS = {
-    BASE: 1000.0,
-    PENALTY_HARD: 10000.0,      // Trùng lịch
-    PENALTY_GAP: 15.0,          // Trống tiết
-    PENALTY_WRONG_SESSION: 10.0,// Trái buổi
-    BONUS_STREAK_2: 60.0,       // Học 2 ngày liền
-    PENALTY_BURNOUT: 50.0,      // Học >3 ngày liền
-    BONUS_DAY_OFF: 80.0,        // Ngày nghỉ
+    BASE: 100000.0,
+    
+    // Hard Constraints
+    PENALTY_HARD: 99999.0,         // Trùng lịch 
+
+    // Soft Constraints - Days Off
+    PENALTY_DAY_OFF: 80000.0,       // Vi phạm ngày nghỉ
+
+    // Soft Constraints - Session (Buổi học)
+    BONUS_SESSION: 50.0,          // Đúng buổi ưu tiên 
+    PENALTY_WRONG_SESSION: 100.0,  // Trái buổi 
+
+    // Soft Constraints - Strategy (Chiến thuật)
+    BONUS_COMPRESS: 1000.0,        // Thưởng mỗi ngày trống (Compress strategy)
+    PENALTY_SPREAD: 200.0,        // Phạt ngày học quá nặng (Spread strategy) 
+
+    // Soft Constraints - Gaps
+    PENALTY_GAP: 50.0             // Phạt trống tiết
 };
