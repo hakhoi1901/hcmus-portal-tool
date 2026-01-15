@@ -88,7 +88,7 @@ export class CourseRecommender {
 
             const score = parseFloat(scoreRaw);
             if (!isNaN(score)) {
-                if (score >= 5.0) {
+                if (score >= 10.0) {
                     passed.add(cid);
                     passedCreditsMap.set(cid, credits);
                 } else {

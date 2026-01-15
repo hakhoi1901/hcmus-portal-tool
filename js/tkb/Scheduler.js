@@ -6,17 +6,39 @@ export function runScheduleSolver(dbData, userWants, fixedClasses, preferences) 
     // ============================================================
     // 🔍 DEBUG AREA: BẮT ĐẦU KIỂM TRA DỮ LIỆU ĐẦU VÀO
     // ============================================================
-    console.group("🚀 DEBUG: Dữ liệu nhận được tại Scheduler.js");
+    console.group("DEBUG: Dữ liệu nhận được tại Scheduler.js");
     
-    console.log("1️⃣ Danh sách môn muốn học (User Wants):", userWants);
+    console.log("1️Danh sách môn muốn học (User Wants):", userWants);
     
-    console.log("2️⃣ Danh sách lớp đã chọn (Fixed Classes):");
+    console.log("2️Danh sách lớp đã chọn (Fixed Classes):");
     console.table(fixedClasses); // In dạng bảng cho dễ nhìn
     console.log("   -> Raw object:", fixedClasses); // In raw để check kiểu dữ liệu
 
-    console.log("3️⃣ Tùy chọn (Preferences):", preferences);
+    console.log("3️Tùy chọn (Preferences):", preferences);
     console.groupEnd();
     // ============================================================
+
+    const startTime = performance.now();
+    
+    // --- KHỞI TẠO OBJECT LOG ---
+    const solverLog = {
+        timestamp: new Date().toLocaleTimeString(),
+        input: {
+            userWants: userWants,
+            fixedClasses: fixedClasses,
+            preferences: preferences
+        },
+        process: {
+            totalSubjects: 0,
+            filteredSubjects: []
+        },
+        result: {
+            found: 0,
+            bestScore: null,
+            bestSolutionAnalysis: null, // Phân tích tại sao phương án tốt nhất lại có điểm đó
+            executionTime: ""
+        }
+    };
 
     const db = new CourseDatabase();
     const data = (typeof dbData === 'string') ? JSON.parse(dbData) : dbData;
@@ -24,77 +46,76 @@ export function runScheduleSolver(dbData, userWants, fixedClasses, preferences) 
 
     const selectedCourses = [];
     
-    console.group("🛠️ DEBUG: Quá trình lọc lớp"); // Mở group log quá trình lọc
-
+    // --- LỌC DỮ LIỆU ---
     userWants.forEach(subjID => {
         const cleanID = String(subjID).trim(); 
         const course = db.getCourse(cleanID);
         
         if (course) {
-            // Lấy danh sách lớp được user chọn từ UI
             let allowedClasses = fixedClasses[cleanID];
-
-            // LOG KIỂM TRA TỪNG MÔN
-            if (allowedClasses) {
-                console.log(`Checking môn [${cleanID}]: User yêu cầu lớp ->`, allowedClasses);
-            }
+            let classCountOriginal = course.classes.length;
+            let classCountFiltered = classCountOriginal;
 
             if (allowedClasses && Array.isArray(allowedClasses) && allowedClasses.length > 0) {
-                // Chuẩn hóa ID về String để so sánh chính xác
                 const allowedSet = new Set(allowedClasses.map(id => String(id).trim()));
-
-                // Thực hiện lọc
-                const filteredClasses = course.classes.filter(c => {
-                    const cID = String(c.id).trim();
-                    const isKept = allowedSet.has(cID);
-                    // Log nếu lớp bị loại bỏ để biết lý do
-                    if (!isKept) {
-                        // console.log(`   ❌ Loại bỏ lớp: ${cID} (Không nằm trong danh sách chọn)`);
-                    }
-                    return isKept;
-                });
+                const filteredClasses = course.classes.filter(c => allowedSet.has(String(c.id).trim()));
                 
                 if (filteredClasses.length > 0) {
-                    console.log(`   ✅ Đã lọc môn ${cleanID}: Giữ lại ${filteredClasses.length}/${course.classes.length} lớp.`);
-                    
-                    // COPY SÂU
-                    const newCourseObj = { ...course, classes: filteredClasses };
-                    selectedCourses.push(newCourseObj);
+                    classCountFiltered = filteredClasses.length;
+                    selectedCourses.push({ ...course, classes: filteredClasses });
                 } else {
-                    // TRƯỜNG HỢP NGUY HIỂM: Chọn rồi mà lọc không ra gì
-                    console.error(`   ❌ LỖI: Môn ${cleanID} có yêu cầu lớp ${allowedClasses} nhưng không tìm thấy trong DB!`);
-                    console.log("   👉 Danh sách lớp thực tế trong DB:", course.classes.map(c => c.id));
-                    
-                    alert(`Lỗi dữ liệu: Bạn chọn lớp ${allowedClasses} cho môn ${cleanID} nhưng hệ thống không tìm thấy lớp này. Vui lòng chọn lại.`);
+                    console.error(`❌ Lỗi: Môn ${cleanID} chọn lớp ${allowedClasses} nhưng không tìm thấy.`);
                     return []; 
                 }
             } else {
-                // console.log(`   ℹ️ Môn ${cleanID}: Không chọn lớp cụ thể -> Lấy tất cả.`);
                 selectedCourses.push(course);
             }
+
+            // Ghi log quá trình lọc
+            solverLog.process.filteredSubjects.push({
+                id: cleanID,
+                original: classCountOriginal,
+                kept: classCountFiltered
+            });
+
         } else {
-            console.warn(`⚠️ Không tìm thấy môn [${cleanID}] trong dữ liệu.`);
+            console.warn(`⚠️ Không tìm thấy môn [${cleanID}]`);
         }
     });
-    console.groupEnd(); // Đóng group log
 
-    if (selectedCourses.length === 0) {
-        console.error('Không tìm thấy môn nào hợp lệ.');
-        return []; 
-    }
+    if (selectedCourses.length === 0) return [];
+    solverLog.process.totalSubjects = selectedCourses.length;
 
-    // ... (Phần code bên dưới giữ nguyên: Valuator, Solver...)
+    // --- CHẠY THUẬT TOÁN ---
     const valuator = new FitnessEvaluator(preferences);
-    const solver = new GeneticSolver(selectedCourses, valuator); // Đã bỏ tham số thừa fixedConstraints
+    const solver = new GeneticSolver(selectedCourses, valuator);
     const rawResults = solver.solve(5); 
 
+    // --- TỔNG HỢP KẾT QUẢ ---
+    solverLog.result.found = rawResults.length;
+    solverLog.result.executionTime = (performance.now() - startTime).toFixed(2) + "ms";
+
+    if (rawResults.length > 0) {
+        const bestInd = rawResults[0];
+        solverLog.result.bestScore = bestInd.fitness;
+        
+        // Gọi hàm phân tích (getInsights) để xem chi tiết
+        //solverLog.result.bestSolutionAnalysis = valuator.getInsights(bestInd, selectedCourses);
+    }
+
+    // 🔥🔥🔥 IN LOG RA MÀN HÌNH 🔥🔥🔥
+    console.log("%c📊 BÁO CÁO XẾP LỊCH (SOLVER REPORT)", "color: #004A98; font-size: 14px; font-weight: bold;");
+    console.log(solverLog); 
+    // Nếu muốn xem dạng bảng cho phần input
+    // console.table(solverLog.process.filteredSubjects);
+
+    // --- MAPPING VỀ FORMAT UI ---
     const mappedResults = rawResults.map((ind, index) => {
         const scheduleList = [];
         ind.genes.forEach((classIdx, courseIdx) => {
             if (classIdx !== -1) {
                 const course = selectedCourses[courseIdx];
                 const classObj = course.classes[classIdx];
-                
                 if (!classObj) return;
 
                 let visualMask = classObj.mask;

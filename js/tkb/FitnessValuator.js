@@ -4,27 +4,27 @@ import { WEIGHTS } from './Constants.js';
 export class FitnessEvaluator { 
     constructor(preferences) {
         this.prefs = { ...preferences };
-        // Chuẩn hóa daysOff thành số nguyên
+        // Chuẩn hóa daysOff thành số nguyên (0=T2, 6=CN)
         if (this.prefs.daysOff && Array.isArray(this.prefs.daysOff)) {
             this.prefs.daysOff = this.prefs.daysOff.map(d => parseInt(d));
         } else {
             this.prefs.daysOff = [];
         }
-        // console.log("🔍 [Fitness] Config:", this.prefs);
     }
 
+    // --- HÀM TÍNH ĐIỂM (CORE) ---
     getFitness(chromosome, subjects) {
         chromosome.combinedMask = new Bitset(); 
         let score = WEIGHTS.BASE; 
         let conflictCount = 0;
-
         const genes = chromosome.genes;
 
-        // --- 1. HARD CONSTRAINT (Check trùng & Xây dựng Mask tổng) ---
+        // 1. HARD CONSTRAINT: Check Trùng
         for (let i = 0; i < genes.length; i++) {
             const classIdx = genes[i];
             if (classIdx === -1) continue;
 
+            // scheduleMask đã gộp tất cả các buổi của lớp đó
             const currentMask = subjects[i].classes[classIdx].scheduleMask; 
             
             if (currentMask) {
@@ -40,95 +40,135 @@ export class FitnessEvaluator {
             return chromosome.fitness;
         }
 
-        // --- 2. SOFT CONSTRAINTS ---
-
-        // A. Ngày nghỉ (Days Off) - DÙNG MASK ĐỂ CHECK
+        // 2. SOFT CONSTRAINTS
+        
+        // A. Ngày nghỉ (Dùng Mask quét Bit)
         if (this.prefs.daysOff.length > 0) {
             genes.forEach((classIdx, idx) => {
                 if (classIdx === -1) return;
-
-                // Lấy Mask của lớp hiện tại
                 const currentMask = subjects[idx].classes[classIdx].scheduleMask;
                 
                 if (currentMask) {
-                    // Duyệt qua các ngày bị cấm (trong setting)
                     this.prefs.daysOff.forEach(dayForbidden => {
-                        // Kiểm tra xem trong ngày cấm đó, có tiết nào sáng đèn không?
-                        // Thứ 2 (index 0) chiếm bit 0-9
-                        // Thứ 7 (index 5) chiếm bit 50-59
+                        // Kiểm tra 10 tiết của ngày đó (VD: T2 là bit 0-9)
                         const startBit = dayForbidden * 10;
                         const endBit = startBit + 9;
-                        
-                        let hasClassOnForbiddenDay = false;
-                        
-                        // Quét 10 tiết của ngày đó
                         for (let k = startBit; k <= endBit; k++) {
                             if (currentMask.test(k)) {
-                                hasClassOnForbiddenDay = true;
-                                break; // Dính 1 tiết là coi như đi học ngày đó rồi
+                                score -= WEIGHTS.PENALTY_DAY_OFF;
+                                break; // Dính 1 tiết là phạt, không cần check tiếp
                             }
-                        }
-
-                        if (hasClassOnForbiddenDay) {
-                            score -= WEIGHTS.PENALTY_DAY_OFF;
-                            // console.log(`❌ PHẠT: Môn ${subjects[idx].id} dính ngày nghỉ (Thứ ${dayForbidden + 2})`);
                         }
                     });
                 }
             });
         }
 
-        // B. Buổi ưu tiên (Session) - CŨNG DÙNG MASK
+        // B. Buổi ưu tiên
         if (this.prefs.session && this.prefs.session !== '0') {
-            const targetSession = parseInt(this.prefs.session); // 1=Sáng, 2=Chiều
-            
+            const targetSession = parseInt(this.prefs.session); 
             genes.forEach((classIdx, idx) => {
                 if (classIdx === -1) return;
                 const currentMask = subjects[idx].classes[classIdx].scheduleMask;
-                
                 if(currentMask) {
                     const session = this.getSessionFromMask(currentMask);
-                    if (session === targetSession) score += WEIGHTS.BONUS_SESSION;
-                    else if (session !== 3 && session !== 0) score -= WEIGHTS.PENALTY_WRONG_SESSION;
+                    if (session === targetSession) score += WEIGHTS.BONUS_SESSION; 
+                    else if (session !== 3 && session !== 0) score -= WEIGHTS.PENALTY_WRONG_SESSION; 
                 }
             });
         }
 
-        // C. Chiến thuật & Gaps (Dùng Mask tổng)
+        // C. Chiến thuật & Gap
         const dailyLoad = this.calculateDailyLoad(chromosome.combinedMask);
         const daysWithClasses = dailyLoad.filter(count => count > 0).length;
 
         if (this.prefs.strategy === 'compress') {
-            // Thưởng cho số ngày nghỉ trọn vẹn (7 - số ngày đi học)
             score += (7 - daysWithClasses) * WEIGHTS.BONUS_COMPRESS; 
         } else if (this.prefs.strategy === 'spread') {
             const heavyDays = dailyLoad.filter(count => count > 8).length;
             score -= heavyDays * WEIGHTS.PENALTY_SPREAD;
         }
 
-        if (this.prefs.noGaps) {
-            const gaps = this.calculateGaps(chromosome.combinedMask);
-            score -= gaps * WEIGHTS.PENALTY_GAP;
-        }
+        // Luôn tính Gap để trừ điểm nhẹ (hoặc nặng nếu user yêu cầu)
+        const gaps = this.calculateGaps(chromosome.combinedMask);
+        const gapPenalty = this.prefs.noGaps ? (WEIGHTS.PENALTY_GAP * 2) : WEIGHTS.PENALTY_GAP;
+        score -= gaps * gapPenalty;
 
         chromosome.fitness = score;
         return score;
     }
 
-    // --- HELPER MỚI (DÙNG MASK) ---
+    // --- HÀM PHÂN TÍCH CHI TIẾT (ĐỂ GHI LOG RA MÀN HÌNH) ---
+    getInsights(chromosome, subjects) {
+        const report = {
+            conflicts: 0,
+            penalties: [],
+            bonuses: []
+        };
+        
+        const combinedMask = new Bitset();
+        const genes = chromosome.genes;
 
-    // Xác định buổi học dựa trên bitmask
-    // 1: Sáng (tiết 0-4 của mỗi ngày), 2: Chiều (tiết 5-9), 3: Cả hai
+        // 1. Re-check Trùng
+        for (let i = 0; i < genes.length; i++) {
+            const classIdx = genes[i];
+            if (classIdx === -1) continue;
+            const cls = subjects[i].classes[classIdx];
+            const currentMask = cls.scheduleMask;
+            
+            if (currentMask) {
+                if (combinedMask.anyCommon(currentMask)) {
+                    report.conflicts++;
+                    report.penalties.push(`Trùng lịch: ${subjects[i].id} - Lớp ${cls.id}`);
+                }
+                combinedMask.or(currentMask);
+            }
+        }
+
+        // 2. Re-check Ngày nghỉ
+        if (this.prefs.daysOff.length > 0) {
+            genes.forEach((classIdx, idx) => {
+                if (classIdx === -1) return;
+                const cls = subjects[idx].classes[classIdx];
+                const currentMask = cls.scheduleMask;
+                
+                if (currentMask) {
+                    this.prefs.daysOff.forEach(dayForbidden => {
+                        const startBit = dayForbidden * 10;
+                        const endBit = startBit + 9;
+                        for (let k = startBit; k <= endBit; k++) {
+                            if (currentMask.test(k)) {
+                                report.penalties.push(`Học ngày nghỉ (Thứ ${dayForbidden + 2}): ${subjects[idx].id} (${cls.id})`);
+                                break;
+                            }
+                        }
+                    });
+                }
+            });
+        }
+
+        // 3. Re-check Gap
+        const gaps = this.calculateGaps(combinedMask);
+        if (gaps > 0) {
+            report.penalties.push(`Có ${gaps} tiết trống trong tuần.`);
+        }
+
+        return report;
+    }
+
+    // --- HELPERS (DÙNG MASK - CHÍNH XÁC CAO) ---
+
+    // 1: Sáng, 2: Chiều, 3: Cả hai, 0: Không rõ
     getSessionFromMask(mask) {
         let hasMorning = false;
         let hasAfternoon = false;
 
         for (let d = 0; d < 7; d++) {
-            // Check sáng (Tiết 1-5 -> index 0-4 trong 10 bit ngày)
+            // Sáng: bit 0-4
             for (let p = 0; p < 5; p++) {
                 if (mask.test(d * 10 + p)) hasMorning = true;
             }
-            // Check chiều (Tiết 6-10 -> index 5-9)
+            // Chiều: bit 5-9
             for (let p = 5; p < 10; p++) {
                 if (mask.test(d * 10 + p)) hasAfternoon = true;
             }
@@ -144,34 +184,124 @@ export class FitnessEvaluator {
         const load = new Array(7).fill(0);
         for (let d = 0; d < 7; d++) {
             for (let p = 0; p < 10; p++) {
-                if (combinedMask.test(d * 10 + p)) {
-                    load[d]++;
-                }
+                if (combinedMask.test(d * 10 + p)) load[d]++;
             }
         }
         return load;
     }
 
     calculateGaps(combinedMask) {
-        let gaps = 0;
+        let totalGaps = 0;
         for (let d = 0; d < 7; d++) {
             let first = -1;
             let last = -1;
-            let count = 0;
+            let learningBits = 0;
             
             for (let p = 0; p < 10; p++) {
                 if (combinedMask.test(d * 10 + p)) {
                     if (first === -1) first = p;
                     last = p;
-                    count++;
+                    learningBits++;
                 }
             }
 
             if (first !== -1 && last !== -1) {
                 const span = last - first + 1;
-                gaps += (span - count);
+                // Số tiết trống = Khoảng thời gian ở trường - Số tiết thực học
+                totalGaps += (span - learningBits);
             }
         }
-        return gaps;
+        return totalGaps;
+    }
+
+    // --- HELPER QUAN TRỌNG: XỬ LÝ MẢNG LỊCH ---
+    
+    getDaysFromClass(cls) {
+        const days = new Set();
+        if (!cls.schedule) return [];
+
+        // 1. CHUẨN HÓA: Ép kiểu thành mảng nếu nó là string
+        // VD: "T2(1-3)" -> ["T2(1-3)"]
+        // VD: ["T3(7-9)", "T4(4-6)"] -> Giữ nguyên
+        const schedules = Array.isArray(cls.schedule) ? cls.schedule : [cls.schedule];
+
+        // 2. DUYỆT TẤT CẢ CÁC BUỔI
+        schedules.forEach(s => {
+            const str = String(s).toUpperCase().trim();
+            
+            // Regex bắt Thứ 2 -> Thứ 7 (VD: T2, THỨ 2, T 2)
+            let matchT = str.match(/T\s*([2-7])/); 
+            if (!matchT) matchT = str.match(/THU\s*([2-7])/);
+
+            if (matchT) {
+                const thu = parseInt(matchT[1]);
+                days.add(thu - 2); // T2 -> 0
+            }
+
+            // Regex bắt Chủ Nhật
+            if (str.includes('CN') || str.includes('T8') || str.includes('CHU NHAT')) {
+                days.add(6);
+            }
+        });
+
+        // VD: Trả về [1, 2] nghĩa là lớp này học cả Thứ 3 và Thứ 4
+        return Array.from(days);
+    }
+
+    // Xác định buổi học dựa trên Mask (Chính xác nhất cho nhiều buổi)
+    getSessionFromMask(mask) {
+        if (!mask) return 0;
+        let hasMorning = false;
+        let hasAfternoon = false;
+
+        for (let d = 0; d < 7; d++) {
+            // Check sáng (Tiết 1-5 -> bit 0-4 của ngày d)
+            for (let p = 0; p < 5; p++) {
+                if (mask.test(d * 10 + p)) hasMorning = true;
+            }
+            // Check chiều (Tiết 6-10 -> bit 5-9 của ngày d)
+            for (let p = 5; p < 10; p++) {
+                if (mask.test(d * 10 + p)) hasAfternoon = true;
+            }
+        }
+
+        if (hasMorning && hasAfternoon) return 3; // Học cả ngày (hoặc sáng thứ này, chiều thứ kia)
+        if (hasMorning) return 1;
+        if (hasAfternoon) return 2;
+        return 0;
+    }
+
+    // Các hàm tính Gaps, Load giữ nguyên như cũ (vì nó dùng combinedMask đã gộp rồi)
+    calculateDailyLoad(combinedMask) {
+        const load = new Array(7).fill(0);
+        for (let d = 0; d < 7; d++) {
+            for (let p = 0; p < 10; p++) {
+                if (combinedMask.test(d * 10 + p)) load[d]++;
+            }
+        }
+        return load;
+    }
+
+    calculateGaps(combinedMask) {
+        let totalGaps = 0;
+        for (let d = 0; d < 7; d++) {
+            let first = -1;
+            let last = -1;
+            let learningBits = 0;
+            
+            for (let p = 0; p < 10; p++) {
+                if (combinedMask.test(d * 10 + p)) {
+                    if (first === -1) first = p;
+                    last = p;
+                    learningBits++;
+                }
+            }
+
+            if (first !== -1 && last !== -1) {
+                const span = last - first + 1;
+                totalGaps += (span - learningBits);
+            }
+        }
+        return totalGaps;
     }
 }
