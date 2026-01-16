@@ -48,38 +48,62 @@
             modal.style.cssText = "position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:999999;display:flex;justify-content:center;align-items:center;font-family:'Segoe UI', sans-serif;";
             
             modal.innerHTML = `
-                <div style="background:#fff;width:500px;max-width:95%;border-radius:12px;box-shadow:0 10px 25px rgba(0,0,0,0.2);overflow:hidden;animation:slideDown 0.3s ease-out;">
-                    <div style="background:#004A98;padding:15px 20px;color:white;">
-                        <h3 style="margin:0;font-size:18px;font-weight:600;">Cấu hình lấy dữ liệu</h3>
+                <div style="background:#fff;width:550px;max-width:95%;border-radius:12px;box-shadow:0 20px 50px rgba(0,0,0,0.3);overflow:hidden;animation:slideDown 0.3s ease-out;display:flex;flex-direction:column;max-height:90vh;">
+                    
+                    <!-- Header -->
+                    <div style="background:#004A98;padding:16px 24px;color:white;flex-shrink:0;">
+                        <h3 style="margin:0;font-size:18px;font-weight:600;display:flex;align-items:center;gap:8px;">
+                            <span>⚙️</span> Cấu hình lấy dữ liệu
+                        </h3>
                     </div>
                     
-                    <div style="padding:20px;max-height:80vh;overflow-y:auto;">
-                        <div style="background:#f0f9ff;border-left:4px solid #004A98;padding:12px;margin-bottom:20px;font-size:13px;color:#333;line-height:1.5;">
-                            <strong>🛡️ Cam kết bảo mật:</strong><br>
-                            Toàn bộ dữ liệu (Điểm, Lịch thi, MSSV) chỉ được xử lý trên trình duyệt và lưu vào <code>localStorage</code> của máy bạn. Chúng tôi cam kết <strong>KHÔNG</strong> thu thập hay gửi dữ liệu đi bất cứ đâu.
+                    <!-- Body (Scrollable) -->
+                    <div style="padding:24px;overflow-y:auto;flex:1;">
+                        
+                        <!-- Privacy Box (Updated) -->
+                        <div style="margin-bottom: 24px;">
+                            <h4 style="margin: 0 0 12px; font-size: 14px; color: #004A98; text-transform: uppercase; font-weight: 700; letter-spacing: 0.5px;">
+                                🛡️ Cam kết về quyền riêng tư & dữ liệu
+                            </h4>
+                            <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 16px; max-height: 180px; overflow-y: auto; font-size: 13px; color: #475569; line-height: 1.6; box-shadow: inset 0 2px 4px rgba(0,0,0,0.02);">
+                                <p style="margin-top: 0; font-weight: 700; color: #1e293b; margin-bottom: 4px;">1. Cơ chế lưu trữ cục bộ (Local Storage)</p>
+                                <p style="margin-bottom: 12px; margin-top: 0;">Toàn bộ dữ liệu được trích xuất (điểm số, lịch thi, thông tin cá nhân) chỉ được lưu trữ duy nhất trên trình duyệt của thiết bị bạn đang sử dụng (thông qua localStorage).</p>
+                                
+                                <p style="margin-top: 0; font-weight: 700; color: #1e293b; margin-bottom: 4px;">2. Giới hạn truy cập của nhà phát triển</p>
+                                <p style="margin-bottom: 4px; margin-top: 0;">Chúng tôi khẳng định:</p>
+                                <ul style="margin: 0 0 12px 20px; padding: 0; list-style-type: disc;">
+                                    <li><strong>KHÔNG</strong> có máy chủ lưu trữ dữ liệu cá nhân (No Database).</li>
+                                    <li><strong>KHÔNG</strong> thu thập, theo dõi hay gửi bất kỳ thông tin nào về phía chúng tôi hoặc bên thứ ba.</li>
+                                    <li><strong>KHÔNG THỂ</strong> truy cập dữ liệu của bạn ngay cả khi chúng tôi muốn, vì dữ liệu nằm hoàn toàn trên máy của bạn.</li>
+                                </ul>
+
+                                <p style="margin-top: 0; font-weight: 700; color: #1e293b; margin-bottom: 4px;">3. Cam kết của người dùng</p>
+                                <p style="margin-bottom: 0; margin-top: 0;">Bằng việc tiếp tục sử dụng công cụ, bạn xác nhận đã hiểu rõ cơ chế hoạt động trên và đồng ý rằng việc bảo mật thiết bị cá nhân là trách nhiệm của bạn.</p>
+                            </div>
                         </div>
 
-                        <div style="display:flex;flex-direction:column;gap:15px;">
+                        <!-- Config Options -->
+                        <div style="display:flex;flex-direction:column;gap:16px;border-top: 1px solid #eee; padding-top: 20px;">
                             
                             <div style="display:flex;gap:20px;">
-                                <label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-weight:500;">
-                                    <input type="checkbox" id="opt-info" checked disabled> Thông tin & Điểm
+                                <label style="display:flex;align-items:center;gap:8px;cursor:not-allowed;font-weight:600;color:#64748b;">
+                                    <input type="checkbox" id="opt-info" checked disabled style="width:16px;height:16px;accent-color:#004A98;"> Thông tin & Điểm
                                 </label>
-                                <label style="display:flex;align-items:center;gap:8px;cursor:pointer;">
-                                    <input type="checkbox" id="opt-tuition" checked> Học phí
+                                <label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-weight:600;color:#334155;">
+                                    <input type="checkbox" id="opt-tuition" checked style="width:16px;height:16px;accent-color:#004A98;"> Học phí
                                 </label>
                             </div>
 
-                            <hr style="border:0;border-top:1px solid #eee;margin:5px 0;">
+                            <div style="background:#f1f5f9; height:1px;"></div>
 
                             <div>
-                                <label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-weight:600;margin-bottom:8px;">
-                                    <input type="checkbox" id="opt-exam" checked onchange="toggleGroup('grp-exam', this.checked)"> 
+                                <label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-weight:600;margin-bottom:10px;color:#004A98;">
+                                    <input type="checkbox" id="opt-exam" checked onchange="toggleGroup('grp-exam', this.checked)" style="width:16px;height:16px;accent-color:#004A98;"> 
                                     Lấy Lịch Thi
                                 </label>
-                                <div id="grp-exam" style="display:flex;gap:10px;padding-left:24px;">
-                                    <input type="text" id="exam-year" value="25-26" placeholder="Năm (vd: 25-26)" style="width:100px;padding:6px;border:1px solid #ccc;border-radius:4px;">
-                                    <select id="exam-sem" style="padding:6px;border:1px solid #ccc;border-radius:4px;">
+                                <div id="grp-exam" style="display:flex;gap:10px;padding-left:28px;">
+                                    <input type="text" id="exam-year" value="25-26" placeholder="Năm (vd: 25-26)" style="width:110px;padding:8px;border:1px solid #cbd5e1;border-radius:6px;font-size:13px;outline:none;">
+                                    <select id="exam-sem" style="padding:8px;border:1px solid #cbd5e1;border-radius:6px;font-size:13px;outline:none;background:white;">
                                         <option value="1">Học kỳ 1</option>
                                         <option value="2">Học kỳ 2</option>
                                         <option value="3">Học kỳ 3</option>
@@ -88,13 +112,13 @@
                             </div>
 
                             <div>
-                                <label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-weight:600;margin-bottom:8px;">
-                                    <input type="checkbox" id="opt-class" checked onchange="toggleGroup('grp-class', this.checked)"> 
+                                <label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-weight:600;margin-bottom:10px;color:#004A98;">
+                                    <input type="checkbox" id="opt-class" checked onchange="toggleGroup('grp-class', this.checked)" style="width:16px;height:16px;accent-color:#004A98;"> 
                                     Lấy Danh Sách Lớp Mở
                                 </label>
-                                <div id="grp-class" style="display:flex;gap:10px;padding-left:24px;">
-                                    <input type="text" id="class-year" value="25-26" placeholder="Năm (vd: 25-26)" style="width:100px;padding:6px;border:1px solid #ccc;border-radius:4px;">
-                                    <select id="class-sem" style="padding:6px;border:1px solid #ccc;border-radius:4px;">
+                                <div id="grp-class" style="display:flex;gap:10px;padding-left:28px;">
+                                    <input type="text" id="class-year" value="25-26" placeholder="Năm (vd: 25-26)" style="width:110px;padding:8px;border:1px solid #cbd5e1;border-radius:6px;font-size:13px;outline:none;">
+                                    <select id="class-sem" style="padding:8px;border:1px solid #cbd5e1;border-radius:6px;font-size:13px;outline:none;background:white;">
                                         <option value="1">Học kỳ 1</option>
                                         <option value="2">Học kỳ 2</option>
                                         <option value="3">Học kỳ 3</option>
@@ -104,12 +128,17 @@
                         </div>
                     </div>
 
-                    <div style="background:#f9fafb;padding:15px 20px;display:flex;justify-content:flex-end;gap:10px;border-top:1px solid #eee;">
-                        <button id="btn-cancel" style="padding:8px 16px;border:1px solid #ccc;background:white;border-radius:6px;cursor:pointer;font-weight:500;">Hủy</button>
-                        <button id="btn-agree" style="padding:8px 16px;border:none;background:#004A98;color:white;border-radius:6px;cursor:pointer;font-weight:500;box-shadow:0 2px 5px rgba(0,74,152,0.3);">Đồng ý & Bắt đầu</button>
+                    <!-- Footer -->
+                    <div style="background:#f8fafc;padding:16px 24px;display:flex;justify-content:flex-end;gap:12px;border-top:1px solid #e2e8f0;flex-shrink:0;">
+                        <button id="btn-cancel" style="padding:8px 16px;border:1px solid #cbd5e1;background:white;color:#475569;border-radius:6px;cursor:pointer;font-weight:600;font-size:13px;transition:all 0.2s;">Hủy</button>
+                        <button id="btn-agree" style="padding:8px 20px;border:none;background:#004A98;color:white;border-radius:6px;cursor:pointer;font-weight:600;font-size:13px;box-shadow:0 2px 4px rgba(0,74,152,0.2);transition:all 0.2s;">Đồng ý & Bắt đầu</button>
                     </div>
                 </div>
-                <style>@keyframes slideDown{from{opacity:0;transform:translateY(-20px)}to{opacity:1;transform:translateY(0)}}</style>
+                <style>
+                    @keyframes slideDown{from{opacity:0;transform:translateY(-20px)}to{opacity:1;transform:translateY(0)}}
+                    #btn-cancel:hover { background: #f1f5f9; }
+                    #btn-agree:hover { background: #003875; transform: translateY(-1px); box-shadow: 0 4px 6px rgba(0,74,152,0.3); }
+                </style>
             `;
 
             document.body.appendChild(modal);
@@ -120,6 +149,11 @@
                 if(el) {
                     el.style.opacity = show ? 1 : 0.5;
                     el.style.pointerEvents = show ? 'auto' : 'none';
+                    // Tự động focus vào input nếu enable
+                    if(show) {
+                        const input = el.querySelector('input');
+                        if(input) input.focus();
+                    }
                 }
             };
 

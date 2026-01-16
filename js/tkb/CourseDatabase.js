@@ -20,23 +20,28 @@ export default class CourseDatabase {
         rawData.forEach((subj, index) => {
             // Chuẩn hóa danh sách lớp
             const processedClasses = subj.classes.map(cls => {
-                // Nếu chưa có mask (data từ Portal), tính toán từ schedule string
-                let maskData = cls.mask;
-                if (!maskData && cls.schedule) {
-                    maskData = encodeScheduleToMask(cls.schedule);
-                }
+                let bitsetMask = new Bitset();
                 
-                // Fallback nếu không có gì cả
-                if (!maskData) maskData = [0, 0, 0, 0];
-
-                // 2. Chuyển đổi Array [int] -> Đối tượng Bitset
-                const bitsetMask = new Bitset();
-                bitsetMask.loadFromData(maskData);
+                // Ưu tiên 1: Dùng Mask có sẵn (nếu là file JSON tĩnh)
+                if (cls.mask && Array.isArray(cls.mask) && cls.mask.length === 4) {
+                    bitsetMask.loadFromData(cls.mask);
+                } 
+                // Ưu tiên 2: Tính toán từ lịch học (nếu là dữ liệu Portal)
+                else if (cls.schedule) {
+                    // Gọi hàm encode mới đã sửa ở Utils.js
+                    const calculatedData = encodeScheduleToMask(cls.schedule);
+                    // calculatedData trả về { parts: [...] }
+                    bitsetMask.loadFromData(calculatedData.parts);
+                } 
+                // Fallback: Mask rỗng
+                else {
+                    bitsetMask.loadFromData([0,0,0,0]);
+                }
 
                 return {
                     id: cls.id,
-                    schedule: cls.schedule, // Giữ lại để hiển thị
-                    scheduleMask: bitsetMask // 3. Đổi tên thành scheduleMask và lưu Object Bitset
+                    schedule: cls.schedule,
+                    scheduleMask: bitsetMask // Lưu Object Bitset
                 };
             });
 
@@ -47,7 +52,6 @@ export default class CourseDatabase {
                 classes: processedClasses
             });
 
-            // Tạo map để tra cứu nhanh theo ID môn học
             this.mapIdToIndex[subj.id] = index;
         });
     }

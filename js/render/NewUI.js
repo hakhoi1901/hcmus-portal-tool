@@ -39,7 +39,8 @@ export function renderSidebar(activeId = 'roadmap') {
     
     let html = '';
     SIDEBAR_CONFIG.forEach(group => {
-        html += `<div class="mb-6"><p class="px-3 mb-2 text-xs text-blue-300 uppercase tracking-wider truncate" style="font-weight: 500;">${group.category}</p><ul class="space-y-1">`;
+        // Thêm class sidebar-text cho tiêu đề nhóm để ẩn khi thu nhỏ
+        html += `<div class="mb-6"><p class="px-3 mb-2 text-xs text-blue-300 uppercase tracking-wider truncate sidebar-text" style="font-weight: 500;">${group.category}</p><ul class="space-y-1">`;
         group.items.forEach(item => {
             const isActive = item.id === activeId;
             const bgClass = isActive ? "bg-white/10" : "hover:bg-white/5";
@@ -48,10 +49,10 @@ export function renderSidebar(activeId = 'roadmap') {
             const subLabel = item.subLabel ? `<p class="text-blue-300 text-xs mt-0.5 leading-tight truncate font-normal">${item.subLabel}</p>` : "";
 
             html += `<li>
-                <a href="#" onclick="window.switchPage('${item.id}')" class="flex items-start gap-3 px-3 py-2.5 rounded transition-all group relative ${bgClass}">
+                <a href="#" onclick="window.switchPage('${item.id}')" class="flex items-center gap-3 px-3 py-2.5 rounded transition-all group relative ${bgClass} sidebar-item">
                     ${indicator}
-                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="flex-shrink-0 mt-0.5 text-current">${item.icon}</svg>
-                    <div class="flex-1 min-w-0">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="flex-shrink-0 text-current">${item.icon}</svg>
+                    <div class="flex-1 min-w-0 sidebar-text">
                         <p class="truncate ${textClass} font-${isActive ? 'medium' : 'normal'}">${item.label}</p>
                         ${subLabel}
                     </div>
@@ -86,12 +87,29 @@ let GLOBAL_COURSES_REF = [];
 export function renderNewUI(courses) {
     if (!courses || courses.length === 0) return;
 
-    if (SELECTED_COURSES.size === 0) {
-        loadBasket();
-    }
-    
+    if (SELECTED_COURSES.size === 0) loadBasket();
     GLOBAL_COURSES_REF = courses;
     
+    // --- [ĐOẠN ĐƯỢC THÊM MỚI] ---
+    // Kiểm tra xem các môn trong giỏ hàng có thực sự tồn tại trong danh sách courses mới không
+    const availableIds = new Set(courses.map(c => c.id));
+    const validSelection = new Set();
+    
+    // Chỉ giữ lại những môn có ID nằm trong danh sách mới
+    SELECTED_COURSES.forEach(id => {
+        if (availableIds.has(id)) {
+            validSelection.add(id);
+        }
+    });
+
+    // Nếu số lượng khác nhau (tức là có môn bị mất), cập nhật lại Set và Storage
+    if (validSelection.size !== SELECTED_COURSES.size) {
+        console.log(`♻️ Dọn dẹp giỏ hàng: Xóa ${SELECTED_COURSES.size - validSelection.size} môn không còn tồn tại.`);
+        SELECTED_COURSES = validSelection;
+        saveBasket(); // Lưu trạng thái sạch sẽ vào localStorage ngay lập tức
+    }
+    // -----------------------------
+
     window.switchPage('roadmap'); 
     updateHeaderInfo();
 
@@ -99,25 +117,19 @@ export function renderNewUI(courses) {
     if (!container) return;
     container.innerHTML = '';
     
-    // CSS Container
     container.className = "space-y-8 w-full max-w-7xl mx-auto pb-24 px-2"; 
 
-    // Map dữ liệu lớp mở
     const openCoursesMap = new Map();
     courses.forEach(c => openCoursesMap.set(c.id, c));
-
-    // Biến lưu các ID đã được render để tìm môn mồ côi
     const renderedCourseIds = new Set();
 
-    // 1. Render theo Categories (Nếu có dữ liệu)
     if (AUX_DATA.categories && Object.keys(AUX_DATA.categories).length > 0) {
         
-        // Hàm đệ quy render nhóm
         const renderCategoryRecursive = (key, categoryData, level = 0) => {
             let htmlContent = '';
             let hasAnyCourse = false;
 
-            // A. Tìm và Render các môn học trực tiếp của nhóm này
+            // A. Tìm và Render các môn học trực tiếp
             if (categoryData.courses && Array.isArray(categoryData.courses)) {
                 const validCourses = categoryData.courses
                     .map(id => openCoursesMap.get(id))
@@ -125,7 +137,6 @@ export function renderNewUI(courses) {
 
                 if (validCourses.length > 0) {
                     hasAnyCourse = true;
-                    // Đánh dấu đã render
                     validCourses.forEach(c => renderedCourseIds.add(c.id));
 
                     htmlContent += `<div class="space-y-2 mt-2 mb-4 w-full">`;
@@ -136,13 +147,11 @@ export function renderNewUI(courses) {
                 }
             }
 
-            // B. Đệ quy Render các nhóm con (Breakdown hoặc Sub-groups)
-            // Tìm các key con là object (trừ metadata)
+            // B. Đệ quy
             const subKeys = [];
             if (categoryData.breakdown) {
                 Object.keys(categoryData.breakdown).forEach(k => subKeys.push({key: k, data: categoryData.breakdown[k]}));
             } else {
-                // Fallback cho cấu trúc không có 'breakdown'
                 for (const [k, v] of Object.entries(categoryData)) {
                     if (typeof v === 'object' && v !== null && k !== 'courses' && k !== 'breakdown') {
                          if(v.name || v.courses || v.breakdown || v.sub_groups) subKeys.push({key: k, data: v});
@@ -159,25 +168,30 @@ export function renderNewUI(courses) {
                 }
             });
 
-            // C. Nếu nhóm này (hoặc con nó) có chứa môn học -> Sinh HTML Wrapper
             if (hasAnyCourse) {
                 const title = categoryData.name || formatCategoryName(key);
                 const note = categoryData.note ? `<span class="text-xs font-normal text-gray-500 ml-2">(${categoryData.note})</span>` : '';
                 const credits = categoryData.credits ? `<span class="px-2 py-0.5 bg-gray-100 text-gray-600 text-[10px] rounded-full ml-2 font-normal">Yêu cầu: ${categoryData.credits} TC</span>` : '';
 
-                // Style tiêu đề
                 let headerClass = "";
-                let wrapperClass = "filterable-group w-full transition-all duration-300"; // Class để lọc
+                
+                // === CHỈNH SỬA CĂN CHỈNH TẠI ĐÂY ===
+                // Bỏ w-full để div tự co dãn theo margin, không bị tràn
+                let wrapperClass = "filterable-group transition-all duration-300"; 
 
                 if (level === 0) {
+                    // Cấp 1 (Lớn nhất): Không thụt lề
                     headerClass = "text-xl text-[#004A98] border-b border-gray-200 pb-2 mt-8 mb-4 uppercase tracking-wide font-bold flex items-center";
                     wrapperClass += " mb-8";
                 } else if (level === 1) {
+                    // Cấp 2: Thụt lề nhẹ, viền trái đậm
                     headerClass = "text-lg text-gray-800 mt-4 mb-3 font-semibold flex items-center";
-                    wrapperClass += " ml-0 md:ml-4 border-l-2 border-gray-100 pl-4";
+                    // Dùng pl-3 thay vì margin lớn để tránh mất diện tích
+                    wrapperClass += " ml-1 md:ml-2 border-l-4 border-gray-100 pl-3"; 
                 } else {
+                    // Cấp 3 trở đi: Thụt lề nhỏ, viền trái chấm bi
                     headerClass = "text-sm text-gray-700 mt-2 mb-2 font-medium flex items-center";
-                    wrapperClass += " ml-4 pl-4 border-l border-dotted border-gray-200";
+                    wrapperClass += " ml-2 pl-3 border-l border-dotted border-gray-300";
                 }
 
                 const finalHtml = `
@@ -206,7 +220,7 @@ export function renderNewUI(courses) {
 
         container.innerHTML = mainHtml;
 
-        // 2. Render Môn Mồ Côi (Chưa được phân nhóm)
+        // 2. Render Môn Mồ Côi
         const orphanCourses = courses.filter(c => !renderedCourseIds.has(c.id));
         if (orphanCourses.length > 0) {
             const orphanHtml = `
@@ -224,32 +238,25 @@ export function renderNewUI(courses) {
         }
 
     } else {
-        // Fallback nếu không có file Categories
-        renderDefaultGroups(courses, container);
+        // Fallback
+        container.innerHTML = courses.map(c => renderCourseCard(c)).join('');
     }
-
     updateBasketUI();
 }
 
 // --- HÀM VẼ CARD MÔN HỌC  ---
 export function renderCourseCard(course) {
     const isSelected = SELECTED_COURSES.has(course.id);
-    
-    // Fallback thông tin
-    let credits = course.credits;
-    if (!credits || credits == 0) {
-        if (AUX_DATA && AUX_DATA.allCourses) {
-            const meta = AUX_DATA.allCourses.find(ac => ac.course_id === course.id);
-            if (meta) credits = meta.credits;
-        }
-        if (!credits) credits = '?';
+    let credits = course.credits || '?';
+    if (credits === '?' && AUX_DATA.allCourses) {
+        const meta = AUX_DATA.allCourses.find(ac => ac.course_id === course.id);
+        if (meta) credits = meta.credits;
     }
 
-    // Xử lý màu sắc và trạng thái
     let borderClass = "border-gray-200 bg-white hover:bg-gray-50 hover:border-gray-300";
     let statusBadge = `<span class="px-2.5 py-1 bg-green-100 text-green-700 text-xs rounded-full font-medium inline-block whitespace-nowrap">Sẵn sàng</span>`;
-    let disabledAttr = ""; // Checkbox có bị vô hiệu hóa không?
-    let opacityClass = ""; // Làm mờ nếu không đủ điều kiện
+    let disabledAttr = "";
+    let opacityClass = "";
 
     if (course.recommendationStatus) {
         switch (course.recommendationStatus) {
@@ -261,7 +268,6 @@ export function renderCourseCard(course) {
                 borderClass = "border-blue-200 bg-blue-50 hover:bg-blue-100"; 
                 statusBadge = `<span class="px-2.5 py-1 bg-blue-100 text-blue-700 text-xs rounded-full font-medium inline-block whitespace-nowrap">Bắt buộc</span>`; 
                 break;
-            // Ví dụ trạng thái chưa đủ điều kiện (giả lập)
             case 'LOCKED':
                 borderClass = "border-gray-200 bg-gray-50";
                 statusBadge = `<span class="px-2.5 py-1 bg-gray-100 text-gray-500 text-xs rounded-full font-medium inline-block whitespace-nowrap">Chưa đủ điều kiện</span>`;
@@ -271,24 +277,22 @@ export function renderCourseCard(course) {
         }
     }
 
-    // Nếu đang được chọn thì highlight
     if (isSelected) {
         borderClass = "border-[#004A98] bg-blue-50/20 ring-1 ring-[#004A98]";
     }
 
+    setTimeout(() => {
+        const savedData = JSON.parse(localStorage.getItem('hcmus_selected_classes') || '{}');
+        const selected = savedData[course.id];
+        if (typeof window.updateCourseRowUI === 'function') {
+             window.updateCourseRowUI(course.id, selected ? selected.length : 0, !selected);
+        }
+    }, 0);
+
     return `
         <div class="group course-row w-full transition-all duration-200 mb-2 ${opacityClass}" id="row-${course.id}" data-name="${course.name.toLowerCase()}">
             <div class="flex items-center gap-3 px-4 py-3 border rounded-lg transition-all ${borderClass}">
-                
-                <input 
-                    type="checkbox" 
-                    class="chk-course w-4 h-4 text-[#004A98] border-gray-300 rounded focus:ring-[#004A98] cursor-pointer disabled:cursor-not-allowed flex-shrink-0"
-                    value="${course.id}"
-                    id="chk-${course.id}"
-                    onchange="window.toggleNewRow('${course.id}')"
-                    ${isSelected ? 'checked' : ''}
-                    ${disabledAttr}
-                >
+                <input type="checkbox" class="chk-course w-4 h-4 text-[#004A98] border-gray-300 rounded focus:ring-[#004A98] cursor-pointer disabled:cursor-not-allowed flex-shrink-0" value="${course.id}" id="chk-${course.id}" onchange="window.toggleNewRow('${course.id}')" ${isSelected ? 'checked' : ''} ${disabledAttr}>
 
                 <div class="w-24 flex-shrink-0">
                     <p class="text-sm font-semibold text-gray-900 truncate" title="${course.id}">${course.id}</p>
@@ -297,27 +301,19 @@ export function renderCourseCard(course) {
                 <div class="flex-1 min-w-0 flex flex-col justify-center">
                     <div class="flex items-center justify-between gap-2">
                         <p class="text-sm text-gray-900 truncate font-medium" title="${course.name}">${course.name}</p>
-                        
-                        <button onclick="openClassModal('${course.id}')" 
-                                class="flex items-center gap-1.5 px-2 py-1 rounded border border-gray-200 bg-white text-xs font-medium text-gray-600 hover:text-[#004A98] hover:border-blue-200 transition-colors shadow-sm"
-                                title="Bấm để lọc lớp học">
+                        <button onclick="window.openClassModal('${course.id}')" class="flex items-center gap-1.5 px-2 py-1 rounded border border-gray-200 bg-white text-xs font-medium text-gray-600 hover:text-[#004A98] hover:border-blue-200 transition-colors shadow-sm" title="Bấm để lọc lớp học">
                             <span id="label-count-${course.id}">Tất cả</span>
                             <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M7 12h10"/><path d="M10 18h4"/></svg>
                         </button>
                     </div>
-                    
-                    <p id="desc-sel-${course.id}" class="text-[10px] text-gray-400 truncate mt-0.5">
-                        Mặc định lấy tất cả các lớp mở
-                    </p>
+                    <p id="desc-sel-${course.id}" class="text-[10px] text-gray-400 truncate mt-0.5">Mặc định lấy tất cả các lớp mở</p>
                 </div>
 
                 <div class="w-16 flex-shrink-0 text-center">
                     <span class="px-2 py-1 bg-gray-100 text-gray-700 text-xs rounded font-medium whitespace-nowrap">${credits} TC</span>
                 </div>
 
-                <div class="w-32 flex-shrink-0 hidden sm:block">
-                    ${statusBadge}
-                </div>
+                <div class="w-32 flex-shrink-0 hidden sm:block">${statusBadge}</div>
 
                 <div class="flex items-center gap-1 flex-shrink-0">
                     <button onclick="window.openInfoModal('${course.id}')" class="p-1.5 hover:bg-gray-200 rounded transition-colors text-gray-500 hover:text-[#004A98]" title="Xem chi tiết">
@@ -327,10 +323,8 @@ export function renderCourseCard(course) {
                         <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-git-branch"><line x1="6" x2="6" y1="3" y2="15"/><circle cx="18" cy="6" r="3"/><circle cx="6" cy="18" r="3"/><path d="M18 9a9 9 0 0 1-9 9"/></svg>
                     </button>
                 </div>
-
             </div>
-        </div>
-    `;
+        </div>`;
 }
 
 // Hàm này gọi 1 lần khi khởi động app để tạo khung Modal ẩn

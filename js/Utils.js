@@ -7,7 +7,6 @@ import { CourseRecommender } from './tkb/Recommender.js';
 import { renderNewUI, updateHeaderInfo, fillStudentProfile, injectClassSelectionModal } from './render/NewUI.js';
 import { logStatus, logSuccess, logWarning, logAlgo, logData, logError } from './styleLog.js';
 
-
 // ====== BIẾN TOÀN CỤC ======
 
 // lưu các dữ liệu môn học 
@@ -41,11 +40,19 @@ export function encodeScheduleToMask(scheduleInput) {
     // 2. Duyệt qua từng chuỗi lịch để bật bit
     scheduleArr.forEach(str => {
         if (!str) return;
-        const match = str.match(/T(\d|CN)\s*\((\d+)-(\d+)\)/); // Regex bắt T2(1-3)
+        
+        // Cập nhật Regex để bắt được số thập phân (3.5, 8.5)
+        // (\d+(\.\d+)?) : Bắt số nguyên hoặc số thập phân
+        const match = str.match(/T(\d|CN)\s*\((\d+(?:\.\d+)?)-(\d+(?:\.\d+)?)\)/);
+        
         if (match) {
             let day = match[1] === 'CN' ? 6 : parseInt(match[1]) - 2;
-            const start = parseInt(match[2]);
-            const end = parseInt(match[3]);
+            
+            // Xử lý làm tròn:
+            // 3.5 -> Bắt đầu từ tiết 4 -> Math.ceil(3.5) = 4
+            // 8.5 -> Bắt đầu từ tiết 9 -> Math.ceil(8.5) = 9
+            const start = Math.ceil(parseFloat(match[2]));
+            const end = Math.floor(parseFloat(match[3])); // Thường kết thúc là số chẵn, floor cho chắc
 
             // Bật bit cho từng tiết học
             for (let i = start; i <= end; i++) {
@@ -63,18 +70,16 @@ export function decodeScheduleMask(parts) {
     let slots = [];
     
     // FIX QUAN TRỌNG: Luôn chạy đủ 4 phần (128 bit) để quét hết cả tuần
-    // Dữ liệu JSON có thể bị cắt bớt (ví dụ [480]), nếu chỉ loop i < parts.length sẽ mất các ngày sau.
     for (let i = 0; i < 4; i++) {
-        // Nếu mảng parts ngắn quá, coi như phần thiếu là 0
         const part = (parts && parts[i] !== undefined) ? parts[i] : 0;
         
-        if (part === 0) continue; // Tối ưu: Không có tiết nào ở phần này
+        if (part === 0) continue; 
 
         for (let bit = 0; bit < 32; bit++) {
             if ((part & (1 << bit)) !== 0) {
                 let totalBit = i * 32 + bit;
                 let day = Math.floor(totalBit / 10);
-                let period = totalBit % 10;
+                let period = totalBit % 10; // 0-9 tương ứng tiết 1-10
                 // period 0 = tiết 1.
                 if (day < 7) slots.push({ day, period });
             }
@@ -605,8 +610,6 @@ window.loadSettingsToUI = function() {
         if (gapChk) gapChk.checked = true;
     }
 }
-
-
 
 export function loadSettingsToUI() {
     // 1. Đọc dữ liệu đã lưu
