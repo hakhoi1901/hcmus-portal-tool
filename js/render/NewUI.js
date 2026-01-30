@@ -7,7 +7,7 @@ import { LAST_SOLVER_RESULTS, saveScheduleToStorage, getSavedSchedules, deleteSa
 
 const MAX_CREDITS = 25; // Giới hạn tín chỉ tối đa
 
-// --- CẤU HÌNH MENU ---
+// === CẤU HÌNH MENU ===
 export const SIDEBAR_CONFIG = [
     {
         category: "Chính",

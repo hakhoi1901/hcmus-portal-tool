@@ -60,27 +60,28 @@
                     <!-- Body (Scrollable) -->
                     <div style="padding:24px;overflow-y:auto;flex:1;">
                         
-                        <!-- Privacy Box (Updated) -->
+                        <!-- [THAY ĐỔI]: Cập nhật nội dung Tuyên bố miễn trừ trách nhiệm & Điều khoản -->
                         <div style="margin-bottom: 24px;">
-                            <h4 style="margin: 0 0 12px; font-size: 14px; color: #004A98; text-transform: uppercase; font-weight: 700; letter-spacing: 0.5px;">
-                                🛡️ Cam kết về quyền riêng tư & dữ liệu
+                            <h4 style="margin: 0 0 12px; font-size: 14px; color: #dc2626; text-transform: uppercase; font-weight: 800; letter-spacing: 0.5px;">
+                                ⚠️ TUYÊN BỐ MIỄN TRỪ TRÁCH NHIỆM & ĐIỀU KHOẢN SỬ DỤNG
                             </h4>
-                            <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 16px; max-height: 180px; overflow-y: auto; font-size: 13px; color: #475569; line-height: 1.6; box-shadow: inset 0 2px 4px rgba(0,0,0,0.02);">
-                                <p style="margin-top: 0; font-weight: 700; color: #1e293b; margin-bottom: 4px;">1. Cơ chế lưu trữ cục bộ (Local Storage)</p>
-                                <p style="margin-bottom: 12px; margin-top: 0;">Toàn bộ dữ liệu được trích xuất (điểm số, lịch thi, thông tin cá nhân) chỉ được lưu trữ duy nhất trên trình duyệt của thiết bị bạn đang sử dụng (thông qua localStorage).</p>
+                            <div style="background: #fffafa; border: 1px solid #fee2e2; border-radius: 8px; padding: 16px; max-height: 180px; overflow-y: auto; font-size: 13px; color: #475569; line-height: 1.6; box-shadow: inset 0 2px 4px rgba(0,0,0,0.02);">
                                 
-                                <p style="margin-top: 0; font-weight: 700; color: #1e293b; margin-bottom: 4px;">2. Giới hạn truy cập của nhà phát triển</p>
-                                <p style="margin-bottom: 4px; margin-top: 0;">Chúng tôi khẳng định:</p>
+                                <p style="margin-top: 0; font-weight: 700; color: #1e293b; margin-bottom: 4px;">1. Minh bạch kỹ thuật (Transparency)</p>
+                                <p style="margin-bottom: 12px; margin-top: 0;">Công cụ này hoạt động dựa trên cơ chế <strong>Client-side</strong>. Mọi dữ liệu (điểm, lịch thi...) được xử lý trực tiếp trên trình duyệt và lưu trữ cục bộ (<code>localStorage</code>) tại thiết bị của bạn. Chúng tôi không sở hữu máy chủ lưu trữ và không thu thập dữ liệu về phía nhà phát triển.</p>
+                                
+                                <p style="margin-top: 0; font-weight: 700; color: #1e293b; margin-bottom: 4px;">2. Tuyên bố miễn trừ trách nhiệm (Disclaimer)</p>
                                 <ul style="margin: 0 0 12px 20px; padding: 0; list-style-type: disc;">
-                                    <li><strong>KHÔNG</strong> có máy chủ lưu trữ dữ liệu cá nhân (No Database).</li>
-                                    <li><strong>KHÔNG</strong> thu thập, theo dõi hay gửi bất kỳ thông tin nào về phía chúng tôi hoặc bên thứ ba.</li>
-                                    <li><strong>KHÔNG THỂ</strong> truy cập dữ liệu của bạn ngay cả khi chúng tôi muốn, vì dữ liệu nằm hoàn toàn trên máy của bạn.</li>
+                                    <li>Phần mềm được cung cấp theo nguyên trạng <strong>"NHƯ LÀ" (AS-IS)</strong>, không có sự bảo đảm nào.</li>
+                                    <li>Nhóm phát triển <strong>KHÔNG</strong> chịu trách nhiệm cho bất kỳ thiệt hại nào (mất dữ liệu, lộ thông tin cá nhân do máy tính bị nhiễm virus, lỗi hiển thị...) phát sinh từ việc sử dụng công cụ.</li>
+                                    <li>Chúng tôi không cam kết phần mềm hoạt động không lỗi do các thay đổi khách quan từ phía Portal nhà trường.</li>
                                 </ul>
 
-                                <p style="margin-top: 0; font-weight: 700; color: #1e293b; margin-bottom: 4px;">3. Cam kết của người dùng</p>
-                                <p style="margin-bottom: 0; margin-top: 0;">Bằng việc tiếp tục sử dụng công cụ, bạn xác nhận đã hiểu rõ cơ chế hoạt động trên và đồng ý rằng việc bảo mật thiết bị cá nhân là trách nhiệm của bạn.</p>
+                                <p style="margin-top: 0; font-weight: 700; color: #1e293b; margin-bottom: 4px;">3. Chấp thuận của người dùng (Consent)</p>
+                                <p style="margin-bottom: 0; margin-top: 0;">Bằng việc tiếp tục, bạn xác nhận hiểu rõ dữ liệu nằm trên thiết bị của mình, chấp nhận mọi rủi ro tiềm ẩn khi dùng phần mềm thứ ba và đồng ý giải phóng nhóm phát triển khỏi mọi trách nhiệm pháp lý liên quan.</p>
                             </div>
                         </div>
+                        <!-- [KẾT THÚC THAY ĐỔI] -->
 
                         <!-- Config Options -->
                         <div style="display:flex;flex-direction:column;gap:16px;border-top: 1px solid #eee; padding-top: 20px;">
@@ -131,7 +132,9 @@
                     <!-- Footer -->
                     <div style="background:#f8fafc;padding:16px 24px;display:flex;justify-content:flex-end;gap:12px;border-top:1px solid #e2e8f0;flex-shrink:0;">
                         <button id="btn-cancel" style="padding:8px 16px;border:1px solid #cbd5e1;background:white;color:#475569;border-radius:6px;cursor:pointer;font-weight:600;font-size:13px;transition:all 0.2s;">Hủy</button>
-                        <button id="btn-agree" style="padding:8px 20px;border:none;background:#004A98;color:white;border-radius:6px;cursor:pointer;font-weight:600;font-size:13px;box-shadow:0 2px 4px rgba(0,74,152,0.2);transition:all 0.2s;">Đồng ý & Bắt đầu</button>
+                        
+                        <!-- [THAY ĐỔI]: Sửa text nút bấm để thể hiện sự đồng thuận pháp lý -->
+                        <button id="btn-agree" style="padding:8px 20px;border:none;background:#004A98;color:white;border-radius:6px;cursor:pointer;font-weight:600;font-size:13px;box-shadow:0 2px 4px rgba(0,74,152,0.2);transition:all 0.2s;">Tôi đã hiểu & Đồng ý</button>
                     </div>
                 </div>
                 <style>
@@ -180,7 +183,7 @@
         });
     }
 
-    // === 2. CÁC HÀM CÀO DỮ LIỆU (Đã sửa để nhận tham số 'doc') ===
+    // === 2. CÁC HÀM CÀO DỮ LIỆU ===
 
     // Cào Bảng Điểm (Target: Virtual Document)
     function scrapeGrades(doc) {
@@ -219,7 +222,6 @@
     function scrapeBackgroundData(doc, type) {
         try {
             if (type === 'EXAM') {
-                // Khởi tạo object chứa 2 danh sách
                 const result = {
                     midterm: [], // Giữa kỳ
                     final: []    // Cuối kỳ
@@ -229,7 +231,6 @@
                 const tableGK = doc.getElementById('tbLichThiGK');
                 if (tableGK) {
                     tableGK.querySelectorAll('tbody tr').forEach(row => {
-                        // Bỏ qua dòng header hoặc dòng trống
                         if (row.cells.length > 7) {
                             result.midterm.push({
                                 id: row.cells[1]?.innerText.trim(),      // Mã MH
@@ -263,7 +264,6 @@
                         }
                     });
                 }
-
                 return result;
             }
 
@@ -285,7 +285,6 @@
 
         } catch (e) { 
             console.error("Lỗi cào dữ liệu background: ", e);
-            // Trả về cấu trúc an toàn để không bị crash code chính
             return type === 'EXAM' ? { midterm: [], final: [] } : { total: "0", details: [] }; 
         }
         return [];
@@ -302,7 +301,6 @@
 
     async function fetchPracticalClasses(lmid) {
         try {
-            // Lưu ý: Fetch này chạy trên ngữ cảnh trang hiện tại nên cookie vẫn ok
             const url = `Modules/SVDangKyHocPhan/HandlerSVDKHP.ashx?method=LopThucHanh&lmid=${lmid}&dot=1`;
             const res = await fetch(url);
             const json = await res.json();
@@ -318,12 +316,9 @@
         const rows = Array.from(table.querySelectorAll('tbody tr'));
         const courseMap = {}; 
 
-        // Update loading UI
         const total = rows.length;
         
-        // Chạy loop
         for (let i = 0; i < rows.length; i++) {
-            // Update tiến độ mỗi 5 dòng để đỡ lag UI
             if (i % 5 === 0) showLoading(`Đang quét lớp thực hành: ${i}/${total}`);
 
             const row = rows[i];
@@ -392,56 +387,13 @@
         return parseHTML(text);
     }
 
-    // Hàm giả lập Submit Form để đổi học kỳ (Đã nâng cấp để dùng chung)
+    // Hàm giả lập Submit Form để đổi học kỳ
     async function postToGetSemester(url, originalDoc, elementIds, targetYear, targetSem) {
-    // 1. Lấy ViewState (Giữ nguyên)
-    const viewState = originalDoc.getElementById('__VIEWSTATE')?.value;
-    const viewStateGen = originalDoc.getElementById('__VIEWSTATEGENERATOR')?.value;
-    const eventValidation = originalDoc.getElementById('__EVENTVALIDATION')?.value;
+        const viewState = originalDoc.getElementById('__VIEWSTATE')?.value;
+        const viewStateGen = originalDoc.getElementById('__VIEWSTATEGENERATOR')?.value;
+        const eventValidation = originalDoc.getElementById('__EVENTVALIDATION')?.value;
 
-    if (!viewState) throw new Error("Không lấy được ViewState. Session có thể đã hết hạn.");
-
-    // 2. Tạo Form Data (Giữ nguyên)
-    const formData = new URLSearchParams();
-    formData.append('__EVENTTARGET', '');
-    formData.append('__EVENTARGUMENT', '');
-    formData.append('__VIEWSTATE', viewState);
-    if(viewStateGen) formData.append('__VIEWSTATEGENERATOR', viewStateGen);
-    if(eventValidation) formData.append('__EVENTVALIDATION', eventValidation);
-
-    // 3. Append các tham số Dropdown (SỬA ĐOẠN NÀY)
-    // Dùng biến targetYear/targetSem truyền vào, KHÔNG DÙNG CONFIG
-    formData.append(elementIds.year, targetYear); 
-    formData.append(elementIds.sem, targetSem);   
-    formData.append(elementIds.btn, elementIds.btnValue || "Xem");
-
-    // 4. Gửi Request (Giữ nguyên)
-    const res = await fetch(url, {
-        method: 'POST',
-        body: formData,
-        headers: { 'Content-Type': 'application/x-www-form-urlencoded' }
-    });
-    
-    const text = await res.text();
-    return parseHTML(text);
-}
-
-    // Hàm lấy trang điểm "Tất cả các kỳ"
-    async function getFullGradesPage() {
-        const url = CONFIG.URL_DIEM;
-        let doc = await fetchVirtualPage(url);
-
-        // Kiểm tra xem đã hiển thị tất cả chưa
-        // Dấu hiệu: Dropdown Năm học có value = "" hoặc "0" hoặc Text="--Tất cả--"
-        // (Tùy Portal, thường chọn Tất cả thì value gửi đi là 0 hoặc rỗng)
-        
-        // Cách chắc ăn nhất: Gửi luôn request POST chọn "Tất cả"
-        // ID các control trên trang Xem Điểm (pid=211)
-        const viewState = doc.getElementById('__VIEWSTATE')?.value;
-        const viewStateGen = doc.getElementById('__VIEWSTATEGENERATOR')?.value;
-        const eventValidation = doc.getElementById('__EVENTVALIDATION')?.value;
-        
-        if (!viewState) return doc; // Không post được thì dùng tạm trang hiện tại
+        if (!viewState) throw new Error("Không lấy được ViewState. Session có thể đã hết hạn.");
 
         const formData = new URLSearchParams();
         formData.append('__EVENTTARGET', '');
@@ -450,13 +402,43 @@
         if(viewStateGen) formData.append('__VIEWSTATEGENERATOR', viewStateGen);
         if(eventValidation) formData.append('__EVENTVALIDATION', eventValidation);
 
-        // Tham số quan trọng để lấy "Tất cả"
-        // ID này lấy từ Portal HCMUS thực tế
+        formData.append(elementIds.year, targetYear); 
+        formData.append(elementIds.sem, targetSem);   
+        formData.append(elementIds.btn, elementIds.btnValue || "Xem");
+
+        const res = await fetch(url, {
+            method: 'POST',
+            body: formData,
+            headers: { 'Content-Type': 'application/x-www-form-urlencoded' }
+        });
+        
+        const text = await res.text();
+        return parseHTML(text);
+    }
+
+    // Hàm lấy trang điểm "Tất cả các kỳ"
+    async function getFullGradesPage() {
+        const url = CONFIG.URL_DIEM;
+        let doc = await fetchVirtualPage(url);
+
+        const viewState = doc.getElementById('__VIEWSTATE')?.value;
+        const viewStateGen = doc.getElementById('__VIEWSTATEGENERATOR')?.value;
+        const eventValidation = doc.getElementById('__EVENTVALIDATION')?.value;
+        
+        if (!viewState) return doc; 
+
+        const formData = new URLSearchParams();
+        formData.append('__EVENTTARGET', '');
+        formData.append('__EVENTARGUMENT', '');
+        formData.append('__VIEWSTATE', viewState);
+        if(viewStateGen) formData.append('__VIEWSTATEGENERATOR', viewStateGen);
+        if(eventValidation) formData.append('__EVENTVALIDATION', eventValidation);
+
         formData.append('ctl00$ContentPlaceHolder1$ctl00$cboNamHoc_gvDKHPLichThi$ob_CbocboNamHoc_gvDKHPLichThiTB', '--Tất cả--'); 
-        formData.append('ctl00$ContentPlaceHolder1$ctl00$cboNamHoc_gvDKHPLichThi', '0'); // Value = 0 thường là All
-        formData.append('ctl00$ContentPlaceHolder1$ctl00$cboHocKy_gvDKHPLichThi$ob_CbocboHocKy_gvDKHPLichThiTB', ''); // HK để trống
+        formData.append('ctl00$ContentPlaceHolder1$ctl00$cboNamHoc_gvDKHPLichThi', '0'); 
+        formData.append('ctl00$ContentPlaceHolder1$ctl00$cboHocKy_gvDKHPLichThi$ob_CbocboHocKy_gvDKHPLichThiTB', ''); 
         formData.append('ctl00$ContentPlaceHolder1$ctl00$cboHocKy_gvDKHPLichThi', '0'); 
-        formData.append('ctl00$ContentPlaceHolder1$ctl00$btnXemDiemThi', 'Xem Kết Quả Học Tập'); // Nút bấm
+        formData.append('ctl00$ContentPlaceHolder1$ctl00$btnXemDiemThi', 'Xem Kết Quả Học Tập'); 
 
         const res = await fetch(url, {
             method: 'POST',
@@ -469,31 +451,28 @@
 
     // === 3. MAIN RUNNER ===
     try {
-        // 1. Hiển thị Modal & Chờ người dùng cấu hình
         const config = await showPrivacyAndConfigModal();
         
         showLoading("Đang khởi tạo & Lấy dữ liệu cơ bản...");
 
-        // Khởi tạo các biến chứa dữ liệu
         let gradeData = { mssv: "Unknown", grades: [] };
         let tuitionData = { total: "0", details: [] };
         let examData = { midterm: [], final: [] };
         let courses = [];
 
         // 2. Lấy dữ liệu cơ bản (Điểm - Bắt buộc)
-        // Lưu ý: Hàm getFullGradesPage vẫn giữ nguyên logic "Tất cả"
         const docDiemFull = await getFullGradesPage(); 
         gradeData = scrapeGrades(docDiemFull);
 
         showLoading("Đang tải Bảng điểm đầy đủ...");
-        // Lấy Học phí (Nếu tick chọn)
+        // Lấy Học phí
         if (config.getTuition) {
             showLoading("Đang tải Học phí...");
             const docHocPhi = await fetchVirtualPage(URLS.HOCPHI);
             tuitionData = scrapeBackgroundData(docHocPhi, 'TUITION');
         }
 
-        // 3. Xử lý Lịch thi (Nếu tick chọn + Dùng Năm/Kỳ user nhập)
+        // 3. Xử lý Lịch thi
         if (config.getExam) {
             showLoading(`Đang lấy Lịch thi HK${config.examSem}/${config.examYear}...`);
             
@@ -506,23 +485,20 @@
                 btnValue: "Xem Lịch Thi"
             };
 
-            // Check xem trang hiện tại có đúng năm/kỳ user muốn không
             const curExamYear = docThi.getElementById("ctl00_ContentPlaceHolder1_ctl00_cboNamHoc_gvDKHPLichThi_ob_CbocboNamHoc_gvDKHPLichThiTB")?.value 
                              || docThi.querySelector("input[name$='cboNamHoc_gvDKHPLichThi$ob_CbocboNamHoc_gvDKHPLichThiTB']")?.value;
             const curExamSem = docThi.getElementById("ctl00_ContentPlaceHolder1_ctl00_cboHocKy_gvDKHPLichThi_ob_CbocboHocKy_gvDKHPLichThiTB")?.value
                             || docThi.querySelector("input[name$='cboHocKy_gvDKHPLichThi$ob_CbocboHocKy_gvDKHPLichThiTB']")?.value;
 
-            // So sánh với config.examYear và config.examSem (từ Modal)
             if (curExamYear !== config.examYear || curExamSem !== config.examSem) {
                 showLoading(`Đang chuyển Lịch thi sang HK${config.examSem}/${config.examYear}...`);
-                // Truyền năm/kỳ vào hàm postToGetSemester
                 docThi = await postToGetSemester(URLS.LICHTHI, docThi, examPageIds, config.examYear, config.examSem);
             }
             
             examData = scrapeBackgroundData(docThi, 'EXAM');
         }
 
-        // 4. Xử lý Lớp Mở (Nếu tick chọn + Dùng Năm/Kỳ user nhập)
+        // 4. Xử lý Lớp Mở
         if (config.getClass) {
             showLoading(`Đang truy cập Lớp mở HK${config.classSem}/${config.classYear}...`);
             
@@ -538,10 +514,8 @@
             const curClassYear = docLopMo.getElementById("ctl00_ContentPlaceHolder1_ctl00_cboNamHoc")?.value;
             const curClassSem = docLopMo.getElementById("ctl00_ContentPlaceHolder1_ctl00_cboHocKy")?.value;
 
-            // So sánh với config.classYear và config.classSem
             if (curClassYear !== config.classYear || curClassSem !== config.classSem) {
                 showLoading(`Đang chuyển Lớp mở sang HK${config.classSem}/${config.classYear}...`);
-                // Truyền năm/kỳ vào hàm
                 docLopMo = await postToGetSemester(URLS.LOPMO, docLopMo, openClassPageIds, config.classYear, config.classSem);
             }
 
@@ -550,43 +524,30 @@
 
         hideLoading();
 
-        // --- BƯỚC 4: KẾT QUẢ ---
         if (config.getClass && (!courses || courses.length === 0)) {
             alert("⚠️ Không lấy được danh sách lớp mở. Có thể do lỗi kết nối hoặc Portal bị đổi cấu trúc.");
             return;
         }
 
-        // 1. Chuẩn bị gói tin Sinh viên (Giữ nguyên cấu trúc cũ của bạn)
         const studentPayload = {
             mssv: gradeData.mssv,
             grades: gradeData.grades,
-            exams: examData,    // Object { midterm: [], final: [] }
+            exams: examData,
             tuition: tuitionData,
             program: []
         };
 
-        // 2. Đóng gói toàn bộ (Sinh viên + Lớp mở)
         const fullDataPacket = {
-            student: {
-                mssv: gradeData.mssv,
-                grades: gradeData.grades,
-                exams: examData,
-                tuition: tuitionData,
-                program: []
-            },
+            student: studentPayload,
             courses: courses
         };
 
         console.log("🔥 FULL DATA PACKET:", fullDataPacket);
 
-        // 3. Gửi 1 lần duy nhất về Tool
         if (window.opener) {
-            // Gửi sự kiện mới: IMPORT_FULL_DATA
             window.opener.postMessage({ type: 'IMPORT_FULL_DATA', payload: fullDataPacket }, '*');
-            
             alert(`✅ HOÀN TẤT QUÁ TRÌNH!\n\nĐã gửi gói dữ liệu tổng hợp gồm:\n- Thông tin SV & Điểm thi\n- ${studentPayload.exams.midterm?.length + studentPayload.exams.final?.length} lịch thi\n- ${courses.length} lớp mở\n\nKiểm tra bên tab Tool nhé!`);
         } else {
-            // Fallback: Tải file JSON nếu chạy độc lập
             const blob = new Blob([JSON.stringify(fullDataPacket, null, 2)], {type : 'application/json'});
             const url = URL.createObjectURL(blob);
             const a = document.createElement('a');
